@@ -4,6 +4,8 @@ reply-to:
 
 ---
 
+<!-- tomd:summary tables=0 trusted=0 flagged=0 likely=0 marked=0 confidence=n/a unfamiliarity=0.40 -->
+
 This is a synthetic test fixture used by the tomd test suite. It contains exactly one vector diagram drawn as PDF path operators below this paragraph.
 
 The extraction pipeline should detect the diagram as one image and emit a single image reference in the output markdown.

@@ -99,4 +99,5 @@ def convert_one_paper(
         title=paper.title,
         status="ok",
         images=list(converted.images),
+        summary=converted.summary,
     )

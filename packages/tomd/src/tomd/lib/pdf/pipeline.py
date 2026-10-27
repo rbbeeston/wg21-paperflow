@@ -57,7 +57,7 @@ from .table import (
     _filter_phantom_mupdf_tables, _cluster_x_positions, TableStrategy,
 )
 from .wg21 import extract_metadata_from_blocks
-from .emit import emit_markdown, emit_prompts, _escape_italic_text
+from .emit import emit_markdown, emit_prompts, renumber_uncertain_markers, _escape_italic_text
 from .types import (
     Confidence,
     KNOWN_SECTIONS,
@@ -99,6 +99,7 @@ from ._fitz_lock import _FITZ_LOCK
 from .runctx import current, run_scope
 from .select import trust_tables
 from .levels import assign as assign_level
+from .summary import build as build_summary, generator as pdf_generator, header_comment, prompt_elements
 
 __all__ = ["run_pipeline", "PipelineResult", "ExtractedImage"]
 
@@ -1070,6 +1071,9 @@ _STRUCTURAL_INSIDE_VECTOR_THRESHOLD = 0.8
 # emitted as one. The reason travels in Section.metadata["possible_table"].
 _MARK_DOT_LEADER = "a table with dot leaders, demoted as contents"
 _MARK_FALSE_POSITIVE = "a table the classifier judged not a table, kept as text"
+# Removed-content entries: examples shown per entry, and their length.
+_DISCARD_EXAMPLES = 3
+_DISCARD_DETAIL_CHARS = 120
 
 # Depth of the caption band below a vector cluster, used for the
 # section-level caption-shaped drop and sub-caption capture (NOT for
@@ -1645,6 +1649,9 @@ def _filter_sections_inside_vector_images(
                 current().record.exclude(
                     "vector-images", sec.page_num, sec_bbox,
                     f"{sec.kind.value} inside an extracted vector figure", "paths")
+                current().discards.append((
+                    "vector figure", f"a {sec.kind.value} section on page {sec.page_num + 1} lies "
+                    "inside an extracted vector figure", sec.text[:_DISCARD_DETAIL_CHARS]))
                 continue
             kept.append(sec)
             continue
@@ -1817,6 +1824,10 @@ class PipelineResult:
     # Table readers and checks that raised during the run (runctx.RunContext.reader_error):
     # recorded instead of failing the paper, never swallowed silently.
     reader_errors: list[dict] = field(default_factory=list)
+    # Content removed on purpose: (what, why, an example). Never silent.
+    discards: list[tuple[str, str, str]] = field(default_factory=list)
+    # The paper summary (summary.build); None for a skipped paper.
+    summary: dict | None = None
 
     @classmethod
     def for_skip(
@@ -1902,6 +1913,17 @@ def _parse_pdf_info_date(raw: str) -> str:
     return ""
 
 
+def _insert_after_front_matter(md: str, line: str) -> str:
+    """Insert one line after the YAML front matter (at the top when there is
+    none), and point the uncertainty markers at their text again."""
+    if md.startswith("---\n") and "\n---\n" in md[4:]:
+        end = md.index("\n---\n", 4) + len("\n---\n")
+        md = md[:end] + "\n" + line + "\n" + md[end:]
+    else:
+        md = line + "\n\n" + md
+    return renumber_uncertain_markers(md)
+
+
 def _in_run_scope(fn):
     """Run ``fn`` inside a fresh run context (``runctx.run_scope``): everything the
     table readers record belongs to this call only, also when papers convert on
@@ -1912,6 +1934,7 @@ def _in_run_scope(fn):
         with run_scope() as ctx:
             result = fn(*args, **kwargs)
             result.reader_errors = list(ctx.record.errors)
+            result.discards = list(ctx.discards)
         return result
     return wrapper
 
@@ -2140,6 +2163,8 @@ def run_pipeline(
             total_hidden,
             len(all_hidden),
         )
+        current().discards.append(("hidden", f"text under {total_hidden} covered region(s) "
+                                   f"on {len(all_hidden)} page(s) removed", ""))
         all_mupdf_blocks = strip_hidden_blocks(all_mupdf_blocks, all_hidden)
         all_spatial_blocks = strip_hidden_blocks(all_spatial_blocks, all_hidden)
 
@@ -2197,6 +2222,9 @@ def run_pipeline(
     repeating = detect_repeating(all_edge_items, result.page_count, page_height)
     if repeating:
         _log.info("Stripping %d repeating header/footer patterns", len(repeating))
+        current().discards.append(("headers", f"{len(repeating)} repeating header/footer "
+                                   "pattern(s) removed",
+                                   ", ".join(sorted(map(str, repeating))[:_DISCARD_EXAMPLES])[:_DISCARD_DETAIL_CHARS]))
         all_mupdf_blocks = strip_repeating(all_mupdf_blocks, repeating)
         all_spatial_blocks = strip_repeating(all_spatial_blocks, repeating)
 
@@ -2738,6 +2766,18 @@ def run_pipeline(
             for problem in wording_problems
         ]
         prompts = (prompts or []) + wording_prompts
+
+    # The paper summary: what was done with the tables, what was removed and
+    # why, which readers raised. One comment after the front matter; the
+    # removed content, reader errors and summary as prompt elements when the
+    # paper has prompts at all.
+    ctx = current()
+    summary = build_summary(sections, ctx.discards, ctx.record.errors, pdf_generator(doc_metadata))
+    if md.strip():
+        md = _insert_after_front_matter(md, header_comment(summary))
+    if prompts:
+        prompts = prompts + prompt_elements(summary, ctx.discards, ctx.record.errors)
+    result.summary = summary
 
     result.md = md
     result.prompts = prompts

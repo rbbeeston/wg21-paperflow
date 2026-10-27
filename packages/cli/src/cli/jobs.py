@@ -459,6 +459,7 @@ async def run_convert(
                     "intent": result.intent,
                     "title": result.title,
                     "images": result.images,
+                    "summary": result.summary,
                     "status": "ok",
                 }
             except RuntimeError as exc:
@@ -506,6 +507,8 @@ async def run_convert(
             md_path = backend.write_paper_md(pid, result["markdown"])
             if write_prompts and result["prompts"]:
                 backend.write_intermediate(pid, "prompts", result["prompts"])
+            if result.get("summary") is not None:
+                backend.write_intermediate(pid, "summary", result["summary"])
             backend.record_markdown(pid, md_path, intent=result["intent"])
             succeeded.append(pid)
         elif result["status"] == "skipped":

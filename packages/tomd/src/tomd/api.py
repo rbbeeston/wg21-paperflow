@@ -82,6 +82,9 @@ class ConvertedPaper:
     skip_reason: SkipReason | None = None
     source_raster_count: int = 0
     source_vector_count: int = 0
+    # The PDF paper summary (tables trusted, flagged and marked, removed
+    # content, reader errors); None for HTML and skipped papers.
+    summary: dict | None = None
 
     @classmethod
     def skipped_from(cls, raw: PipelineResult) -> "ConvertedPaper":
@@ -294,6 +297,7 @@ class _RawConversion:
     skip_reason: SkipReason | None
     source_raster_count: int = 0
     source_vector_count: int = 0
+    summary: dict | None = None
 
 
 def _convert_with_tomd_full(
@@ -336,6 +340,7 @@ def _convert_with_tomd_full(
             skip_reason=r.skip_reason,
             source_raster_count=raster,
             source_vector_count=vector,
+            summary=r.summary,
         )
     if suffix in (".html", ".htm"):
         html_result = None
@@ -462,6 +467,7 @@ def convert_paper_full(
         skip_reason=None,
         source_raster_count=raw.source_raster_count,
         source_vector_count=raw.source_vector_count,
+        summary=raw.summary,
     )
 
 

@@ -1399,7 +1399,12 @@ def emit_prompts(sections: list[Section]) -> list[str] | None:
     """
     uncertain = [(idx, s) for idx, s in enumerate(sections)
                  if s.kind == SectionKind.UNCERTAIN]
-    if not uncertain:
+    # Flagged tables and possible tables follow the reconcile prompts, in
+    # section order: one self-contained element each.
+    flagged = [(idx, s) for idx, s in enumerate(sections)
+               if s.kind != SectionKind.UNCERTAIN
+               and (is_flagged_table(s) or s.metadata.get("possible_table"))]
+    if not uncertain and not flagged:
         return None
 
     prompts: list[str] = []
@@ -1450,4 +1455,55 @@ def emit_prompts(sections: list[Section]) -> list[str] | None:
 
         prompts.append("\n".join(parts))
 
+    prompts.extend(_table_prompt(sections, idx) for idx, _ in flagged)
     return prompts
+
+
+_CONTEXT_CHARS = 200       # characters of a neighbouring section quoted as context
+
+
+def _is_flagged(sec: Section) -> bool:
+    return (sec.kind == SectionKind.UNCERTAIN or is_flagged_table(sec)
+            or bool(sec.metadata.get("possible_table")))
+
+
+def _table_prompt(sections: list[Section], idx: int) -> str:
+    """One self-contained prompt for a flagged table or a possible table."""
+    sec = sections[idx]
+    ctx_before = ""
+    ctx_after = ""
+    if idx > 0 and not _is_flagged(sections[idx - 1]):
+        ctx_before = sections[idx - 1].text[:_CONTEXT_CHARS].strip()
+    if idx + 1 < len(sections) and not _is_flagged(sections[idx + 1]):
+        ctx_after = sections[idx + 1].text[:_CONTEXT_CHARS].strip()
+    parts: list[str] = [
+        "You are checking a table extracted from a PDF.",
+        "",
+        "CRITICAL: Keep ALL data verbatim. Do not summarize, omit, or paraphrase "
+        "any text. Every word from the source must appear in your output. You are "
+        "only fixing structure (rows, columns, cells) - never content.",
+        "",
+        f"This region is on page {sec.page_num}.",
+        "",
+    ]
+    if ctx_before:
+        parts += ["Context (preceding confident section):", f"> {ctx_before}", ""]
+    if sec.metadata.get("possible_table"):
+        parts += ["This text may be a table that was not extracted as one",
+                  f"({sec.metadata['possible_table']}). If it is a table,",
+                  "rebuild it as one Markdown table; otherwise keep it as it is.",
+                  "", "```", _render_section_md(sec), "```"]
+    else:
+        parts += ["This is a table no second kind of evidence confirmed. Check its rows,",
+                  "columns and cell text against the page and produce one correct Markdown table.",
+                  ""]
+        if sec.metadata.get("table_note"):
+            parts += [sec.metadata["table_note"], ""]
+        versions = sec.metadata.get("table_versions") or [(sec.table_source or "tomd", _render_section_md(sec))]
+        for i, (source, table_md) in enumerate(versions):
+            label = "emitted" if i == 0 else "alternative"
+            parts += [f"Table from the {source} extractor ({label}):", "```", table_md, "```", ""]
+        parts.pop()
+    if ctx_after:
+        parts += ["", "Context (following confident section):", f"> {ctx_after}"]
+    return "\n".join(parts)

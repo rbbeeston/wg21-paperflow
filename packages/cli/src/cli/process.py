@@ -494,6 +494,8 @@ async def _stage_convert(
             )
         logger.info("%s: persisted %d image(s)", pid, len(pdf_images))
     backend.write_paper_md(pid, result.markdown)
+    if result.summary is not None:
+        backend.write_intermediate(pid, "summary", result.summary)
 
     downstream_cleared: tuple[str, ...] = ()
     if content_changed and not keep_downstream:

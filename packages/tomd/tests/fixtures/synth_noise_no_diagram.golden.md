@@ -4,11 +4,13 @@ reply-to:
 
 ---
 
+<!-- tomd:summary tables=1 trusted=0 flagged=1 likely=0 marked=0 confidence=n/a unfamiliarity=0.40 -->
+
 This synthetic fixture contains only table borders and horizontal rules. The vector-extraction pipeline must produce zero image candidates from this page.
 
 <!-- tomd:level L2 minor: one source -->
 
-<!-- tomd:uncertain:L13-L17 -->
+<!-- tomd:uncertain:L15-L19 -->
 
 | Header | Column B cell | Column C cell |
 | --- | --- | --- |

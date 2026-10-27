@@ -30,6 +30,8 @@ ERROR_MESSAGE_LIMIT = 300
 @dataclass
 class RunContext:
     record: Record = field(default_factory=Record)
+    # content removed on purpose: (what, why, an example); listed in the summary and prompts
+    discards: list[tuple[str, str, str]] = field(default_factory=list)
     # re-raise reader errors instead of recording them (tests of a reader's own failures)
     strict: bool = False
 

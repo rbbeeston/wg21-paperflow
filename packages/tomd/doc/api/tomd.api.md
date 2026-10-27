@@ -1,6 +1,6 @@
 # tomd API surface
 
-71 modules, 86 classes, 170 functions, 85 methods, 343 fields. Typed: 807 of 850 functions and methods (94%).
+72 modules, 86 classes, 175 functions, 85 methods, 347 fields. Typed: 814 of 858 functions and methods (94%).
 
 ## Contents
 
@@ -53,6 +53,7 @@
 - [`lib/pdf/select.py`](#lib-pdf-select-py): candidate_from_section, candidates_agree, conservation_error, partial_reading, trust_tables
 - [`lib/pdf/spans.py`](#lib-pdf-spans-py): normalize_spans
 - [`lib/pdf/structure.py`](#lib-pdf-structure-py): compare_extractions, drop_leaked_toc_entries, heading_confidence, structure_body, structure_sections
+- [`lib/pdf/summary.py`](#lib-pdf-summary-py): build, generator, header_comment, prompt_elements, unfamiliarity, COMMON_LAYOUTS, KNOWN_GENERATORS
 - [`lib/pdf/table.py`](#lib-pdf-table-py): TableKind, TableStrategy, detect_tables, exclude_table_regions
 - [`lib/pdf/types.py`](#lib-pdf-types-py): Block, Confidence, FigureEdge, FigureGraph, FigureNode, FigureRegion, Line, PageEdgeItem, Section, SectionKind, SkipReason, Span, ...
 - [`lib/pdf/vector_images.py`](#lib-pdf-vector-images-py): extract_page_vector_images, format_uncertainty_marker, should_emit_marker, ALLOWED_REASON_KEYS, REASON_ASPECT_EXTREME, REASON_BBOX_TOO_LARGE, REASON_CLUSTERS_OVERFLOW, REASON_EDGE_BAND, REASON_TEXT_OVERLAP, REASON_TOO_FEW_ITEMS, REASON_TOO_SMALL, REASON_WORDING_COLOR, ...
@@ -137,6 +138,9 @@ class ConvertedPaper:
     skip_reason: SkipReason | None = None
     source_raster_count: int = 0
     source_vector_count: int = 0
+    # The PDF paper summary (tables trusted, flagged and marked, removed
+    # content, reader errors); None for HTML and skipped papers.
+    summary: dict | None = None
     @classmethod
     def skipped_from(cls, raw: PipelineResult) -> 'ConvertedPaper':
         """Translate a skipped :class:`PipelineResult` into a skipped
@@ -2116,7 +2120,7 @@ def extract_docling_tables(pdf_path: Path) -> dict[int, list[dict]]:
 
 ## `lib/pdf/emit.py` ([source](../../src/tomd/lib/pdf/emit.py))
 
-Typed: 40 of 40 functions and methods (100%).
+Typed: 42 of 42 functions and methods (100%).
 
 ```python
 """Markdown and companion prompts file generation."""
@@ -2160,11 +2164,12 @@ def emit_prompts(sections: list[Section]) -> list[str] | None:
     Each returned element is a complete prompt the operator can paste into
     any LLM verbatim. Returns ``None`` when there are no uncertain regions.
     """
+    # calls: is_flagged_table, _table_prompt
     # called by: pipeline.run_pipeline
 
 def is_flagged_table(sec: Section) -> bool:
     """A TABLE section no second kind of evidence confirmed (select.trust_tables)."""
-    # called by: emit_markdown
+    # called by: _is_flagged, emit_markdown, emit_prompts
 
 def renumber_uncertain_markers(md: str) -> str:
     """Point every ``tomd:uncertain:L{a}-L{b}`` marker at the lines under it.
@@ -2175,7 +2180,7 @@ def renumber_uncertain_markers(md: str) -> str:
     it covers and is renumbered from its own position: the covered text
     starts two lines below the marker.
     """
-    # called by: api.convert_paper_full, emit_markdown
+    # called by: api.convert_paper_full, emit_markdown, pipeline._insert_after_front_matter
 
 # The single Markdown unordered-list marker this converter emits, at every
 # nesting depth. "-" over "*" because the HTML renderer already emits "-", the
@@ -2183,7 +2188,7 @@ def renumber_uncertain_markers(md: str) -> str:
 # stray bullet glyph survives mid-text (#303).
 LIST_BULLET = '-'
 
-# + 36 private module-level names
+# + 38 private module-level names
 ```
 
 <a id="lib-pdf-emoji-data-py"></a>
@@ -2873,7 +2878,7 @@ def propagate_monospace(mupdf_blocks: list[Block], spatial_blocks: list[Block], 
 
 ## `lib/pdf/pipeline.py` ([source](../../src/tomd/lib/pdf/pipeline.py))
 
-Typed: 28 of 39 functions and methods (71%).
+Typed: 29 of 40 functions and methods (72%).
 
 ```python
 """PDF to Markdown converter - pipeline entry point."""
@@ -2912,6 +2917,10 @@ class PipelineResult:
     # Table readers and checks that raised during the run (runctx.RunContext.reader_error):
     # recorded instead of failing the paper, never swallowed silently.
     reader_errors: list[dict] = field(default_factory=list)
+    # Content removed on purpose: (what, why, an example). Never silent.
+    discards: list[tuple[str, str, str]] = field(default_factory=list)
+    # The paper summary (summary.build); None for a skipped paper.
+    summary: dict | None = None
     @classmethod
     def for_skip(cls, reason: SkipReason, *, page_count: int = 0, prompts: list[str] | None = None, readable: bool = True) -> 'PipelineResult':
         """Construct a complete skip result.
@@ -2936,9 +2945,9 @@ def run_pipeline(path: Path, *, ml_tables: bool = False, visualize: bool = False
     effect when ``extract_vector`` is False.
     labels inside vector figures render as pixels alongside body text.
     """
-    # calls: PipelineResult, images._VectorExtractionStats, _enforce_skip_contract, PipelineResult.for_skip, _is_slide_deck, _is_standards_draft, extract.extract_mupdf, extract.extract_spatial, cleanup.get_edge_items, extract.collect_links, extract.attach_links, images.extract_page_images, +66 more
+    # calls: PipelineResult, images._VectorExtractionStats, _enforce_skip_contract, PipelineResult.for_skip, _is_slide_deck, _is_standards_draft, extract.extract_mupdf, extract.extract_spatial, cleanup.get_edge_items, extract.collect_links, extract.attach_links, images.extract_page_images, +71 more
 
-# + 37 private module-level names
+# + 38 private module-level names
 ```
 
 <a id="lib-pdf-qa-py"></a>
@@ -3049,6 +3058,8 @@ globals: two papers converted on two threads each see only their own context
 @dataclass
 class RunContext:
     record: Record = field(default_factory=Record)
+    # content removed on purpose: (what, why, an example); listed in the summary and prompts
+    discards: list[tuple[str, str, str]] = field(default_factory=list)
     # re-raise reader errors instead of recording them (tests of a reader's own failures)
     strict: bool = False
     def reader_error(self, stage: str, page: int | None, exc: BaseException, table=None) -> None:
@@ -3285,6 +3296,61 @@ def structure_sections(sections: list[Section], has_title: bool = False) -> tupl
     # calls: extract.extract_metadata, _structure_body_impl
 
 # + 81 private module-level names
+```
+
+<a id="lib-pdf-summary-py"></a>
+
+## `lib/pdf/summary.py` ([source](../../src/tomd/lib/pdf/summary.py))
+
+Typed: 4 of 5 functions and methods (80%).
+
+```python
+"""Paper-level summary: what tomd did with this paper's tables, and how unlike
+the measured papers this one is.
+
+The output feeds AI analysis of WG21 papers, where a trusted-but-wrong
+conversion is the costly failure, so every conversion carries:
+  - tables trusted (HIGH), flagged (UNCERTAIN) and marked (possible tables),
+    with their pages; content removed on purpose and why; reader errors;
+  - an unfamiliarity score: how unlike the measured papers this one is
+    (generator not seen in the measured sets, rare layout classes, rotated
+    text);
+  - a paper-level confidence: the chance that the paper's tables hold no
+    silent error. It is "not estimated" here: the calibrated model belongs to
+    the conversion it was fitted on, and is refitted on this pipeline's output
+    before a figure is published.
+
+Machine-readable (``PipelineResult.summary``, persisted by the CLI beside the
+Markdown), one ``tomd:summary`` comment after the front matter, and prompt
+elements for the removed content, the reader errors and the summary.
+"""
+
+def build(sections, discards: list[tuple[str, str, str]], reader_errors: list[dict], generator_name: str) -> dict:
+    """The paper summary (JSON-serializable)."""
+    # untyped: sections
+    # calls: unfamiliarity
+    # called by: pipeline.run_pipeline
+
+def generator(meta: dict) -> str:
+    """The PDF producer's family, from the document metadata."""
+    # called by: pipeline.run_pipeline
+
+def header_comment(s: dict) -> str:
+    """The one-line ``tomd:summary`` comment written after the front matter."""
+    # called by: pipeline.run_pipeline
+
+def prompt_elements(s: dict, discards: list[tuple[str, str, str]], reader_errors: list[dict]) -> list[str]:
+    """Self-contained prompt elements: removed content, reader errors, the summary."""
+    # called by: pipeline.run_pipeline
+
+def unfamiliarity(generator_name: str, layouts: list[str], rotated: bool, skipped: bool) -> tuple[float, list[str]]:
+    """0 (like the measured papers) .. 1 (unlike them), with the reasons."""
+    # called by: build
+
+COMMON_LAYOUTS = {'poll', 'grid', 'rule-per-row', 'tagged', 'booktabs'}
+
+# Generators of the measured papers (the answer-key sets).
+KNOWN_GENERATORS = ...
 ```
 
 <a id="lib-pdf-table-py"></a>
@@ -4730,6 +4796,7 @@ class MarkdownWriter:
 - `Block`: [`lib/pdf/types.py`](#lib-pdf-types-py)
 - `BlockElement`: [`domain/elements.py`](#domain-elements-py)
 - `Blockquote`: [`domain/elements.py`](#domain-elements-py)
+- `build`: [`lib/pdf/summary.py`](#lib-pdf-summary-py)
 - `build_review_prompt`: [`lib/golden_qa.py`](#lib-golden-qa-py)
 - `BULLET_CHARS`: [`lib/pdf/types.py`](#lib-pdf-types-py)
 - `BULLET_RE`: [`lib/pdf/types.py`](#lib-pdf-types-py)
@@ -4757,6 +4824,7 @@ class MarkdownWriter:
 - `collect_links`: [`lib/pdf/extract.py`](#lib-pdf-extract-py)
 - `collect_text_emoji_bboxes`: [`lib/pdf/glyphs.py`](#lib-pdf-glyphs-py)
 - `comment`: [`lib/pdf/levels.py`](#lib-pdf-levels-py)
+- `COMMON_LAYOUTS`: [`lib/pdf/summary.py`](#lib-pdf-summary-py)
 - `compare`: [`lib/golden_compare.py`](#lib-golden-compare-py)
 - `compare_extractions`: [`lib/pdf/structure.py`](#lib-pdf-structure-py)
 - `COMPOUND_PREFIXES`: [`lib/pdf/types.py`](#lib-pdf-types-py)
@@ -4850,6 +4918,7 @@ class MarkdownWriter:
 - `fuzzy_match_label`: [`lib/similarity.py`](#lib-similarity-py)
 - `Gap`: [`lib/golden_gaps.py`](#lib-golden-gaps-py)
 - `generate_ideal`: [`lib/golden_qa.py`](#lib-golden-qa-py)
+- `generator`: [`lib/pdf/summary.py`](#lib-pdf-summary-py)
 - `get_edge_items`: [`lib/pdf/cleanup.py`](#lib-pdf-cleanup-py)
 - `GLYPH_FONT_SENTINEL`: [`lib/pdf/glyphs.py`](#lib-pdf-glyphs-py)
 - `GLYPH_PLACEHOLDER_MARKER_TEMPLATE`: [`lib/pdf/glyphs.py`](#lib-pdf-glyphs-py)
@@ -4857,6 +4926,7 @@ class MarkdownWriter:
 - `GlyphCandidate`: [`lib/pdf/glyphs.py`](#lib-pdf-glyphs-py)
 - `GlyphPassStats`: [`lib/pdf/glyphs.py`](#lib-pdf-glyphs-py)
 - `has_dot_leader`: [`lib/toc.py`](#lib-toc-py)
+- `header_comment`: [`lib/pdf/summary.py`](#lib-pdf-summary-py)
 - `Heading`: [`domain/elements.py`](#domain-elements-py)
 - `heading_confidence`: [`lib/pdf/structure.py`](#lib-pdf-structure-py)
 - `HtmlImagesResult`: [`lib/html/images.py`](#lib-html-images-py)
@@ -4877,6 +4947,7 @@ class MarkdownWriter:
 - `is_unedited_seed`: [`lib/golden_qa.py`](#lib-golden-qa-py)
 - `is_wording_rgb`: [`lib/pdf/wording.py`](#lib-pdf-wording-py)
 - `issue_for_stem`: [`lib/golden_qa.py`](#lib-golden-qa-py)
+- `KNOWN_GENERATORS`: [`lib/pdf/summary.py`](#lib-pdf-summary-py)
 - `KNOWN_SECTIONS`: [`lib/pdf/types.py`](#lib-pdf-types-py)
 - `LEGACY_FENCE_MARKER`: [`lib/wording_markup.py`](#lib-wording-markup-py)
 - `LEGACY_WORDING_FENCE_RE`: [`lib/wording_markup.py`](#lib-wording-markup-py)
@@ -4921,6 +4992,7 @@ class MarkdownWriter:
 - `partial_reading`: [`lib/pdf/select.py`](#lib-pdf-select-py)
 - `PipelineResult`: [`lib/pdf/pipeline.py`](#lib-pdf-pipeline-py)
 - `promote_abstract_from_uncertain`: [`lib/body/abstract.py`](#lib-body-abstract-py)
+- `prompt_elements`: [`lib/pdf/summary.py`](#lib-pdf-summary-py)
 - `propagate_monospace`: [`lib/pdf/mono.py`](#lib-pdf-mono-py)
 - `QABatchResult`: [`lib/pdf/qa.py`](#lib-pdf-qa-py)
 - `QAMetrics`: [`lib/pdf/qa.py`](#lib-pdf-qa-py)
@@ -5013,6 +5085,7 @@ class MarkdownWriter:
 - `TRUNCATION_MARKER_TEMPLATE`: [`lib/pdf/images.py`](#lib-pdf-images-py)
 - `trust_tables`: [`lib/pdf/select.py`](#lib-pdf-select-py)
 - `UncertainElement`: [`domain/elements.py`](#domain-elements-py)
+- `unfamiliarity`: [`lib/pdf/summary.py`](#lib-pdf-summary-py)
 - `UNICODE_EMOJI_VERSION`: [`lib/pdf/emoji_data.py`](#lib-pdf-emoji-data-py)
 - `UNIFORM_ROLE_THRESHOLD`: [`lib/wording_policy.py`](#lib-wording-policy-py)
 - `UNKNOWN_GLYPH`: [`lib/pdf/glyphs.py`](#lib-pdf-glyphs-py)

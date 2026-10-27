@@ -4,11 +4,13 @@ reply-to:
 
 ---
 
+<!-- tomd:summary tables=1 trusted=0 flagged=1 likely=0 marked=0 confidence=n/a unfamiliarity=0.40 -->
+
 This synthetic fixture exercises the structural-overlap filter: the comparison table below is rendered with per-cell background rectangles and no inter-column spanning rules, the canonical false-positive shape for vector extraction. Each column would naively cluster as its own vector image; the filter must drop them when the table detector identifies the region as a TABLE section.
 
 <!-- tomd:level L2 minor: one source -->
 
-<!-- tomd:uncertain:L13-L23 -->
+<!-- tomd:uncertain:L15-L25 -->
 
 | Platform | Mode | Time (ms) | Score |
 | --- | --- | --- | --- |

@@ -77,3 +77,5 @@ class ConvertResult:
     skip_reason: "SkipReason | None" = None
     error: str = ""
     images: list["ExtractedImage"] = field(default_factory=list)
+    # tomd's paper summary for a converted PDF (persisted as <pid>.summary.json)
+    summary: dict | None = None

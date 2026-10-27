@@ -6,6 +6,10 @@ reply-to:
 
 This synthetic fixture contains only table borders and horizontal rules. The vector-extraction pipeline must produce zero image candidates from this page.
 
+<!-- tomd:level L2 minor: one source -->
+
+<!-- tomd:uncertain:L13-L17 -->
+
 | Header | Column B cell | Column C cell |
 | --- | --- | --- |
 | Row 1 data | Column B cell | Column C cell |

@@ -51,6 +51,7 @@ from tomd.lib import (
 from tomd.lib.html import convert_html
 from tomd.lib.html.images import load_html_images
 from tomd.lib.pdf import ExtractedImage, PipelineResult, SkipReason, run_pipeline
+from tomd.lib.pdf.emit import renumber_uncertain_markers
 
 __all__ = ["ConvertedPaper", "convert_paper", "convert_paper_full"]
 
@@ -446,6 +447,8 @@ def convert_paper_full(
         md = apply_strip_leading_h1(md, title)
 
     md = _strip_toc(md)
+    # the rewrites above shift lines: point uncertainty markers at their text again
+    md = renumber_uncertain_markers(md)
 
     extracted_intent = _extract_intent_from_front_matter(md)
     return ConvertedPaper(

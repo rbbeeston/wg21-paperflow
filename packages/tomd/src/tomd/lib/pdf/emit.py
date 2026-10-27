@@ -24,7 +24,8 @@ from .glyphs import (
     GlyphPassStats,
 )
 from .images import TRUNCATION_MARKER_TEMPLATE, VectorUncertaintyStats
-from .types import Line, Span, Section, SectionKind, BULLET_CHARS, BULLET_RE, NUMBERED_LIST_RE, FALLBACK_FONT_SIZE
+from .levels import SHOWN_FROM, comment as level_comment
+from .types import Line, Span, Section, SectionKind, Confidence, BULLET_CHARS, BULLET_RE, NUMBERED_LIST_RE, FALLBACK_FONT_SIZE
 from .vector_images import format_uncertainty_marker, should_emit_marker
 _log = logging.getLogger(__name__)
 
@@ -1270,6 +1271,24 @@ def emit_markdown(
         if sec.kind in (SectionKind.TITLE, SectionKind.HEADING):
             if not rendered.lstrip("#").strip():
                 continue
+        if is_flagged_table(sec) or sec.metadata.get("possible_table"):
+            # A table no second kind of evidence confirmed, or text that may be a
+            # table no reader produced: marked like any uncertain region, its
+            # rendering kept. A table's level comment (levels.py) says how it may
+            # be wrong; the marker touches the table.
+            head = []
+            lv = sec.metadata.get("level") if sec.kind == SectionKind.TABLE else None
+            if lv and lv.get("level", 0) >= SHOWN_FROM and not sec.metadata.get("possible_table"):
+                head.append(level_comment(lv))
+            text_lines = rendered.count("\n") + 1
+            text_start = line_num + 2 * len(head) + 2
+            block = head + [f"<!-- tomd:uncertain:L{text_start}-L{text_start + text_lines - 1} -->", rendered]
+            if annotate:
+                parts.append(_annotate_wrap("\n\n".join(block), sec))
+            else:
+                parts.extend(block)
+            line_num += 2 * len(head) + text_lines + 3
+            continue
         if annotate:
             rendered = _annotate_wrap(rendered, sec)
         parts.append(rendered)
@@ -1338,7 +1357,38 @@ def emit_markdown(
             )
 
     md = md.rstrip() + "\n"
+    if not annotate:
+        md = renumber_uncertain_markers(md)
     return md
+
+
+def is_flagged_table(sec: Section) -> bool:
+    """A TABLE section no second kind of evidence confirmed (select.trust_tables)."""
+    return sec.kind == SectionKind.TABLE and sec.confidence == Confidence.UNCERTAIN
+
+
+_UNCERTAIN_MARKER_RE = re.compile(r"^<!-- tomd:uncertain:L(\d+)-L(\d+) -->$")
+# Lines from an uncertainty marker to the first line it covers: the marker, then a blank line.
+_MARKER_TO_TEXT = 2
+
+
+def renumber_uncertain_markers(md: str) -> str:
+    """Point every ``tomd:uncertain:L{a}-L{b}`` marker at the lines under it.
+
+    Emit numbers the markers as it writes them; later rewrites (duplicate
+    paragraphs collapsed, the table style block, front matter normalized,
+    the contents stripped) shift lines. Each marker keeps the number of lines
+    it covers and is renumbered from its own position: the covered text
+    starts two lines below the marker.
+    """
+    lines = md.split("\n")
+    for i, ln in enumerate(lines):
+        m = _UNCERTAIN_MARKER_RE.match(ln)
+        if m:
+            span = int(m.group(2)) - int(m.group(1))
+            start = i + 1 + _MARKER_TO_TEXT
+            lines[i] = f"<!-- tomd:uncertain:L{start}-L{start + span} -->"
+    return "\n".join(lines)
 
 
 def emit_prompts(sections: list[Section]) -> list[str] | None:

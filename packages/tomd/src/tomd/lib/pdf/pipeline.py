@@ -54,7 +54,7 @@ from ..metadata_yaml.extract import (
 )
 from .table import (
     detect_tables, exclude_table_regions, _rot_bbox, _rot_midpoint,
-    _filter_phantom_mupdf_tables, _cluster_x_positions,
+    _filter_phantom_mupdf_tables, _cluster_x_positions, TableStrategy,
 )
 from .wg21 import extract_metadata_from_blocks
 from .emit import emit_markdown, emit_prompts, _escape_italic_text
@@ -98,6 +98,7 @@ from .docling_backend import (
 from ._fitz_lock import _FITZ_LOCK
 from .runctx import current, run_scope
 from .select import trust_tables
+from .levels import assign as assign_level
 
 __all__ = ["run_pipeline", "PipelineResult", "ExtractedImage"]
 
@@ -1065,6 +1066,11 @@ _SECTION_INSIDE_VECTOR_THRESHOLD = 0.5
 # cluster bbox).
 _STRUCTURAL_INSIDE_VECTOR_THRESHOLD = 0.8
 
+# Possible-table marks (L5): content a reader proposed as a table that is not
+# emitted as one. The reason travels in Section.metadata["possible_table"].
+_MARK_DOT_LEADER = "a table with dot leaders, demoted as contents"
+_MARK_FALSE_POSITIVE = "a table the classifier judged not a table, kept as text"
+
 # Depth of the caption band below a vector cluster, used for the
 # section-level caption-shaped drop and sub-caption capture (NOT for
 # rasterisation, NOT for the per-line PARAGRAPH filter, NOT for the
@@ -1635,6 +1641,10 @@ def _filter_sections_inside_vector_images(
                 for im in page_vectors
             )
             if mostly_inside:
+                # recorded, never silent: the paper summary lists removed content
+                current().record.exclude(
+                    "vector-images", sec.page_num, sec_bbox,
+                    f"{sec.kind.value} inside an extracted vector figure", "paths")
                 continue
             kept.append(sec)
             continue
@@ -2482,8 +2492,12 @@ def run_pipeline(
     # can misclassify TOC entries (section number + title + page number
     # on the same y-line) as table rows; reverting them here lets the
     # existing find_toc_indices / label-anchored logic strip them.
+    # A table two kinds of evidence agree on is exempt; a demoted table
+    # carries a possible-table mark, so the demotion is never silent.
     for sec in sections:
-        if sec.kind == SectionKind.TABLE and has_dot_leader(sec.text):
+        if (sec.kind == SectionKind.TABLE and has_dot_leader(sec.text)
+                and sec.confidence != Confidence.HIGH):
+            sec.metadata["possible_table"] = _MARK_DOT_LEADER
             sec.kind = SectionKind.PARAGRAPH
             sec.table_kind = None
             sec.table_strategy = None
@@ -2691,6 +2705,17 @@ def run_pipeline(
     # duplicate headings and title-like paragraph/list entries, plus the
     # non-recurring stragglers (front-region only) that fragment the block.
     sections = drop_leaked_toc_entries(sections)
+
+    # Every table gets a graded level (L0-L5, levels.py): how a flagged table
+    # may be wrong. A table classified as not a table (rendered as text) is a
+    # possible-table mark instead.
+    for sec in sections:
+        if sec.kind != SectionKind.TABLE:
+            continue
+        if sec.table_strategy == TableStrategy.SKIP.value:
+            sec.metadata["possible_table"] = _MARK_FALSE_POSITIVE
+        else:
+            sec.metadata["level"] = assign_level(sec)
 
     md = emit_markdown(
         metadata,

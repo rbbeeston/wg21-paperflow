@@ -1,6 +1,6 @@
 # tomd API surface
 
-70 modules, 86 classes, 165 functions, 85 methods, 343 fields. Typed: 801 of 844 functions and methods (94%).
+71 modules, 86 classes, 170 functions, 85 methods, 343 fields. Typed: 807 of 850 functions and methods (94%).
 
 ## Contents
 
@@ -38,13 +38,14 @@
 - [`lib/pdf/code_format.py`](#lib-pdf-code-format-py): is_diagram_block, maybe_normalize_code_line, normalize_code_line
 - [`lib/pdf/code_grid.py`](#lib-pdf-code-grid-py): CodeGrid
 - [`lib/pdf/docling_backend.py`](#lib-pdf-docling-backend-py): absorb_cross_page_spec_rows, discover_tables_with_docling, docling_available, enrich_tables_with_docling, extract_docling_tables
-- [`lib/pdf/emit.py`](#lib-pdf-emit-py): emit_markdown, emit_prompts, LIST_BULLET
+- [`lib/pdf/emit.py`](#lib-pdf-emit-py): emit_markdown, emit_prompts, is_flagged_table, renumber_uncertain_markers, LIST_BULLET
 - [`lib/pdf/emoji_data.py`](#lib-pdf-emoji-data-py): EMOJI_PRESENTATION_RANGES, UNICODE_EMOJI_VERSION
 - [`lib/pdf/evidence.py`](#lib-pdf-evidence-py): Entry, Record, CODE_ERRORS
 - [`lib/pdf/extract.py`](#lib-pdf-extract-py): attach_links, collect_links, extract_mupdf, extract_spatial
 - [`lib/pdf/figures.py`](#lib-pdf-figures-py): detect_figure_regions
 - [`lib/pdf/glyphs.py`](#lib-pdf-glyphs-py): GlyphCandidate, GlyphPassStats, collect_glyph_candidates, collect_text_emoji_bboxes, drop_glyphs_in_code_and_tables, filter_coincident, glyph_to_char, inject_glyph_spans, is_glyph_only_block, GLYPH_FONT_SENTINEL, GLYPH_PLACEHOLDER_MARKER_TEMPLATE, UNKNOWN_GLYPH
 - [`lib/pdf/images.py`](#lib-pdf-images-py): ExtractedImage, ExtractionResult, VectorUncertaintyStats, extract_page_images, finalize_extraction, MIN_IMAGE_DIM_PT, TRUNCATION_MARKER_TEMPLATE
+- [`lib/pdf/levels.py`](#lib-pdf-levels-py): assign, cell_markers, comment, NAMES, SHOWN_FROM
 - [`lib/pdf/mono.py`](#lib-pdf-mono-py): classify_monospace, propagate_monospace
 - [`lib/pdf/pipeline.py`](#lib-pdf-pipeline-py): PipelineResult, run_pipeline
 - [`lib/pdf/qa.py`](#lib-pdf-qa-py): QABatchResult, QAMetrics, compute_metrics, format_qa_report, run_qa_batch, write_qa_json_atomic
@@ -183,7 +184,7 @@ def convert_paper_full(paper_id: str, source_path: Path, meta: dict, *, html_ima
     audience, reply-to``.
     """
     # untyped: html_images_manifest
-    # calls: _convert_with_tomd_full, ConvertedPaper.skipped_from, _normalize_front_matter, _strip_body_metadata_text, format.parse_front_matter, _strip_toc, _extract_intent_from_front_matter, ConvertedPaper
+    # calls: _convert_with_tomd_full, ConvertedPaper.skipped_from, _normalize_front_matter, _strip_body_metadata_text, format.parse_front_matter, _strip_toc, emit.renumber_uncertain_markers, _extract_intent_from_front_matter, ConvertedPaper
     # called by: convert_paper
 
 # + 7 private module-level names
@@ -2115,7 +2116,7 @@ def extract_docling_tables(pdf_path: Path) -> dict[int, list[dict]]:
 
 ## `lib/pdf/emit.py` ([source](../../src/tomd/lib/pdf/emit.py))
 
-Typed: 38 of 38 functions and methods (100%).
+Typed: 40 of 40 functions and methods (100%).
 
 ```python
 """Markdown and companion prompts file generation."""
@@ -2150,7 +2151,7 @@ def emit_markdown(metadata: dict, sections: list[Section], *, annotate: bool = F
     ``placeholders`` count is taken from the finished body (after
     duplicate-paragraph collapse) so it matches a grep of the output.
     """
-    # calls: _assign_emdash_nesting, _annotate_wrap, _render_section_md, vector_images.should_emit_marker, vector_images.format_uncertainty_marker, shared._find_front_matter_end
+    # calls: _assign_emdash_nesting, _annotate_wrap, _render_section_md, is_flagged_table, levels.comment, vector_images.should_emit_marker, vector_images.format_uncertainty_marker, shared._find_front_matter_end, renumber_uncertain_markers
     # called by: pipeline.run_pipeline
 
 def emit_prompts(sections: list[Section]) -> list[str] | None:
@@ -2160,6 +2161,21 @@ def emit_prompts(sections: list[Section]) -> list[str] | None:
     any LLM verbatim. Returns ``None`` when there are no uncertain regions.
     """
     # called by: pipeline.run_pipeline
+
+def is_flagged_table(sec: Section) -> bool:
+    """A TABLE section no second kind of evidence confirmed (select.trust_tables)."""
+    # called by: emit_markdown
+
+def renumber_uncertain_markers(md: str) -> str:
+    """Point every ``tomd:uncertain:L{a}-L{b}`` marker at the lines under it.
+
+    Emit numbers the markers as it writes them; later rewrites (duplicate
+    paragraphs collapsed, the table style block, front matter normalized,
+    the contents stripped) shift lines. Each marker keeps the number of lines
+    it covers and is renumbered from its own position: the covered text
+    starts two lines below the marker.
+    """
+    # called by: api.convert_paper_full, emit_markdown
 
 # The single Markdown unordered-list marker this converter emits, at every
 # nesting depth. "-" over "*" because the HTML renderer already emits "-", the
@@ -2743,6 +2759,57 @@ TRUNCATION_MARKER_TEMPLATE = ...
 # + 4 private module-level names
 ```
 
+<a id="lib-pdf-levels-py"></a>
+
+## `lib/pdf/levels.py` ([source](../../src/tomd/lib/pdf/levels.py))
+
+Typed: 4 of 4 functions and methods (100%).
+
+```python
+"""Graded table levels (L0-L5) and cell markers, from the table's own evidence.
+
+HIGH / UNCERTAIN says only whether to trust a table; a reader of the output
+(an agent evaluating the paper) also needs to know how a flagged table may be
+wrong, so it can tell a nearly-right reading from a misattributed one:
+
+  L0 trusted               HIGH: independent sources agree
+  L1 likely                flagged, but the words fit the drawn cells evenly
+  L2 minor                 flagged on one source only; every check on content passed
+  L3 structure uncertain   readers disagree, the fit or layout check failed, relational
+                           violations, the extent is open (a table may continue)
+  L4 content at risk       text duplicated or misattributed (conservation surplus),
+                           damaged text, cells read out of order, a reader error, repaired
+     L4 incomplete         text of the area missing from the cells, nothing duplicated or
+                           out of order: content missing, what is there is not contradicted
+  L5 mark only             a possible table that was not produced (a mark, not a table)
+
+The most severe level that applies is the table's level. Cell markers list the
+cells where the table's alternative readings (same shape) disagree. Levels are
+metadata: the table's content is unchanged.
+"""
+
+def assign(sec: Section) -> dict:
+    """{"level", "name", "why", "incomplete", "cells"} for a table section."""
+    # calls: cell_markers
+    # called by: pipeline.run_pipeline
+
+def cell_markers(sec: Section) -> list[tuple[int, int]]:
+    """Cells where an alternative reading of the same shape disagrees with the table."""
+    # calls: _rows
+    # called by: assign
+
+def comment(info: dict) -> str:
+    """The ``tomd:level`` comment written above a flagged table."""
+    # called by: emit.emit_markdown
+
+NAMES = ...
+
+# First level shown in the Markdown: L0 and L1 carry no level comment.
+SHOWN_FROM = 2
+
+# + 1 private module-level name
+```
+
 <a id="lib-pdf-mono-py"></a>
 
 ## `lib/pdf/mono.py` ([source](../../src/tomd/lib/pdf/mono.py))
@@ -2869,7 +2936,7 @@ def run_pipeline(path: Path, *, ml_tables: bool = False, visualize: bool = False
     effect when ``extract_vector`` is False.
     labels inside vector figures render as pixels alongside body text.
     """
-    # calls: PipelineResult, images._VectorExtractionStats, _enforce_skip_contract, PipelineResult.for_skip, _is_slide_deck, _is_standards_draft, extract.extract_mupdf, extract.extract_spatial, cleanup.get_edge_items, extract.collect_links, extract.attach_links, images.extract_page_images, +65 more
+    # calls: PipelineResult, images._VectorExtractionStats, _enforce_skip_contract, PipelineResult.for_skip, _is_slide_deck, _is_standards_draft, extract.extract_mupdf, extract.extract_spatial, cleanup.get_edge_items, extract.collect_links, extract.attach_links, images.extract_page_images, +66 more
 
 # + 37 private module-level names
 ```
@@ -2997,7 +3064,7 @@ def current() -> RunContext:
     as in unit tests) a detached context is returned, so recording never fails.
     """
     # calls: RunContext
-    # called by: pipeline.run_pipeline
+    # called by: pipeline._filter_sections_inside_vector_images, pipeline.run_pipeline
 
 @contextlib.contextmanager
 def run_scope():
@@ -4652,6 +4719,7 @@ class MarkdownWriter:
 - `apply_pdf_metadata_fallbacks`: [`lib/metadata_yaml/extract.py`](#lib-metadata-yaml-extract-py)
 - `apply_strip_leading_h1`: [`lib/shared.py`](#lib-shared-py)
 - `ascii_escape`: [`lib/shared.py`](#lib-shared-py)
+- `assign`: [`lib/pdf/levels.py`](#lib-pdf-levels-py)
 - `attach_links`: [`lib/pdf/extract.py`](#lib-pdf-extract-py)
 - `AUDIENCE_RE`: [`lib/pdf/types.py`](#lib-pdf-types-py)
 - `AxisReport`: [`lib/golden_qa.py`](#lib-golden-qa-py)
@@ -4668,6 +4736,7 @@ class MarkdownWriter:
 - `candidate_from_section`: [`lib/pdf/select.py`](#lib-pdf-select-py)
 - `candidates_agree`: [`lib/pdf/select.py`](#lib-pdf-select-py)
 - `Cell`: [`domain/table.py`](#domain-table-py)
+- `cell_markers`: [`lib/pdf/levels.py`](#lib-pdf-levels-py)
 - `cell_style`: [`lib/tables.py`](#lib-tables-py)
 - `CellAlign`: [`domain/table.py`](#domain-table-py)
 - `check_paper_content`: [`lib/check_content.py`](#lib-check-content-py)
@@ -4687,6 +4756,7 @@ class MarkdownWriter:
 - `collect_line_drawings`: [`lib/pdf/wording.py`](#lib-pdf-wording-py)
 - `collect_links`: [`lib/pdf/extract.py`](#lib-pdf-extract-py)
 - `collect_text_emoji_bboxes`: [`lib/pdf/glyphs.py`](#lib-pdf-glyphs-py)
+- `comment`: [`lib/pdf/levels.py`](#lib-pdf-levels-py)
 - `compare`: [`lib/golden_compare.py`](#lib-golden-compare-py)
 - `compare_extractions`: [`lib/pdf/structure.py`](#lib-pdf-structure-py)
 - `COMPOUND_PREFIXES`: [`lib/pdf/types.py`](#lib-pdf-types-py)
@@ -4797,6 +4867,7 @@ class MarkdownWriter:
 - `inject_glyph_spans`: [`lib/pdf/glyphs.py`](#lib-pdf-glyphs-py)
 - `InsertedSpan`: [`domain/span.py`](#domain-span-py)
 - `is_diagram_block`: [`lib/pdf/code_format.py`](#lib-pdf-code-format-py)
+- `is_flagged_table`: [`lib/pdf/emit.py`](#lib-pdf-emit-py)
 - `is_foreign_chromatic`: [`lib/pdf/wording.py`](#lib-pdf-wording-py)
 - `is_glyph_only_block`: [`lib/pdf/glyphs.py`](#lib-pdf-glyphs-py)
 - `is_green_ins`: [`lib/pdf/wording.py`](#lib-pdf-wording-py)
@@ -4827,6 +4898,7 @@ class MarkdownWriter:
 - `MIN_UNCERTAIN_WORDS`: [`lib/pdf/types.py`](#lib-pdf-types-py)
 - `MisalignedRegion`: [`lib/check_content.py`](#lib-check-content-py)
 - `MIXED_TABLE_MARKER`: [`lib/tables.py`](#lib-tables-py)
+- `NAMES`: [`lib/pdf/levels.py`](#lib-pdf-levels-py)
 - `normalize`: [`lib/golden_compare.py`](#lib-golden-compare-py)
 - `normalize_code_line`: [`lib/pdf/code_format.py`](#lib-pdf-code-format-py)
 - `normalize_date`: [`lib/shared.py`](#lib-shared-py)
@@ -4865,6 +4937,7 @@ class MarkdownWriter:
 - `Record`: [`lib/pdf/evidence.py`](#lib-pdf-evidence-py)
 - `render_body`: [`lib/html/render.py`](#lib-html-render-py)
 - `render_pdf_pages`: [`lib/golden_qa.py`](#lib-golden-qa-py)
+- `renumber_uncertain_markers`: [`lib/pdf/emit.py`](#lib-pdf-emit-py)
 - `reorder_abstract_in_uncertain`: [`lib/body/abstract.py`](#lib-body-abstract-py)
 - `REPEATING_THRESHOLD`: [`lib/pdf/types.py`](#lib-pdf-types-py)
 - `REPLY_TO_CONTINUATION_CAP`: [`lib/pdf/wg21.py`](#lib-pdf-wg21-py)
@@ -4890,6 +4963,7 @@ class MarkdownWriter:
 - `SECTION_NUM_RE`: [`lib/pdf/types.py`](#lib-pdf-types-py)
 - `SectionKind`: [`lib/pdf/types.py`](#lib-pdf-types-py)
 - `should_emit_marker`: [`lib/pdf/vector_images.py`](#lib-pdf-vector-images-py)
+- `SHOWN_FROM`: [`lib/pdf/levels.py`](#lib-pdf-levels-py)
 - `similar`: [`lib/similarity.py`](#lib-similarity-py)
 - `SIMILARITY_THRESHOLD`: [`lib/pdf/types.py`](#lib-pdf-types-py)
 - `SkipReason`: [`domain/document.py`](#domain-document-py)

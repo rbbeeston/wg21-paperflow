@@ -1,6 +1,7 @@
 """PDF to Markdown converter - pipeline entry point."""
 
 import fitz
+import functools
 import logging
 import re
 from bisect import bisect_right
@@ -95,6 +96,7 @@ from .docling_backend import (
     discover_tables_with_docling as _discover_tables_with_docling,
 )
 from ._fitz_lock import _FITZ_LOCK
+from .runctx import current, run_scope
 
 __all__ = ["run_pipeline", "PipelineResult", "ExtractedImage"]
 
@@ -1801,6 +1803,9 @@ class PipelineResult:
     images_truncated: bool = False
     vector_uncertainty: VectorUncertaintyStats | None = None
     glyph_stats: GlyphPassStats | None = None
+    # Table readers and checks that raised during the run (runctx.RunContext.reader_error):
+    # recorded instead of failing the paper, never swallowed silently.
+    reader_errors: list[dict] = field(default_factory=list)
 
     @classmethod
     def for_skip(
@@ -1886,6 +1891,21 @@ def _parse_pdf_info_date(raw: str) -> str:
     return ""
 
 
+def _in_run_scope(fn):
+    """Run ``fn`` inside a fresh run context (``runctx.run_scope``): everything the
+    table readers record belongs to this call only, also when papers convert on
+    several threads. Reader errors recorded during the run are returned on
+    ``PipelineResult.reader_errors``."""
+    @functools.wraps(fn)
+    def wrapper(*args, **kwargs) -> PipelineResult:
+        with run_scope() as ctx:
+            result = fn(*args, **kwargs)
+            result.reader_errors = list(ctx.record.errors)
+        return result
+    return wrapper
+
+
+@_in_run_scope
 def run_pipeline(
     path: Path,
     *,
@@ -2209,11 +2229,15 @@ def run_pipeline(
     # detector) to correctly populate Docling cell grids.
     pre_detect_blocks = list(all_mupdf_blocks) if ml_tables else []
 
-    table_sections, all_mupdf_blocks = detect_tables(
-        all_mupdf_blocks,
-        page_mupdf_tables=page_mupdf_tables,
-        two_column_pages=two_column_pages,
-    )
+    try:
+        table_sections, all_mupdf_blocks = detect_tables(
+            all_mupdf_blocks,
+            page_mupdf_tables=page_mupdf_tables,
+            two_column_pages=two_column_pages,
+        )
+    except Exception as exc:  # a failing table reader must not fail the paper: recorded, its text kept as prose
+        current().reader_error("detect_tables", None, exc)
+        table_sections = []
     if table_sections:
         _log.info("Detected %d table(s)", len(table_sections))
         all_spatial_blocks = exclude_table_regions(all_spatial_blocks, table_sections)

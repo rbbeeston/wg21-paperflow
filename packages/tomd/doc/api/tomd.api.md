@@ -1,6 +1,6 @@
 # tomd API surface
 
-67 modules, 82 classes, 158 functions, 76 methods, 325 fields. Typed: 785 of 821 functions and methods (95%).
+69 modules, 85 classes, 160 functions, 81 methods, 339 fields. Typed: 787 of 829 functions and methods (94%).
 
 ## Contents
 
@@ -40,6 +40,7 @@
 - [`lib/pdf/docling_backend.py`](#lib-pdf-docling-backend-py): absorb_cross_page_spec_rows, discover_tables_with_docling, docling_available, enrich_tables_with_docling, extract_docling_tables
 - [`lib/pdf/emit.py`](#lib-pdf-emit-py): emit_markdown, emit_prompts, LIST_BULLET
 - [`lib/pdf/emoji_data.py`](#lib-pdf-emoji-data-py): EMOJI_PRESENTATION_RANGES, UNICODE_EMOJI_VERSION
+- [`lib/pdf/evidence.py`](#lib-pdf-evidence-py): Entry, Record, CODE_ERRORS
 - [`lib/pdf/extract.py`](#lib-pdf-extract-py): attach_links, collect_links, extract_mupdf, extract_spatial
 - [`lib/pdf/figures.py`](#lib-pdf-figures-py): detect_figure_regions
 - [`lib/pdf/glyphs.py`](#lib-pdf-glyphs-py): GlyphCandidate, GlyphPassStats, collect_glyph_candidates, collect_text_emoji_bboxes, drop_glyphs_in_code_and_tables, filter_coincident, glyph_to_char, inject_glyph_spans, is_glyph_only_block, GLYPH_FONT_SENTINEL, GLYPH_PLACEHOLDER_MARKER_TEMPLATE, UNKNOWN_GLYPH
@@ -47,6 +48,7 @@
 - [`lib/pdf/mono.py`](#lib-pdf-mono-py): classify_monospace, propagate_monospace
 - [`lib/pdf/pipeline.py`](#lib-pdf-pipeline-py): PipelineResult, run_pipeline
 - [`lib/pdf/qa.py`](#lib-pdf-qa-py): QABatchResult, QAMetrics, compute_metrics, format_qa_report, run_qa_batch, write_qa_json_atomic
+- [`lib/pdf/runctx.py`](#lib-pdf-runctx-py): RunContext, current, run_scope, ERROR_MESSAGE_LIMIT
 - [`lib/pdf/spans.py`](#lib-pdf-spans-py): normalize_spans
 - [`lib/pdf/structure.py`](#lib-pdf-structure-py): compare_extractions, drop_leaked_toc_entries, heading_confidence, structure_body, structure_sections
 - [`lib/pdf/table.py`](#lib-pdf-table-py): TableKind, TableStrategy, detect_tables, exclude_table_regions
@@ -2188,6 +2190,63 @@ EMOJI_PRESENTATION_RANGES: tuple[tuple[int, int], ...] = ...
 UNICODE_EMOJI_VERSION = '17.0'
 ```
 
+<a id="lib-pdf-evidence-py"></a>
+
+## `lib/pdf/evidence.py` ([source](../../src/tomd/lib/pdf/evidence.py))
+
+Typed: 1 of 4 functions and methods (25%).
+
+```python
+"""The evidence record: what every table reader saw, nominated and rejected, and why.
+
+A reader that looks at an area and decides "not a table" records the area, the
+rule that decided, and the kind of information the rule used. Later steps (the
+region scan, the prompts, the paper summary) read the record instead of each
+reader's private verdict, so nothing is dropped without a trace.
+
+One record per conversion, held by the run's context (``runctx.RunContext``).
+
+Information types: "words" (text positions), "paths" (drawn lines, boxes,
+shading), "tree" (tagged structure), "meaning" (content kinds, poll
+vocabulary, code similarity), "document" (captions, counts, generator).
+"""
+
+@dataclass
+class Entry:
+    kind: str  # "nominated" | "excluded" | "feature"
+    scan: str  # which reader or check wrote it
+    page: int
+    bbox: Box
+    rule: str  # the rule that decided (or the feature's name)
+    info: str  # information type the rule used
+    value: object = None  # a feature's value, or extra detail
+    observed: bool = True  # observed on the page, or inferred
+
+@dataclass
+class Record:
+    entries: list[Entry] = field(default_factory=list)
+    # every candidate reading: (source, page, bbox, rows of cell text)
+    readings: list[tuple] = field(default_factory=list)
+    # readers, checks and specialists that raised: never swallowed silently
+    errors: list[dict] = field(default_factory=list)
+    def exclude(self, scan: str, page: int, bbox: Box, rule: str, info: str, value=None) -> None:
+        # untyped: value
+        # calls: Entry
+        ...
+    def feature(self, scan: str, page: int, bbox: Box, name: str, info: str, value, observed: bool = True) -> None:
+        # untyped: value
+        # calls: Entry
+        ...
+    def nominate(self, scan: str, page: int, bbox: Box, cue: str, info: str, value=None) -> None:
+        # untyped: value
+        # calls: Entry
+        ...
+    def on_page(self, page: int, kind: str | None = None) -> list[Entry]: ...
+
+# Exceptions that mean the code is wrong, not the PDF: the release gate fails on any of them.
+CODE_ERRORS = ...
+```
+
 <a id="lib-pdf-extract-py"></a>
 
 ## `lib/pdf/extract.py` ([source](../../src/tomd/lib/pdf/extract.py))
@@ -2746,7 +2805,7 @@ def propagate_monospace(mupdf_blocks: list[Block], spatial_blocks: list[Block], 
 
 ## `lib/pdf/pipeline.py` ([source](../../src/tomd/lib/pdf/pipeline.py))
 
-Typed: 28 of 38 functions and methods (73%).
+Typed: 28 of 39 functions and methods (71%).
 
 ```python
 """PDF to Markdown converter - pipeline entry point."""
@@ -2782,6 +2841,9 @@ class PipelineResult:
     images_truncated: bool = False
     vector_uncertainty: VectorUncertaintyStats | None = None
     glyph_stats: GlyphPassStats | None = None
+    # Table readers and checks that raised during the run (runctx.RunContext.reader_error):
+    # recorded instead of failing the paper, never swallowed silently.
+    reader_errors: list[dict] = field(default_factory=list)
     @classmethod
     def for_skip(cls, reason: SkipReason, *, page_count: int = 0, prompts: list[str] | None = None, readable: bool = True) -> 'PipelineResult':
         """Construct a complete skip result.
@@ -2806,9 +2868,9 @@ def run_pipeline(path: Path, *, ml_tables: bool = False, visualize: bool = False
     effect when ``extract_vector`` is False.
     labels inside vector figures render as pixels alongside body text.
     """
-    # calls: PipelineResult, images._VectorExtractionStats, _enforce_skip_contract, PipelineResult.for_skip, _is_slide_deck, _is_standards_draft, extract.extract_mupdf, extract.extract_spatial, cleanup.get_edge_items, extract.collect_links, extract.attach_links, images.extract_page_images, +63 more
+    # calls: PipelineResult, images._VectorExtractionStats, _enforce_skip_contract, PipelineResult.for_skip, _is_slide_deck, _is_standards_draft, extract.extract_mupdf, extract.extract_spatial, cleanup.get_edge_items, extract.collect_links, extract.attach_links, images.extract_page_images, +64 more
 
-# + 36 private module-level names
+# + 37 private module-level names
 ```
 
 <a id="lib-pdf-qa-py"></a>
@@ -2898,6 +2960,53 @@ def write_qa_json_atomic(path: Path, results: Sequence[QAMetrics]) -> None:
     """Atomically write per-paper QA metrics as JSON."""
 
 # + 12 private module-level names
+```
+
+<a id="lib-pdf-runctx-py"></a>
+
+## `lib/pdf/runctx.py` ([source](../../src/tomd/lib/pdf/runctx.py))
+
+Typed: 1 of 3 functions and methods (33%).
+
+```python
+"""Per-run context: the state one ``run_pipeline`` call owns.
+
+Table readers and checks record what they saw (the evidence record) and what
+raised (reader errors). That state belongs to one conversion, so it lives in a
+``RunContext`` opened by ``run_pipeline`` with ``run_scope()``, never in module
+globals: two papers converted on two threads each see only their own context
+(``contextvars`` gives every thread its own value).
+"""
+
+@dataclass
+class RunContext:
+    record: Record = field(default_factory=Record)
+    # re-raise reader errors instead of recording them (tests of a reader's own failures)
+    strict: bool = False
+    def reader_error(self, stage: str, page: int | None, exc: BaseException, table=None) -> None:
+        """Record a reader, check or specialist that raised: stage, page (None for the
+        whole paper), exception type and message, and whether it is a code error. A table
+        the failure touched carries the stage in ``metadata["reader_errors"]``, so the
+        mark survives the section being copied.
+        """
+        # untyped: table
+
+def current() -> RunContext:
+    """The active run's context. Outside ``run_pipeline`` (a reader called directly,
+    as in unit tests) a detached context is returned, so recording never fails.
+    """
+    # calls: RunContext
+    # called by: pipeline.run_pipeline
+
+@contextlib.contextmanager
+def run_scope():
+    """Open a fresh context for one conversion; restore the previous one on exit."""
+    # untyped: return
+    # calls: RunContext
+    # called by: pipeline._in_run_scope
+
+# Longest exception message kept in a reader-error entry.
+ERROR_MESSAGE_LIMIT = 300
 ```
 
 <a id="lib-pdf-spans-py"></a>
@@ -4473,6 +4582,7 @@ class MarkdownWriter:
 - `classify_wording`: [`lib/pdf/wording.py`](#lib-pdf-wording-py)
 - `cleanup_text`: [`lib/pdf/cleanup.py`](#lib-pdf-cleanup-py)
 - `code_cell`: [`lib/tables.py`](#lib-tables-py)
+- `CODE_ERRORS`: [`lib/pdf/evidence.py`](#lib-pdf-evidence-py)
 - `CODE_LANG_LABELS`: [`lib/shared.py`](#lib-shared-py)
 - `CodeBlock`: [`domain/elements.py`](#domain-elements-py)
 - `CodeCell`: [`domain/table.py`](#domain-table-py)
@@ -4498,6 +4608,7 @@ class MarkdownWriter:
 - `convert_paper_full`: [`api.py`](#api-py)
 - `ConvertedPaper`: [`api.py`](#api-py)
 - `ConvertedPaper`: [`domain/document.py`](#domain-document-py)
+- `current`: [`lib/pdf/runctx.py`](#lib-pdf-runctx-py)
 - `DATE_RE`: [`lib/shared.py`](#lib-shared-py)
 - `dedup_abstract`: [`lib/body/abstract.py`](#lib-body-abstract-py)
 - `dedup_paragraphs`: [`lib/shared.py`](#lib-shared-py)
@@ -4531,6 +4642,8 @@ class MarkdownWriter:
 - `enrich_pdf_reply_to`: [`lib/metadata_yaml/extract.py`](#lib-metadata-yaml-extract-py)
 - `enrich_reply_to_names`: [`lib/shared.py`](#lib-shared-py)
 - `enrich_tables_with_docling`: [`lib/pdf/docling_backend.py`](#lib-pdf-docling-backend-py)
+- `Entry`: [`lib/pdf/evidence.py`](#lib-pdf-evidence-py)
+- `ERROR_MESSAGE_LIMIT`: [`lib/pdf/runctx.py`](#lib-pdf-runctx-py)
 - `escape_leading_atx`: [`lib/pdf/cleanup.py`](#lib-pdf-cleanup-py)
 - `exclude_table_regions`: [`lib/pdf/table.py`](#lib-pdf-table-py)
 - `extract_docling_tables`: [`lib/pdf/docling_backend.py`](#lib-pdf-docling-backend-py)
@@ -4653,6 +4766,7 @@ class MarkdownWriter:
 - `REASON_WORDING_COLOR`: [`lib/pdf/vector_images.py`](#lib-pdf-vector-images-py)
 - `rebless_stems`: [`lib/golden_qa.py`](#lib-golden-qa-py)
 - `ReblessOutcome`: [`lib/golden_qa.py`](#lib-golden-qa-py)
+- `Record`: [`lib/pdf/evidence.py`](#lib-pdf-evidence-py)
 - `render_body`: [`lib/html/render.py`](#lib-html-render-py)
 - `render_pdf_pages`: [`lib/golden_qa.py`](#lib-golden-qa-py)
 - `reorder_abstract_in_uncertain`: [`lib/body/abstract.py`](#lib-body-abstract-py)
@@ -4666,6 +4780,8 @@ class MarkdownWriter:
 - `run_parallel_batch`: [`lib/batch.py`](#lib-batch-py)
 - `run_pipeline`: [`lib/pdf/pipeline.py`](#lib-pdf-pipeline-py)
 - `run_qa_batch`: [`lib/pdf/qa.py`](#lib-pdf-qa-py)
+- `run_scope`: [`lib/pdf/runctx.py`](#lib-pdf-runctx-py)
+- `RunContext`: [`lib/pdf/runctx.py`](#lib-pdf-runctx-py)
 - `RUNNING_FOOTER_MAX_WORDS`: [`lib/pdf/types.py`](#lib-pdf-types-py)
 - `sanitize_metadata`: [`lib/metadata_yaml/format.py`](#lib-metadata-yaml-format-py)
 - `score_report`: [`lib/golden_qa.py`](#lib-golden-qa-py)

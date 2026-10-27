@@ -187,7 +187,7 @@ class Section:
     spatial_text: str = ""
     page_num: int = 0
     font_size: float = 0.0
-    metadata: dict[str, str | list[str]] = field(default_factory=dict)
+    metadata: dict[str, object] = field(default_factory=dict)
     columns: list[list[list[Span]]] = field(default_factory=list)
     fence_lang: str = "cpp"
     indent_level: int = 0
@@ -197,6 +197,46 @@ class Section:
     table_continuation: bool = False
     figure_graph: FigureGraph | None = None
     image_ref: "ExtractedImage | None" = None
+
+
+@dataclass
+class TableCandidate:
+    """A table proposed by one independent reader, before selection.
+
+    rows[r][c] is the list of Lines in that cell (several Lines when the
+    cell wraps). bboxes maps page_num -> bbox of the table's part on that
+    page; a table continued across a page break has several entries.
+    """
+    source: str                                  # the reader: "tomd", "tags", "grid", "rules", ...
+    rows: list[list[list[Line]]]
+    bboxes: dict[int, tuple[float, float, float, float]] = field(default_factory=dict)
+    flags: list[str] = field(default_factory=list)
+
+    @property
+    def pages(self) -> list[int]:
+        return sorted(self.bboxes)
+
+    @property
+    def shape(self) -> tuple[int, int]:
+        return len(self.rows), max((len(r) for r in self.rows), default=0)
+
+    def cell_text(self, r: int, c: int) -> str:
+        if c >= len(self.rows[r]):
+            return ""
+        parts: list[str] = []
+        for ln in self.rows[r][c]:
+            t = ln.text.strip()
+            if not t:
+                continue
+            if parts and getattr(ln, "joins_prev", False):
+                parts[-1] += t                  # a word split by the cell's width
+            else:
+                parts.append(t)
+        return " ".join(parts)
+
+    def text_rows(self) -> list[list[str]]:
+        return [[self.cell_text(r, c) for c in range(len(row))]
+                for r, row in enumerate(self.rows)]
 
 
 @dataclass

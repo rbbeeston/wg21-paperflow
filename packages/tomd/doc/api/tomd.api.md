@@ -1,6 +1,6 @@
 # tomd API surface
 
-69 modules, 85 classes, 160 functions, 81 methods, 339 fields. Typed: 787 of 829 functions and methods (94%).
+70 modules, 86 classes, 165 functions, 85 methods, 343 fields. Typed: 801 of 844 functions and methods (94%).
 
 ## Contents
 
@@ -49,6 +49,7 @@
 - [`lib/pdf/pipeline.py`](#lib-pdf-pipeline-py): PipelineResult, run_pipeline
 - [`lib/pdf/qa.py`](#lib-pdf-qa-py): QABatchResult, QAMetrics, compute_metrics, format_qa_report, run_qa_batch, write_qa_json_atomic
 - [`lib/pdf/runctx.py`](#lib-pdf-runctx-py): RunContext, current, run_scope, ERROR_MESSAGE_LIMIT
+- [`lib/pdf/select.py`](#lib-pdf-select-py): candidate_from_section, candidates_agree, conservation_error, partial_reading, trust_tables
 - [`lib/pdf/spans.py`](#lib-pdf-spans-py): normalize_spans
 - [`lib/pdf/structure.py`](#lib-pdf-structure-py): compare_extractions, drop_leaked_toc_entries, heading_confidence, structure_body, structure_sections
 - [`lib/pdf/table.py`](#lib-pdf-table-py): TableKind, TableStrategy, detect_tables, exclude_table_regions
@@ -2868,7 +2869,7 @@ def run_pipeline(path: Path, *, ml_tables: bool = False, visualize: bool = False
     effect when ``extract_vector`` is False.
     labels inside vector figures render as pixels alongside body text.
     """
-    # calls: PipelineResult, images._VectorExtractionStats, _enforce_skip_contract, PipelineResult.for_skip, _is_slide_deck, _is_standards_draft, extract.extract_mupdf, extract.extract_spatial, cleanup.get_edge_items, extract.collect_links, extract.attach_links, images.extract_page_images, +64 more
+    # calls: PipelineResult, images._VectorExtractionStats, _enforce_skip_contract, PipelineResult.for_skip, _is_slide_deck, _is_standards_draft, extract.extract_mupdf, extract.extract_spatial, cleanup.get_edge_items, extract.collect_links, extract.attach_links, images.extract_page_images, +65 more
 
 # + 37 private module-level names
 ```
@@ -3007,6 +3008,74 @@ def run_scope():
 
 # Longest exception message kept in a reader-error entry.
 ERROR_MESSAGE_LIMIT = 300
+```
+
+<a id="lib-pdf-select-py"></a>
+
+## `lib/pdf/select.py` ([source](../../src/tomd/lib/pdf/select.py))
+
+Typed: 10 of 11 functions and methods (90%).
+
+```python
+"""Table trust: a table is HIGH only when another kind of evidence agrees.
+
+Every table reader proposes candidates (``TableCandidate``). A table read by
+one reader alone, however plausible, is UNCERTAIN: measured on fresh WG21
+papers, single-source tables carry most silent errors. A table whose cells
+lose or repeat the text of its area (``conservation_error``), whose cell text
+is read in an order the page contradicts, or whose text layer is damaged is
+UNCERTAIN too. The reasons are kept in ``Section.metadata`` for the marks, the
+prompts and the paper summary.
+
+Today the only reader is ``table.detect_tables``, so ``trust_tables`` lowers
+its tables without changing a cell. The other readers and the selection
+between their readings join this module as they are ported.
+"""
+
+def candidate_from_section(sec: Section) -> TableCandidate:
+    """Wrap a ``detect_tables`` section (cells are span lists) as a candidate."""
+    # calls: types.Line, types.TableCandidate
+    # called by: trust_tables
+
+def candidates_agree(a: TableCandidate, b: TableCandidate) -> bool:
+    """Same grid shape and every cell matching."""
+    # calls: _cells_agree
+
+def conservation_error(cand: TableCandidate, blocks: list[Block]) -> str:
+    """Check that the text in the table's area went into its cells exactly once.
+
+    The area is where the cells' own lines sit on each page. Every letter and
+    digit of the page lines centred in that area must appear in the cells as
+    often as on the page: a deficit is text the table lost (a dropped row,
+    an overprinted word), a surplus is text it duplicated. Compared as
+    character counts, so line breaks, hyphenation and spacing do not matter.
+    Returns "" when conserved, else a note for the prompt.
+    """
+    # calls: _aligned_neighbour_row
+    # called by: trust_tables
+
+def partial_reading(primary: TableCandidate, other: TableCandidate) -> bool:
+    """True when ``other`` is the text-position reading of part of a fully ruled
+    table: same columns, and every one of its rows matches, cell for cell, a row
+    of the ruled table in the same order. The text-position reader often stops
+    early or starts late on ruled tables; a correct subset confirms the rows it
+    saw rather than contradicting the rest.
+    """
+    # calls: _cells_agree, _all_bold
+
+def trust_tables(table_sections: list[Section], blocks: list[Block]) -> None:
+    """Set each table's confidence from the evidence, in place; no cell changes.
+
+    ``blocks`` are the page blocks before any reader consumed them (the text the
+    conservation check counts). With one reader no second kind of evidence can
+    agree, so every table is UNCERTAIN ("single-source"), plus the reasons its
+    own checks find. Each table's metadata gains ``table_agreement``,
+    ``uncertain_reasons`` and ``table_note``.
+    """
+    # calls: candidate_from_section, conservation_error, _order_contradiction, _damaged_text
+    # called by: pipeline.run_pipeline
+
+# + 6 private module-level names
 ```
 
 <a id="lib-pdf-spans-py"></a>
@@ -3285,7 +3354,7 @@ def exclude_table_regions(blocks: list[Block], table_sections: list[Section]) ->
 
 ## `lib/pdf/types.py` ([source](../../src/tomd/lib/pdf/types.py))
 
-Typed: 12 of 12 functions and methods (100%).
+Typed: 16 of 16 functions and methods (100%).
 
 ```python
 """Shared data types, constants, and precompiled regex patterns for PDF conversion."""
@@ -3383,7 +3452,7 @@ class Section:
     spatial_text: str = ''
     page_num: int = 0
     font_size: float = 0.0
-    metadata: dict[str, str | list[str]] = field(default_factory=dict)
+    metadata: dict[str, object] = field(default_factory=dict)
     columns: list[list[list[Span]]] = field(default_factory=list)
     fence_lang: str = 'cpp'
     indent_level: int = 0
@@ -3430,6 +3499,29 @@ class Span:
     color: int = 0
     link_url: str | None = None
     wording_role: str | None = None
+
+@dataclass
+class TableCandidate:
+    """A table proposed by one independent reader, before selection.
+
+    rows[r][c] is the list of Lines in that cell (several Lines when the
+    cell wraps). bboxes maps page_num -> bbox of the table's part on that
+    page; a table continued across a page break has several entries.
+    """
+    source: str  # the reader: "tomd", "tags", "grid", "rules", ...
+    rows: list[list[list[Line]]]
+    bboxes: dict[int, tuple[float, float, float, float]] = field(default_factory=dict)
+    flags: list[str] = field(default_factory=list)
+    def cell_text(self, r: int, c: int) -> str:
+        # called by: TableCandidate.text_rows
+        ...
+    @property
+    def pages(self) -> list[int]: ...
+    @property
+    def shape(self) -> tuple[int, int]: ...
+    def text_rows(self) -> list[list[str]]:
+        # calls: TableCandidate.cell_text
+        ...
 
 def compute_bbox(bboxes: list[tuple]) -> tuple[float, float, float, float]:
     """Compute the bounding box enclosing all given bbox tuples.
@@ -4573,6 +4665,8 @@ class MarkdownWriter:
 - `build_review_prompt`: [`lib/golden_qa.py`](#lib-golden-qa-py)
 - `BULLET_CHARS`: [`lib/pdf/types.py`](#lib-pdf-types-py)
 - `BULLET_RE`: [`lib/pdf/types.py`](#lib-pdf-types-py)
+- `candidate_from_section`: [`lib/pdf/select.py`](#lib-pdf-select-py)
+- `candidates_agree`: [`lib/pdf/select.py`](#lib-pdf-select-py)
 - `Cell`: [`domain/table.py`](#domain-table-py)
 - `cell_style`: [`lib/tables.py`](#lib-tables-py)
 - `CellAlign`: [`domain/table.py`](#domain-table-py)
@@ -4600,6 +4694,7 @@ class MarkdownWriter:
 - `compute_content_coverage`: [`lib/check_content.py`](#lib-check-content-py)
 - `compute_metrics`: [`lib/pdf/qa.py`](#lib-pdf-qa-py)
 - `Confidence`: [`lib/pdf/types.py`](#lib-pdf-types-py)
+- `conservation_error`: [`lib/pdf/select.py`](#lib-pdf-select-py)
 - `ContainerSpan`: [`domain/span.py`](#domain-span-py)
 - `ContentCheckBatchResult`: [`lib/check_content.py`](#lib-check-content-py)
 - `ContentCheckResult`: [`lib/check_content.py`](#lib-check-content-py)
@@ -4751,6 +4846,7 @@ class MarkdownWriter:
 - `parse_author_lines`: [`lib/shared.py`](#lib-shared-py)
 - `parse_front_matter`: [`lib/metadata_yaml/format.py`](#lib-metadata-yaml-format-py)
 - `parse_html`: [`lib/html/extract.py`](#lib-html-extract-py)
+- `partial_reading`: [`lib/pdf/select.py`](#lib-pdf-select-py)
 - `PipelineResult`: [`lib/pdf/pipeline.py`](#lib-pdf-pipeline-py)
 - `promote_abstract_from_uncertain`: [`lib/body/abstract.py`](#lib-body-abstract-py)
 - `propagate_monospace`: [`lib/pdf/mono.py`](#lib-pdf-mono-py)
@@ -4828,6 +4924,7 @@ class MarkdownWriter:
 - `Table`: [`domain/table.py`](#domain-table-py)
 - `TABLE_CLOSE`: [`lib/tables.py`](#lib-tables-py)
 - `TABLE_OPEN`: [`lib/tables.py`](#lib-tables-py)
+- `TableCandidate`: [`lib/pdf/types.py`](#lib-pdf-types-py)
 - `TableKind`: [`lib/pdf/table.py`](#lib-pdf-table-py)
 - `TableRow`: [`domain/table.py`](#domain-table-py)
 - `TableStrategy`: [`domain/table.py`](#domain-table-py)
@@ -4840,6 +4937,7 @@ class MarkdownWriter:
 - `tomd_markdown`: [`lib/golden_qa.py`](#lib-golden-qa-py)
 - `TomdError`: [`errors.py`](#errors-py)
 - `TRUNCATION_MARKER_TEMPLATE`: [`lib/pdf/images.py`](#lib-pdf-images-py)
+- `trust_tables`: [`lib/pdf/select.py`](#lib-pdf-select-py)
 - `UncertainElement`: [`domain/elements.py`](#domain-elements-py)
 - `UNICODE_EMOJI_VERSION`: [`lib/pdf/emoji_data.py`](#lib-pdf-emoji-data-py)
 - `UNIFORM_ROLE_THRESHOLD`: [`lib/wording_policy.py`](#lib-wording-policy-py)

@@ -97,6 +97,7 @@ from .docling_backend import (
 )
 from ._fitz_lock import _FITZ_LOCK
 from .runctx import current, run_scope
+from .select import trust_tables
 
 __all__ = ["run_pipeline", "PipelineResult", "ExtractedImage"]
 
@@ -2223,11 +2224,12 @@ def run_pipeline(
         all_mupdf_blocks, text_colors=page0_colors
     )
 
-    # Snapshot for Docling enrichment: detect_tables consumes blocks,
-    # but the enrichment needs access to ALL page spans (including
-    # those consumed but dropped from sec.lines by the rule-based
-    # detector) to correctly populate Docling cell grids.
-    pre_detect_blocks = list(all_mupdf_blocks) if ml_tables else []
+    # Snapshot of every page block before detect_tables consumes them:
+    # the table trust check counts the text of each table's area in it
+    # (select.conservation_error), and the Docling enrichment needs ALL
+    # page spans (including those consumed but dropped from sec.lines by
+    # the rule-based detector) to correctly populate Docling cell grids.
+    pre_detect_blocks = list(all_mupdf_blocks)
 
     try:
         table_sections, all_mupdf_blocks = detect_tables(
@@ -2238,6 +2240,10 @@ def run_pipeline(
     except Exception as exc:  # a failing table reader must not fail the paper: recorded, its text kept as prose
         current().reader_error("detect_tables", None, exc)
         table_sections = []
+    # A table is trusted (HIGH) only when another kind of evidence agrees;
+    # with one reader every table is UNCERTAIN. No cell changes, and
+    # emit_markdown does not render a table's confidence.
+    trust_tables(table_sections, pre_detect_blocks)
     if table_sections:
         _log.info("Detected %d table(s)", len(table_sections))
         all_spatial_blocks = exclude_table_regions(all_spatial_blocks, table_sections)

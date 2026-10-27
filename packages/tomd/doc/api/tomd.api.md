@@ -1,6 +1,6 @@
 # tomd API surface
 
-67 modules, 82 classes, 158 functions, 76 methods, 325 fields.
+67 modules, 82 classes, 158 functions, 76 methods, 325 fields. Typed: 785 of 821 functions and methods (95%).
 
 ## Contents
 
@@ -83,6 +83,8 @@
 <a id="api-py"></a>
 
 ## `api.py` ([source](../../src/tomd/api.py))
+
+Typed: 7 of 9 functions and methods (77%).
 
 ```python
 """Public tomd API: convert a staged paper source to markdown.
@@ -177,6 +179,7 @@ def convert_paper_full(paper_id: str, source_path: Path, meta: dict, *, html_ima
     strict canonical key order ``title, document, date, intent,
     audience, reply-to``.
     """
+    # untyped: html_images_manifest
     # calls: _convert_with_tomd_full, ConvertedPaper.skipped_from, _normalize_front_matter, _strip_body_metadata_text, format.parse_front_matter, _strip_toc, _extract_intent_from_front_matter, ConvertedPaper
     # called by: convert_paper
 
@@ -186,6 +189,8 @@ def convert_paper_full(paper_id: str, source_path: Path, meta: dict, *, html_ima
 <a id="cli-py"></a>
 
 ## `cli.py` ([source](../../src/tomd/cli.py))
+
+Typed: 21 of 21 functions and methods (100%).
 
 ```python
 """tomd developer CLI: the golden QA workflow.
@@ -215,6 +220,7 @@ revision, `P4228R0`), normalized to the lowercase fixture stem at parse time.
 
 def main(argv: list[str] | None = None) -> int:
     # calls: _paper_id, _all_flag
+    ...
 
 # + 20 private module-level names
 ```
@@ -235,6 +241,8 @@ Official repository: https://github.com/cppalliance/wg21-paperflow
 <a id="domain-document-py"></a>
 
 ## `domain/document.py` ([source](../../src/tomd/domain/document.py))
+
+Typed: 1 of 1 functions and methods (100%).
 
 ```python
 """Distributed under the Boost Software License, Version 1.0. (See accompanying
@@ -280,6 +288,8 @@ class SkipReason(StrEnum):
 
 ## `domain/elements.py` ([source](../../src/tomd/domain/elements.py))
 
+Typed: 29 of 29 functions and methods (100%).
+
 ```python
 """Block-level AST nodes for WG21 paper documents.
 
@@ -314,6 +324,7 @@ class Blockquote(BlockElement):
     @classmethod
     def from_text(cls, content: str, role: str | None = None) -> 'Blockquote':
         # calls: Paragraph.from_text
+        ...
     def role_text(self, target_type: type[Span]) -> str: ...
     @property
     def text(self) -> str: ...
@@ -350,6 +361,7 @@ class Heading(BlockElement):
     @classmethod
     def from_text(cls, level: int, text: str) -> 'Heading':
         # calls: span.TextSpan
+        ...
     def role_text(self, target_type: type[Span]) -> str: ...
     @property
     def text(self) -> str: ...
@@ -384,6 +396,7 @@ class ListItem:
     @classmethod
     def from_text(cls, text: str) -> 'ListItem':
         # calls: span.TextSpan
+        ...
     def role_text(self, target_type: type[Span]) -> str: ...
     @property
     def text(self) -> str: ...
@@ -397,6 +410,7 @@ class Paragraph(BlockElement):
     def from_text(cls, text: str) -> 'Paragraph':
         # calls: span.TextSpan
         # called by: Blockquote.from_text, WordingBlock.from_text
+        ...
     def role_text(self, target_type: type[Span]) -> str: ...
     @property
     def text(self) -> str: ...
@@ -422,6 +436,7 @@ class WordingBlock(BlockElement):
     @classmethod
     def from_text(cls, text: str, role: WordingRole = 'wording') -> 'WordingBlock':
         # calls: Paragraph.from_text
+        ...
     def role_text(self, target_type: type[Span]) -> str: ...
     @property
     def text(self) -> str: ...
@@ -454,6 +469,8 @@ class ExtractedImage:
 
 ## `domain/metadata.py` ([source](../../src/tomd/domain/metadata.py))
 
+Typed: 2 of 2 functions and methods (100%).
+
 ```python
 """Distributed under the Boost Software License, Version 1.0. (See accompanying
 
@@ -483,6 +500,8 @@ class PaperMetadata:
 
 ## `domain/span.py` ([source](../../src/tomd/domain/span.py))
 
+Typed: 14 of 14 functions and methods (100%).
+
 ```python
 """Distributed under the Boost Software License, Version 1.0. (See accompanying
 
@@ -505,6 +524,7 @@ class ContainerSpan(Span):
     @classmethod
     def from_text(cls, text: str) -> Self:
         # calls: TextSpan
+        ...
     def map_text(self, fn: Callable[[str], str]) -> Self: ...
     def role_text(self, target_type: type[Span]) -> str: ...
     @property
@@ -539,6 +559,7 @@ class LinkSpan(ContainerSpan):
     @classmethod
     def from_text(cls, text: str, url: str = '', title: str | None = None) -> 'LinkSpan':
         # calls: TextSpan
+        ...
 
 @dataclass(frozen=True)
 class Span:
@@ -578,6 +599,8 @@ class TextSpan(Span):
 <a id="domain-table-py"></a>
 
 ## `domain/table.py` ([source](../../src/tomd/domain/table.py))
+
+Typed: 11 of 11 functions and methods (100%).
 
 ```python
 """Distributed under the Boost Software License, Version 1.0. (See accompanying
@@ -627,6 +650,7 @@ class Table(BlockElement):
     def text(self) -> str: ...
     def unwrap_spans(self, target_type: type[Span]) -> Self:
         # calls: TableRow
+        ...
 
 @dataclass
 class TableRow:
@@ -644,6 +668,7 @@ class TextCell(Cell):
     @classmethod
     def from_text(cls, text: str, align: CellAlign = CellAlign.DEFAULT, width: str | None = None) -> 'TextCell':
         # calls: span.TextSpan
+        ...
     def role_text(self, target_type: type[Span]) -> str: ...
     @property
     def text(self) -> str: ...
@@ -680,6 +705,8 @@ class UnsupportedSourceFormatError(TomdError):
 <a id="lib-batch-py"></a>
 
 ## `lib/batch.py` ([source](../../src/tomd/lib/batch.py))
+
+Typed: 5 of 5 functions and methods (100%).
 
 ```python
 """Shared parallel batch runner for tomd QA and content-check batches."""
@@ -724,6 +751,8 @@ def run_parallel_batch(items: list[tuple[str, TItem]], worker: Callable[[TItem],
 <a id="lib-body-abstract-py"></a>
 
 ## `lib/body/abstract.py` ([source](../../src/tomd/lib/body/abstract.py))
+
+Typed: 8 of 8 functions and methods (100%).
 
 ```python
 """Body cleanup: abstract dedup and metadata-echo removal from UNCERTAIN sections."""
@@ -809,6 +838,8 @@ def strip_metadata_from_uncertain(sections: list[Section], metadata: dict) -> No
 <a id="lib-check-content-py"></a>
 
 ## `lib/check_content.py` ([source](../../src/tomd/lib/check_content.py))
+
+Typed: 25 of 25 functions and methods (100%).
 
 ```python
 """Content-coverage check: does the converted Markdown represent the source?
@@ -946,6 +977,8 @@ def write_content_check_json_atomic(json_path: Path, results: Sequence[ContentCh
 
 ## `lib/golden_compare.py` ([source](../../src/tomd/lib/golden_compare.py))
 
+Typed: 18 of 19 functions and methods (94%).
+
 ```python
 """Deterministic structural comparator for golden QA.
 
@@ -994,10 +1027,12 @@ class StructuralScore:
 def compare(tomd_md: str, golden_md: str) -> StructuralScore:
     # calls: normalize, _frontmatter_axis, _heading_axis, _list_axis, _code_axis, _table_axis, _text_axis, _present_axes, StructuralScore
     # called by: golden_gaps.locate_gaps, golden_qa.issue_for_stem, golden_qa.score_report, golden_qa.score_result, golden_qa.score_stem
+    ...
 
 def normalize(md_text: str) -> NormalizedDoc:
     # calls: _block_from_token, NormalizedDoc, _front_matter_keys
     # called by: compare, golden_gaps.locate_gaps
+    ...
 
 # + 17 private module-level names
 ```
@@ -1005,6 +1040,8 @@ def normalize(md_text: str) -> NormalizedDoc:
 <a id="lib-golden-gaps-py"></a>
 
 ## `lib/golden_gaps.py` ([source](../../src/tomd/lib/golden_gaps.py))
+
+Typed: 8 of 8 functions and methods (100%).
 
 ```python
 """Deterministic gap locator and issue drafter for golden QA.
@@ -1049,6 +1086,8 @@ def locate_gaps(tomd_md: str, ideal_md: str) -> list[Gap]:
 <a id="lib-golden-qa-py"></a>
 
 ## `lib/golden_qa.py` ([source](../../src/tomd/lib/golden_qa.py))
+
+Typed: 28 of 30 functions and methods (93%).
 
 ```python
 """Golden QA orchestration helpers: locate a paper's source, convert it with
@@ -1120,6 +1159,7 @@ def download_source(stem: str, golden_dir: Path, *, opener=_fetch) -> Path:
     `<stem>.<ext>`. Network is used only here; the rest of the QA flow is offline.
     `opener(url) -> (final_url, bytes)` is injectable for testing.
     """
+    # untyped: opener
     # calls: source_dir, _source_ext
     # called by: cli._cmd_add, generate_ideal
 
@@ -1213,6 +1253,7 @@ def review_ideal(stem: str, golden_dir: Path, *, runner=_claude_runner) -> str:
     prints it. For PDFs it renders the page images if they are not already staged.
     `runner(prompt, golden_dir) -> text` is injectable for testing.
     """
+    # untyped: runner
     # calls: find_source, ideal_path, render_pdf_pages, build_review_prompt, review_skill_text
     # called by: cli._cmd_review
 
@@ -1247,6 +1288,7 @@ def score_stem(stem: str, golden_dir: Path) -> dict[str, float]:
 
 def source_dir(golden_dir: Path) -> Path:
     # called by: download_source, find_source, stage_source
+    ...
 
 def stage_source(stem: str, source_path: Path, golden_dir: Path) -> Path:
     """Copy a source file into the golden dir as `<stem>.<ext>`; return the dest."""
@@ -1281,6 +1323,8 @@ def validate_facts_jsonl(text: str) -> list[str]:
 
 ## `lib/html/convert.py` ([source](../../src/tomd/lib/html/convert.py))
 
+Typed: 1 of 1 functions and methods (100%).
+
 ```python
 """HTML to Markdown converter for WG21 papers."""
 
@@ -1305,6 +1349,8 @@ def convert_html(path: Path | os.PathLike[str], *, html_images_result: HtmlImage
 <a id="lib-html-extract-py"></a>
 
 ## `lib/html/extract.py` ([source](../../src/tomd/lib/html/extract.py))
+
+Typed: 23 of 23 functions and methods (100%).
 
 ```python
 """HTML parsing, generator detection, metadata extraction, and boilerplate stripping."""
@@ -1350,6 +1396,8 @@ def strip_boilerplate(soup: BeautifulSoup, generator: str) -> list[str]:
 <a id="lib-html-images-py"></a>
 
 ## `lib/html/images.py` ([source](../../src/tomd/lib/html/images.py))
+
+Typed: 1 of 1 functions and methods (100%).
 
 ```python
 """HTML side of the embedded-image flow.
@@ -1400,6 +1448,8 @@ def load_html_images(manifest: HtmlImagesManifest) -> HtmlImagesResult:
 
 ## `lib/html/render.py` ([source](../../src/tomd/lib/html/render.py))
 
+Typed: 49 of 51 functions and methods (96%).
+
 ```python
 """DOM-to-Markdown rendering for WG21 HTML papers."""
 
@@ -1433,6 +1483,8 @@ Use direct imports from submodules:
 <a id="lib-metadata-yaml-extract-py"></a>
 
 ## `lib/metadata_yaml/extract.py` ([source](../../src/tomd/lib/metadata_yaml/extract.py))
+
+Typed: 3 of 3 functions and methods (100%).
 
 ```python
 """Metadata field extraction from PDF sections and blocks.
@@ -1475,6 +1527,8 @@ def extract_metadata(sections: list[Section]) -> tuple[dict[str, str | list[str]
 <a id="lib-metadata-yaml-format-py"></a>
 
 ## `lib/metadata_yaml/format.py` ([source](../../src/tomd/lib/metadata_yaml/format.py))
+
+Typed: 7 of 8 functions and methods (87%).
 
 ```python
 """YAML front matter formatting and parsing for WG21 paper metadata.
@@ -1535,6 +1589,8 @@ FRONT_MATTER_RE = ...
 <a id="lib-metadata-yaml-strip-py"></a>
 
 ## `lib/metadata_yaml/strip.py` ([source](../../src/tomd/lib/metadata_yaml/strip.py))
+
+Typed: 7 of 7 functions and methods (100%).
 
 ```python
 """Strip metadata headings from page 0 that duplicate front-matter content."""
@@ -1599,6 +1655,8 @@ def strip_pre_heading_fragments(sections: list[Section]) -> int:
 <a id="lib-pdf-cleanup-py"></a>
 
 ## `lib/pdf/cleanup.py` ([source](../../src/tomd/lib/pdf/cleanup.py))
+
+Typed: 15 of 16 functions and methods (93%).
 
 ```python
 """Header/footer detection and text cleanup for PDF extraction."""
@@ -1727,6 +1785,7 @@ def find_hidden_regions(page, body_fonts: set[str] | None = None) -> set[tuple[f
     false-positive stripping on Chrome "Save as PDF" output where
     an invisible accessibility overlay covers every page.
     """
+    # untyped: page
     # called by: pipeline.run_pipeline
 
 def get_edge_items(blocks: list[Block], page_num: int) -> list[PageEdgeItem]:
@@ -1772,6 +1831,8 @@ def strip_repeating(blocks: list[Block], repeating: set[tuple[float, str]]) -> l
 <a id="lib-pdf-code-format-py"></a>
 
 ## `lib/pdf/code_format.py` ([source](../../src/tomd/lib/pdf/code_format.py))
+
+Typed: 12 of 12 functions and methods (100%).
 
 ```python
 """Whitespace normalization for code-block lines.
@@ -1853,6 +1914,8 @@ def normalize_code_line(line: str) -> str:
 <a id="lib-pdf-code-grid-py"></a>
 
 ## `lib/pdf/code_grid.py` ([source](../../src/tomd/lib/pdf/code_grid.py))
+
+Typed: 5 of 5 functions and methods (100%).
 
 ```python
 """Character-grid reconstruction from PDF glyph x-positions.
@@ -1944,6 +2007,8 @@ class CodeGrid:
 <a id="lib-pdf-docling-backend-py"></a>
 
 ## `lib/pdf/docling_backend.py` ([source](../../src/tomd/lib/pdf/docling_backend.py))
+
+Typed: 12 of 13 functions and methods (92%).
 
 ```python
 """Docling ML backend for table enrichment and discovery.
@@ -2047,6 +2112,8 @@ def extract_docling_tables(pdf_path: Path) -> dict[int, list[dict]]:
 
 ## `lib/pdf/emit.py` ([source](../../src/tomd/lib/pdf/emit.py))
 
+Typed: 38 of 38 functions and methods (100%).
+
 ```python
 """Markdown and companion prompts file generation."""
 
@@ -2125,6 +2192,8 @@ UNICODE_EMOJI_VERSION = '17.0'
 
 ## `lib/pdf/extract.py` ([source](../../src/tomd/lib/pdf/extract.py))
 
+Typed: 1 of 4 functions and methods (25%).
+
 ```python
 """Dual-path PDF text extraction: MuPDF grouping and spatial rules."""
 
@@ -2142,6 +2211,7 @@ def collect_links(page) -> list[dict]:
     Returns a list of dicts with 'uri' and 'bbox' keys.
     Only http, https, and mailto schemes are kept.
     """
+    # untyped: page
     # called by: pipeline.run_pipeline
 
 def extract_mupdf(page, page_num: int) -> list[Block]:
@@ -2150,6 +2220,7 @@ def extract_mupdf(page, page_num: int) -> list[Block]:
     Uses page.get_text("dict"). Returns MuPDF's interpretation of
     paragraphs, lines, and word groupings with font metadata preserved.
     """
+    # untyped: page
     # calls: types.Span, mono.classify_monospace, types.Line, types.Block
     # called by: pipeline.run_pipeline
 
@@ -2165,6 +2236,7 @@ def extract_spatial(page, page_num: int) -> list[Block]:
       dy > WORD_GAP_RATIO    * avg_fs  -> flush line (large vertical gap)
       dx > WORD_GAP_RATIO    * avg_fs  -> flush word + insert space span
     """
+    # untyped: page
     # calls: types.Span, mono.classify_monospace, types.compute_bbox, types.Line, types.Block
     # called by: pipeline.run_pipeline
 ```
@@ -2172,6 +2244,8 @@ def extract_spatial(page, page_num: int) -> list[Block]:
 <a id="lib-pdf-figures-py"></a>
 
 ## `lib/pdf/figures.py` ([source](../../src/tomd/lib/pdf/figures.py))
+
+Typed: 18 of 18 functions and methods (100%).
 
 ```python
 """Detect inline figure regions (flow diagrams, box-arrow figures) from PDF
@@ -2206,6 +2280,8 @@ def detect_figure_regions(drawings: list[dict], page_num: int, page_width: float
 <a id="lib-pdf-glyphs-py"></a>
 
 ## `lib/pdf/glyphs.py` ([source](../../src/tomd/lib/pdf/glyphs.py))
+
+Typed: 13 of 13 functions and methods (100%).
 
 ```python
 """Inline glyph-placeholder pass: sub-threshold raster glyphs -> U+FFFD.
@@ -2402,6 +2478,8 @@ UNKNOWN_GLYPH = '�'
 <a id="lib-pdf-images-py"></a>
 
 ## `lib/pdf/images.py` ([source](../../src/tomd/lib/pdf/images.py))
+
+Typed: 5 of 6 functions and methods (83%).
 
 ```python
 """Embedded raster image extraction (Resource-Dictionary path).
@@ -2609,6 +2687,8 @@ TRUNCATION_MARKER_TEMPLATE = ...
 
 ## `lib/pdf/mono.py` ([source](../../src/tomd/lib/pdf/mono.py))
 
+Typed: 8 of 8 functions and methods (100%).
+
 ```python
 """Triple-signal monospace font detection.
 
@@ -2665,6 +2745,8 @@ def propagate_monospace(mupdf_blocks: list[Block], spatial_blocks: list[Block], 
 <a id="lib-pdf-pipeline-py"></a>
 
 ## `lib/pdf/pipeline.py` ([source](../../src/tomd/lib/pdf/pipeline.py))
+
+Typed: 28 of 38 functions and methods (73%).
 
 ```python
 """PDF to Markdown converter - pipeline entry point."""
@@ -2732,6 +2814,8 @@ def run_pipeline(path: Path, *, ml_tables: bool = False, visualize: bool = False
 <a id="lib-pdf-qa-py"></a>
 
 ## `lib/pdf/qa.py` ([source](../../src/tomd/lib/pdf/qa.py))
+
+Typed: 16 of 16 functions and methods (100%).
 
 ```python
 """Quality assurance metrics and scoring for Markdown conversion output.
@@ -2820,6 +2904,8 @@ def write_qa_json_atomic(path: Path, results: Sequence[QAMetrics]) -> None:
 
 ## `lib/pdf/spans.py` ([source](../../src/tomd/lib/pdf/spans.py))
 
+Typed: 8 of 8 functions and methods (100%).
+
 ```python
 """Span normalization - snap style boundaries to word edges.
 
@@ -2843,6 +2929,8 @@ def normalize_spans(blocks: list[Block]) -> list[Block]:
 <a id="lib-pdf-structure-py"></a>
 
 ## `lib/pdf/structure.py` ([source](../../src/tomd/lib/pdf/structure.py))
+
+Typed: 83 of 86 functions and methods (96%).
 
 ```python
 """Dual-path comparison, heading intelligence, and document structuring."""
@@ -2957,6 +3045,8 @@ def structure_sections(sections: list[Section], has_title: bool = False) -> tupl
 <a id="lib-pdf-table-py"></a>
 
 ## `lib/pdf/table.py` ([source](../../src/tomd/lib/pdf/table.py))
+
+Typed: 101 of 102 functions and methods (99%).
 
 ```python
 """Table detection, classification, and rendering strategy from MuPDF blocks.
@@ -3085,6 +3175,8 @@ def exclude_table_regions(blocks: list[Block], table_sections: list[Section]) ->
 <a id="lib-pdf-types-py"></a>
 
 ## `lib/pdf/types.py` ([source](../../src/tomd/lib/pdf/types.py))
+
+Typed: 12 of 12 functions and methods (100%).
 
 ```python
 """Shared data types, constants, and precompiled regex patterns for PDF conversion."""
@@ -3327,6 +3419,8 @@ ZERO_WIDTH_CHARS = frozenset({8203, 8204, 8205, 65279})
 
 ## `lib/pdf/vector_images.py` ([source](../../src/tomd/lib/pdf/vector_images.py))
 
+Typed: 21 of 22 functions and methods (95%).
+
 ```python
 """Vector-figure extraction via path-operator clustering.
 
@@ -3459,6 +3553,8 @@ VECTOR_UNCERTAINTY_MARKER_TEMPLATE = ...
 
 ## `lib/pdf/wg21.py` ([source](../../src/tomd/lib/pdf/wg21.py))
 
+Typed: 7 of 7 functions and methods (100%).
+
 ```python
 """WG21-specific metadata extraction from PDF blocks.
 
@@ -3498,6 +3594,8 @@ REPLY_TO_CONTINUATION_CAP = 5
 <a id="lib-pdf-wording-py"></a>
 
 ## `lib/pdf/wording.py` ([source](../../src/tomd/lib/pdf/wording.py))
+
+Typed: 17 of 23 functions and methods (73%).
 
 ```python
 """Wording section detection via multi-signal HSV color + drawing analysis.
@@ -3552,6 +3650,7 @@ def collect_line_drawings(page) -> list[tuple[float, float, float, tuple]]:
 
     Returns list of (y, x0, x1, color_rgb) for horizontal lines.
     """
+    # untyped: page
     # called by: pipeline.run_pipeline
 
 def is_foreign_chromatic(color_int: int) -> bool:
@@ -3596,6 +3695,8 @@ def is_wording_rgb(r: float, g: float, b: float) -> bool:
 
 ## `lib/pdf/wording_emit.py` ([source](../../src/tomd/lib/pdf/wording_emit.py))
 
+Typed: 9 of 9 functions and methods (100%).
+
 ```python
 """Wording-section rendering for the PDF emitter.
 
@@ -3620,6 +3721,8 @@ which inline tags survive, is unchanged.
 <a id="lib-shared-py"></a>
 
 ## `lib/shared.py` ([source](../../src/tomd/lib/shared.py))
+
+Typed: 18 of 19 functions and methods (94%).
 
 ```python
 """Shared text utilities and constants for PDF and HTML converters."""
@@ -3706,6 +3809,7 @@ def parse_author_lines(lines, clean_line=None, skip_line=None):
     str.strip). `skip_line` returns True for lines that are not author
     content, such as metadata labels (default: never skip).
     """
+    # untyped: lines, clean_line, skip_line, return
     # calls: deobfuscate_email
 
 def strip_format_chars(text: str) -> str:
@@ -3803,6 +3907,8 @@ SECTION_NUM_PREFIX_RE = re.compile(f'^{SECTION_NUM_PATTERN}\\.?\\s+')
 
 ## `lib/similarity.py` ([source](../../src/tomd/lib/similarity.py))
 
+Typed: 6 of 6 functions and methods (100%).
+
 ```python
 """String similarity algorithms for fuzzy matching.
 
@@ -3857,6 +3963,8 @@ def word_jaccard(a: str, b: str) -> float:
 <a id="lib-tables-py"></a>
 
 ## `lib/tables.py` ([source](../../src/tomd/lib/tables.py))
+
+Typed: 4 of 4 functions and methods (100%).
 
 ```python
 """Shared HTML-table markup for code-comparison tables ("Tony Tables").
@@ -3918,6 +4026,8 @@ TABLE_OPEN = ...
 <a id="lib-toc-py"></a>
 
 ## `lib/toc.py` ([source](../../src/tomd/lib/toc.py))
+
+Typed: 7 of 7 functions and methods (100%).
 
 ```python
 """Table of Contents detection.
@@ -4001,6 +4111,8 @@ MIN_TOC_RUN = 3
 
 ## `lib/wording_cleanup.py` ([source](../../src/tomd/lib/wording_cleanup.py))
 
+Typed: 1 of 1 functions and methods (100%).
+
 ```python
 """Redundant-tag cleanup for a rendered wording section.
 
@@ -4043,6 +4155,8 @@ def strip_redundant_tags(div_class: str, text: str) -> str:
 <a id="lib-wording-markup-py"></a>
 
 ## `lib/wording_markup.py` ([source](../../src/tomd/lib/wording_markup.py))
+
+Typed: 1 of 1 functions and methods (100%).
 
 ```python
 """Single source of truth for tomd wording-markup syntax.
@@ -4088,6 +4202,8 @@ WORDING_TAG_RE = ...
 <a id="lib-wording-policy-py"></a>
 
 ## `lib/wording_policy.py` ([source](../../src/tomd/lib/wording_policy.py))
+
+Typed: 1 of 1 functions and methods (100%).
 
 ```python
 """Shared wording-emit/cleanup policy.
@@ -4143,6 +4259,8 @@ Official repository: https://github.com/cppalliance/wg21-paperflow
 
 ## `writers/base.py` ([source](../../src/tomd/writers/base.py))
 
+Typed: 1 of 1 functions and methods (100%).
+
 ```python
 """Distributed under the Boost Software License, Version 1.0. (See accompanying
 
@@ -4175,6 +4293,8 @@ Official repository: https://github.com/cppalliance/wg21-paperflow
 
 ## `writers/markdown/blocks.py` ([source](../../src/tomd/writers/markdown/blocks.py))
 
+Typed: 26 of 26 functions and methods (100%).
+
 ```python
 """Distributed under the Boost Software License, Version 1.0. (See accompanying
 
@@ -4200,6 +4320,8 @@ def write_element(element: BlockElement) -> str:
 
 ## `writers/markdown/front_matter.py` ([source](../../src/tomd/writers/markdown/front_matter.py))
 
+Typed: 2 of 2 functions and methods (100%).
+
 ```python
 """Distributed under the Boost Software License, Version 1.0. (See accompanying
 
@@ -4219,6 +4341,8 @@ def write_front_matter(metadata: PaperMetadata | dict[str, Any] | None) -> str:
 <a id="writers-markdown-normalizers-py"></a>
 
 ## `writers/markdown/normalizers.py` ([source](../../src/tomd/writers/markdown/normalizers.py))
+
+Typed: 4 of 4 functions and methods (100%).
 
 ```python
 """Distributed under the Boost Software License, Version 1.0. (See accompanying
@@ -4247,6 +4371,8 @@ def strip_toc(text: str) -> str:
 <a id="writers-markdown-spans-py"></a>
 
 ## `writers/markdown/spans.py` ([source](../../src/tomd/writers/markdown/spans.py))
+
+Typed: 14 of 14 functions and methods (100%).
 
 ```python
 """Distributed under the Boost Software License, Version 1.0. (See accompanying
@@ -4277,6 +4403,8 @@ def write_spans(spans: Sequence[Span]) -> str:
 
 ## `writers/markdown/tables.py` ([source](../../src/tomd/writers/markdown/tables.py))
 
+Typed: 2 of 2 functions and methods (100%).
+
 ```python
 """Distributed under the Boost Software License, Version 1.0. (See accompanying
 
@@ -4296,6 +4424,8 @@ def write_table(table: Table) -> str:
 <a id="writers-markdown-writer-py"></a>
 
 ## `writers/markdown/writer.py` ([source](../../src/tomd/writers/markdown/writer.py))
+
+Typed: 1 of 1 functions and methods (100%).
 
 ```python
 """Distributed under the Boost Software License, Version 1.0. (See accompanying

@@ -38,14 +38,6 @@ from .types import BULLET_CHARS, Block, Confidence, Line, Section, SectionKind, 
 
 _log = logging.getLogger(__name__)
 
-# Readers whose readings are kept (flagged, reason "rule-check") when they fail
-# the rule checks and no other reading covers their region. During the port,
-# the readers that read those layouts in tomd-tables (polls, drawn rules, the
-# content reader) and the marks for dropped readings (flag.py) are not here
-# yet; once they are, this set is emptied and such readings are dropped as
-# there, their text kept as prose and marked.
-KEPT_WHEN_UNREPLACED = frozenset({"tomd"})
-
 def _multiline_code_cells(cand: TableCandidate) -> bool:
     """Some cell holds two or more lines of monospace text."""
     for row in cand.rows:
@@ -1251,17 +1243,6 @@ def select_tables(tomd_sections: list[Section],
                    primary.source, conf.value)
         remaining = [c for c in remaining if not any(c is x for x in settled)]
     for c in remaining:
-        if c.source in KEPT_WHEN_UNREPLACED:
-            # no reader replaces this reading yet: kept, flagged, never dropped silently
-            bad = sorted(set(c.flags) & BAD_TABLE_FLAGS)
-            sec = _to_section(c, Confidence.UNCERTAIN, [])
-            sec.metadata["uncertain_reasons"] = ["rule-check"]
-            sec.metadata["table_agreement"] = "none"
-            sec.metadata["table_note"] = (f"The rule checks reject this reading ({', '.join(bad)}) "
-                                          "and no other reader read this region.")
-            sec.metadata["region_bbox"] = (c.pages[0], c.bboxes[c.pages[0]])
-            out.append(sec)
-            continue
         _log.debug("Dropping %s table candidate on page %d: %s", c.source, c.pages[0], c.flags)
         for pg, bb in c.bboxes.items():
             rec.exclude(c.source, pg, bb, "dropped: " + (", ".join(f for f in c.flags if f in BAD_TABLE_FLAGS)

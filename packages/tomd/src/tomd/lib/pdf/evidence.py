@@ -21,6 +21,8 @@ vocabulary, code similarity), "document" (captions, counts, generator).
 
 from dataclasses import dataclass, field
 
+from .docmeasure import DocMeasure
+
 Box = tuple[float, float, float, float]
 
 # Exceptions that mean the code is wrong, not the PDF: the release gate fails on any of them.
@@ -46,6 +48,8 @@ class Record:
     readings: list[tuple] = field(default_factory=list)
     # readers, checks and specialists that raised: never swallowed silently
     errors: list[dict] = field(default_factory=list)
+    # what ordinary prose looks like in this document (docmeasure.measure), for the region scan
+    doc_measure: DocMeasure | None = None
 
     def nominate(self, scan: str, page: int, bbox: Box, cue: str, info: str, value=None) -> None:
         self.entries.append(Entry("nominated", scan, page, tuple(bbox), cue, info, value))

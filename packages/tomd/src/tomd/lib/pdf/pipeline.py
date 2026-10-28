@@ -57,7 +57,7 @@ from .table import (
     _filter_phantom_mupdf_tables, _cluster_x_positions, TableStrategy,
 )
 from .wg21 import extract_metadata_from_blocks
-from .emit import emit_markdown, emit_prompts, renumber_uncertain_markers, _escape_italic_text
+from .emit import emit_markdown, emit_prompts, renumber_uncertain_markers, table_use, _escape_italic_text
 from .types import (
     Confidence,
     KNOWN_SECTIONS,
@@ -97,12 +97,19 @@ from .docling_backend import (
 )
 from ._fitz_lock import _FITZ_LOCK
 from .runctx import current, run_scope
-from .select import remove_table_regions, select_tables
+from .select import _is_bad, _to_section, page_furniture, remove_table_regions, select_tables, stitch_pages
 from .tagged import extract_tagged_tables
 from .ruled import extract_ruled_tables, page_hrules
 from .poll import extract_poll_tables
 from .codepair import find_code_pairs
 from .classify import gate_tables
+from .content import content_candidates
+from .docmeasure import measure as doc_measure
+from .extent import extend as extend_readings
+from .flag import (aligned_regions, dropped_uncovered, flag_possible_tables, gutter_regions,
+                   outside_view_regions, rejected_regions, text_regions)
+from .records import records_candidates
+from .scan import run_scan
 from .rowbands import merge_rule_bands
 from .levels import assign as assign_level
 from .summary import build as build_summary, generator as pdf_generator, header_comment, prompt_elements
@@ -1083,6 +1090,147 @@ _ERROR_NO_TABLE = frozenset({"generator", "region scan", "figure labels", "wordi
 _ROTATED_NOT_READ = "rotated page: not read by the drawn-rule readers"
 _MARK_DOT_LEADER = "a table with dot leaders, demoted as contents"
 _MARK_FALSE_POSITIVE = "a table the classifier judged not a table, kept as text"
+
+# Dropped nominations that get no possible-table mark: rules that say the area
+# is not a table at all, not a table read wrongly.
+_DROP_NO_MARK = ("no column gaps between rules", "too few rule bands", "monospace prose", "page furniture")
+_DROP_NO_MARK_FLAGS = frozenset({"bullet-list", "numbered-list", "code-comment-column", "reference-list",
+                                 "constant-first-column"})
+# A nominated area smaller than this (pt squared) is a glyph, not a table.
+_MIN_MARK_AREA = 50.0
+# Two boxes are the same area when they share this share of the smaller one.
+_SAME_AREA = 0.3
+# An aligned region that overlaps a located region by more than this is that region.
+_ALIGNED_OVERLAP = 0.3
+# Approximate line height (pt) for estimating the rows of a marked area.
+_MARK_LINE_HEIGHT = 12
+
+
+def _overlap(a, b) -> bool:
+    """Two boxes share at least _SAME_AREA of the smaller one's area."""
+    w = min(a[2], b[2]) - max(a[0], b[0])
+    h = min(a[3], b[3]) - max(a[1], b[1])
+    if w <= 0 or h <= 0:
+        return False
+    small = min((a[2] - a[0]) * (a[3] - a[1]), (b[2] - b[0]) * (b[3] - b[1]))
+    return w * h >= _SAME_AREA * max(small, 1e-6)
+
+
+def dropped_nomination_regions(record, tables) -> list:
+    """Every area a reader or scan nominated and a rule then excluded, where no
+    kept table covers it, as a possible-table region: a drop never leaves the
+    text silent, except for the rules that say it is not a table at all.
+    (page, bbox, reason, rows) like every mark region."""
+    taken = [(pg, bb) for t in tables
+             for pg, bb in ((t.metadata.get("page_bboxes") or {}).items() or
+                            ([t.metadata["region_bbox"]] if t.metadata.get("region_bbox") else []))]
+    out, seen = [], set()
+    for e in record.entries:
+        if e.kind != "excluded" or e.scan in ("mark", "mark-build"):
+            continue
+        rule = e.rule or ""
+        if any(k in rule for k in _DROP_NO_MARK) or rule == _ROTATED_NOT_READ:
+            continue
+        if "dropped:" in rule or "failed checks:" in rule:
+            flags = {f.strip() for f in rule.split(":", 1)[1].split(",") if f.strip()}
+            if flags and flags <= _DROP_NO_MARK_FLAGS:
+                continue
+        x0, y0, x1, y1 = e.bbox
+        if (x1 - x0) * (y1 - y0) < _MIN_MARK_AREA:
+            continue
+        key = (e.page, tuple(round(v / 10) for v in e.bbox))
+        if key in seen or any(pg == e.page and _overlap(tuple(e.bbox), tuple(bb)) for pg, bb in taken):
+            continue
+        seen.add(key)
+        out.append((e.page, tuple(e.bbox), f"the {e.scan} reader nominated this area and a rule dropped it "
+                    f"({rule[:80]})", max(2, int((y1 - y0) / _MARK_LINE_HEIGHT))))
+    return out
+
+
+def _content_readings(pages, located, tomd_sections, blocks, page_rules) -> list:
+    """The content-first builder's and the records reader's readings of every
+    region a reader located (kept or not), the grids the rule reader excluded,
+    and the areas aligned like a table that no reader proposed. Only pages in
+    `pages` (read upright) are read."""
+    try:
+        regions = [(c.pages[0], c.bboxes[c.pages[0]]) for c in located if len(c.pages) == 1]
+        regions += [(s.page_num, (min(ln.bbox[0] for ln in s.lines), min(ln.bbox[1] for ln in s.lines),
+                                  max(ln.bbox[2] for ln in s.lines), max(ln.bbox[3] for ln in s.lines)))
+                    for s in tomd_sections if s.lines and len({ln.page_num for ln in s.lines}) == 1]
+        # a grid whose reading failed the rule reader's checks (a struck word read as a
+        # rule): its words are read here, and that reading is checked like any other
+        regions += [(c.pages[0], c.bboxes[c.pages[0]]) for c in current().excluded_grids if len(c.pages) == 1]
+        aligned = set()
+        for pg, bb, _why, _n in aligned_regions(blocks):
+            if not any(p == pg and _overlap_share(bb, b) > _ALIGNED_OVERLAP for p, b in regions):
+                regions.append((pg, bb))
+                aligned.add((pg, tuple(round(v) for v in bb)))
+        regions = [(pg, bb) for pg, bb in regions if pg in pages]
+        cpages = {pg: pages[pg] for pg in {pg for pg, _ in regions}}
+        out = content_candidates(cpages, regions, rules_by_page=page_rules)
+        for c in out:
+            if len(c.pages) == 1 and getattr(c, "region", None) in aligned:
+                c.flags = list(c.flags) + ["aligned-region"]
+        # the record-pattern reading of the same regions: an alternative only
+        return out + records_candidates(cpages, regions)
+    except Exception as exc:  # never let the builder break conversion; never silently
+        current().reader_error("content reader", None, exc)
+        return []
+
+
+def _overlap_share(a, b) -> float:
+    """Intersection over the smaller box's area."""
+    ix = max(0.0, min(a[2], b[2]) - max(a[0], b[0])) * max(0.0, min(a[3], b[3]) - max(a[1], b[1]))
+    return ix / max(1e-6, min((a[2] - a[0]) * (a[3] - a[1]), (b[2] - b[0]) * (b[3] - b[1])))
+
+
+def _build_scan_tables(path, builds, blocks, page_rotations):
+    """The scan's build band: an area likely to be a table that no reader kept
+    is read by the content-first builder (pieces on consecutive pages joined by
+    the same continuation step as every reader), emitted UNCERTAIN and gated
+    like every table. An area the builder cannot read as a grid, or reads as
+    contents or label: value entries, stays a possible-table mark.
+    Returns (sections, marks for the areas not built)."""
+    built, unbuilt, cands, info = [], [], [], {}
+    with _FITZ_LOCK:  # see _fitz_lock.py for why this lock is required
+        doc = fitz.open(str(path))
+        try:
+            pages = {pg: doc[pg] for pg in {b[0] for b in builds} if pg not in page_rotations}
+            for page, bbox, p, why, nrows in builds:
+                reason = f"the region scan rates this area a likely table (p={p:.2f}; {why})"
+                got = ([c for c in content_candidates(pages, [(page, bbox)]) if not _is_bad(c)]
+                       if page in pages else [])
+                if not got:
+                    unbuilt.append((page, bbox, reason, nrows))
+                    continue
+                first = got[0].pages[0]
+                info[(first, tuple(round(v) for v in got[0].bboxes[first]))] = (p, why, reason, bbox, nrows)
+                cands.append(got[0])
+            for cand in stitch_pages(cands, blocks, page_furniture(blocks)):
+                first = cand.pages[0]
+                p, why, reason, bbox, nrows = info[(first, tuple(round(v) for v in cand.bboxes[first]))]
+                sec = _to_section(cand, Confidence.UNCERTAIN, [])
+                if table_use(sec.columns) != "table":
+                    unbuilt.append((first, bbox, reason, nrows))  # contents, label: value: not tables
+                    continue
+                sec.metadata["region_bbox"] = (first, tuple(cand.bboxes[first]))
+                if len(cand.pages) > 1:
+                    sec.metadata["page_bboxes"] = dict(cand.bboxes)
+                    if getattr(cand, "pieces", None):
+                        sec.metadata["pieces"] = cand.pieces
+                sec.metadata["uncertain_reasons"] = ["single-source", "scan-build"]
+                sec.metadata["table_note"] = ("No reader kept a table here; the region scan rates the area a "
+                                              f"likely table (p={p:.2f}) and the content-first builder read it.")
+                sec.metadata["scan"] = {"p": p, "band": "build", "top": why}
+                built.append(sec)
+            if built:
+                gpages = {pg: doc[pg] for s in built
+                          for pg in ([s.page_num] + list(s.metadata.get("page_bboxes") or {}))
+                          if pg not in page_rotations}
+                gate_tables(doc, gpages, built)
+        finally:
+            doc.close()
+    return built, unbuilt
 # Removed-content entries: examples shown per entry, and their length.
 _DISCARD_EXAMPLES = 3
 _DISCARD_DETAIL_CHARS = 120
@@ -2017,6 +2165,8 @@ def run_pipeline(
             # Rotated pages: pg -> rotation matrix (page space -> reading
             # space).  Used for reading-order sorting and table insertion.
             page_rotations: dict[int, tuple] = {}
+            # every page's words, for the prose measure (docmeasure.py)
+            page_words: list[list] = []
             per_page_image_candidates: list = []
             # Sub-threshold raster glyphs (font-replacement emoji) and the
             # text-layer emoji bboxes used to skip coincident positions.
@@ -2108,6 +2258,8 @@ def run_pipeline(
                 # column-rule tables, and tables bounded by horizontal rules
                 # (booktabs, shaded bands). They read the page upright; a
                 # rotated page is not read by them yet (recorded).
+                words = page.get_text("words")
+                page_words.append(words)
                 if pg_num in page_rotations:
                     current().record.exclude("rules", pg_num, tuple(page.rect), _ROTATED_NOT_READ, "paths")
                 else:
@@ -2118,7 +2270,7 @@ def run_pipeline(
                         current().reader_error("ruled", pg_num, exc)
                     # Table reader: WG21 straw polls ("SF F N A SA" over the counts).
                     try:
-                        poll_tables.extend(extract_poll_tables(page, pg_num, page.get_text("words")))
+                        poll_tables.extend(extract_poll_tables(page, pg_num, words))
                     except Exception as exc:  # a failing table reader must not fail the paper: recorded
                         current().reader_error("poll", pg_num, exc)
 
@@ -2331,15 +2483,31 @@ def run_pipeline(
     except Exception as exc:  # a failing table reader must not fail the paper: recorded
         current().reader_error("codepair", None, exc)
         code_pairs = []
-    # The gate reopens the PDF (the readers' first session closed above) and
-    # checks every selected table against its page and classifies it. Rotated
-    # pages are not read upright yet.
+    # What ordinary prose looks like in this document, for the region scan.
+    current().record.doc_measure = doc_measure(page_words)
+    # The steps around selection reopen the PDF (the readers' first session
+    # closed above). The content-first builder and the records reader read every
+    # region any reader located (kept or not) and the areas aligned like a table
+    # that no reader proposed; the extent step looks just outside each reading
+    # for rows it missed and records why it stopped; the gate checks every
+    # selected table against its page and classifies it. Rotated pages are not
+    # read upright yet.
+    rejected: list = []
     with _FITZ_LOCK:  # see _fitz_lock.py for why this lock is required
         tdoc = fitz.open(str(path))
         try:
             tpages = {pg: tdoc[pg] for pg in range(tdoc.page_count) if pg not in page_rotations}
+            content_tables = _content_readings(
+                tpages, ruled_tables + tagged_tables + poll_tables + code_pairs, tomd_sections,
+                pre_detect_blocks, page_rules)
+            readings = [c for c in ruled_tables + tagged_tables + poll_tables + code_pairs + content_tables
+                        if c.bboxes and all(pg in tpages for pg in c.pages)]
+            try:
+                extend_readings(readings, tpages)
+            except Exception as exc:  # the extent step only adds evidence; never fail on it, never silently
+                current().reader_error("extent step", None, exc)
             table_sections = select_tables(tomd_sections, ruled_tables, tagged_tables, pre_detect_blocks,
-                                           poll_tables, None, code_pairs,
+                                           poll_tables, rejected, code_pairs, content_tables,
                                            generator=pdf_generator(doc_metadata))
             try:
                 gate_tables(tdoc, tpages, table_sections)
@@ -2359,6 +2527,35 @@ def run_pipeline(
     all_spatial_blocks = remove_table_regions(all_spatial_blocks, table_sections)
     if table_sections:
         _log.info("Selected %d table(s)", len(table_sections))
+
+    # Nothing a reader found leaves the text silently: grids the rule reader
+    # excluded and readings that failed the checks are listed for the paper,
+    # and those no kept table covers become possible-table marks below.
+    rejected += current().excluded_grids
+    dropped = dropped_uncovered(rejected, table_sections)
+    if dropped:
+        current().discards.append(("dropped table candidates", f"{len(dropped)} reading(s) failed the "
+                                   "checks and no kept table covers them: " + "; ".join(dropped[:12])
+                                   + ("; ..." if len(dropped) > 12 else ""), ""))
+    # The region scan scores every area any reader nominated or a rule
+    # excluded: a likely table no reader kept is built by the content-first
+    # builder (flagged) or marked; an emitted table gets its likelihood.
+    scan_regions: list = []
+    try:
+        builds: list = []
+        scan_regions = run_scan(path, current().record, table_sections, builds)
+        if builds:
+            built, unbuilt = _build_scan_tables(path, builds, all_mupdf_blocks, page_rotations)
+            scan_regions += unbuilt
+            if built:
+                table_sections += built
+                all_mupdf_blocks = remove_table_regions(all_mupdf_blocks, built)
+                all_spatial_blocks = remove_table_regions(all_spatial_blocks, built)
+    except Exception as exc:  # the scan only adds marks, builds and doubts; never fail on it, never silently
+        current().reader_error("region scan", None, exc)
+    possible_tables = (scan_regions + rejected_regions(rejected, table_sections)
+                       + text_regions(all_mupdf_blocks) + gutter_regions(all_mupdf_blocks)
+                       + dropped_nomination_regions(current().record, table_sections))
 
     # --- Optional Docling ML table processing ---
     # When ml_tables=True and Docling is available:
@@ -2424,6 +2621,13 @@ def run_pipeline(
     for k, v in body_metadata.items():
         if k not in metadata:
             metadata[k] = v
+
+    # Text a reader or the layout says is probably a table, not emitted as one:
+    # marked where it stands (possible tables, L5), its text kept. Marked after
+    # body structuring, so a mark is on the final section (code lines merged
+    # into one block keep it).
+    flag_possible_tables(sections, possible_tables)
+    flag_possible_tables(sections, outside_view_regions(sections))
 
     # Glyph placeholders that attached (before structure ran) to a line
     # now classified CODE or folded into a TABLE are removed: a U+FFFD in

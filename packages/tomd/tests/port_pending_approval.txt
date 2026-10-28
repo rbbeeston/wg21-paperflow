@@ -10,5 +10,4 @@ pdf_pins/test_p4178r0.py::test_p4178r0_table_family_pins | step 6 | drawn-rule r
 test_golden_gate.py::test_tomd_meets_golden_baseline[p0533r9] | step 6 | table 1.00 -> 0.75, text 0.66 -> 0.62 (drawn-rule readings; expected to recover with the poll and content readers, steps 7 and 10)
 test_golden_gate.py::test_tomd_meets_golden_baseline[p1068r11] | step 6 | table 1.00 -> 0.00, text 0.86 -> 0.85 (polls read by the rule reader add a row of dashes; poll reader, step 7)
 test_golden_gate.py::test_tomd_meets_golden_baseline[p3978r0] | step 6 | heading 0.81 -> 0.76, table 0.75 -> 0.67, text 0.69 -> 0.64 (steps 7 and 10)
-test_golden_gate.py::test_tomd_meets_golden_baseline[p4178r0] | step 6 | heading 0.90 -> 0.80, table 1.00 -> 0.79, text 0.97 -> 0.88 (steps 7 and 10)
 test_golden_gate.py::test_tomd_meets_golden_baseline[n5040] | step 7 | table 1.00 -> 0.89, text 0.98 -> 0.97 (polls now read by the poll reader: labels beside a poll are not cells; accepted as in tomd-tables)

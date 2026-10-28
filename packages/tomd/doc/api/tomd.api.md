@@ -1,6 +1,6 @@
 # tomd API surface
 
-89 modules, 88 classes, 237 functions, 86 methods, 355 fields. Typed: 880 of 1047 functions and methods (84%).
+109 modules, 92 classes, 285 functions, 89 methods, 378 fields. Typed: 910 of 1141 functions and methods (79%).
 
 ## Contents
 
@@ -35,7 +35,20 @@
 - [`lib/pdf/__init__.py`](#lib-pdf-init-py)
 - [`lib/pdf/_fitz_lock.py`](#lib-pdf-fitz-lock-py)
 - [`lib/pdf/checks/__init__.py`](#lib-pdf-checks-init-py)
+- [`lib/pdf/checks/_layout.py`](#lib-pdf-checks-layout-py): layout_features, DRAWN
+- [`lib/pdf/checks/base.py`](#lib-pdf-checks-base-py): AreaContext, Check, INFO, LEVELS
+- [`lib/pdf/checks/caption.py`](#lib-pdf-checks-caption-py): has_caption, run, CHECK
+- [`lib/pdf/checks/codereader.py`](#lib-pdf-checks-codereader-py): CodeStream, looks_like_cpp, read_lines
+- [`lib/pdf/checks/coherence.py`](#lib-pdf-checks-coherence-py): column_coherence, content_features, fragment_share, header_contrast, merged_share, run, shape, table_coherence, CHECK
+- [`lib/pdf/checks/data_or_format.py`](#lib-pdf-checks-data-or-format-py): features, likelihood_data, run, CHECK
+- [`lib/pdf/checks/drawn_lines.py`](#lib-pdf-checks-drawn-lines-py): run, CHECK
+- [`lib/pdf/checks/footprint.py`](#lib-pdf-checks-footprint-py): run, CHECK
+- [`lib/pdf/checks/nominations.py`](#lib-pdf-checks-nominations-py): run, CHECK, SOURCE_INFO
 - [`lib/pdf/checks/plausible.py`](#lib-pdf-checks-plausible-py): column_type, duplication, plausibility, poll_counts, sequence_order
+- [`lib/pdf/checks/registry.py`](#lib-pdf-checks-registry-py): run_region_checks, GENERATOR_TIER, REGISTRY
+- [`lib/pdf/checks/same_code.py`](#lib-pdf-checks-same-code-py): run, CHECK
+- [`lib/pdf/checks/text_alignment.py`](#lib-pdf-checks-text-alignment-py): run, CHECK
+- [`lib/pdf/checks/wordgap.py`](#lib-pdf-checks-wordgap-py): run, CHECK
 - [`lib/pdf/classify.py`](#lib-pdf-classify-py): gate_tables, image_share, predict, region_features, text_rows, FLAGS, GENERATORS, IMAGE_GRID_SHARE, SOURCES, WITHHOLD_TRUST_UNTIL_CELL_TEXT
 - [`lib/pdf/classify_trees.py`](#lib-pdf-classify-trees-py): LAYOUT_TREE, TABLE_TREE
 - [`lib/pdf/cleanup.py`](#lib-pdf-cleanup-py): DehyphenatedPair, HyphenEvidence, cleanup_text, collect_hyphen_evidence, dehyphenate_pair, detect_repeating, escape_leading_atx, find_hidden_regions, get_edge_items, normalize_whitespace, strip_hidden_blocks, strip_repeating
@@ -45,25 +58,32 @@
 - [`lib/pdf/content.py`](#lib-pdf-content-py): build, build_text, content_candidates, gutters, page_hrules, page_text, page_words, pieces_of, visual_lines, SPECIALISTS
 - [`lib/pdf/dimensions.py`](#lib-pdf-dimensions-py): dimensions, weak_note
 - [`lib/pdf/docling_backend.py`](#lib-pdf-docling-backend-py): absorb_cross_page_spec_rows, discover_tables_with_docling, docling_available, enrich_tables_with_docling, extract_docling_tables
-- [`lib/pdf/emit.py`](#lib-pdf-emit-py): emit_markdown, emit_prompts, is_code_comparison, is_flagged_table, renumber_uncertain_markers, LIST_BULLET
+- [`lib/pdf/docmeasure.py`](#lib-pdf-docmeasure-py): DocMeasure, area_word_features, gap_stats, hyphenates, measure, visual_lines
+- [`lib/pdf/dvf_model.py`](#lib-pdf-dvf-model-py): MODEL
+- [`lib/pdf/emit.py`](#lib-pdf-emit-py): emit_markdown, emit_prompts, is_code_comparison, is_flagged_table, renumber_uncertain_markers, table_use, LIST_BULLET
 - [`lib/pdf/emoji_data.py`](#lib-pdf-emoji-data-py): EMOJI_PRESENTATION_RANGES, UNICODE_EMOJI_VERSION
 - [`lib/pdf/evidence.py`](#lib-pdf-evidence-py): Entry, Record, CODE_ERRORS
+- [`lib/pdf/extent.py`](#lib-pdf-extent-py): extend, EXTENT_RULE
 - [`lib/pdf/extract.py`](#lib-pdf-extract-py): attach_links, collect_links, extract_mupdf, extract_spatial
 - [`lib/pdf/figures.py`](#lib-pdf-figures-py): detect_figure_regions
 - [`lib/pdf/fit.py`](#lib-pdf-fit-py): fit, fit_rows, grid_of
+- [`lib/pdf/flag.py`](#lib-pdf-flag-py): aligned_regions, dropped_uncovered, flag_possible_tables, gutter_regions, outside_view_regions, rejected_regions, text_regions
 - [`lib/pdf/fullwidth.py`](#lib-pdf-fullwidth-py): apply, full_width_rows
 - [`lib/pdf/glyphs.py`](#lib-pdf-glyphs-py): GlyphCandidate, GlyphPassStats, collect_glyph_candidates, collect_text_emoji_bboxes, drop_glyphs_in_code_and_tables, filter_coincident, glyph_to_char, inject_glyph_spans, is_glyph_only_block, GLYPH_FONT_SENTINEL, GLYPH_PLACEHOLDER_MARKER_TEMPLATE, UNKNOWN_GLYPH
 - [`lib/pdf/images.py`](#lib-pdf-images-py): ExtractedImage, ExtractionResult, VectorUncertaintyStats, extract_page_images, finalize_extraction, MIN_IMAGE_DIM_PT, TRUNCATION_MARKER_TEMPLATE
 - [`lib/pdf/levels.py`](#lib-pdf-levels-py): assign, cell_markers, comment, NAMES, SHOWN_FROM
 - [`lib/pdf/mono.py`](#lib-pdf-mono-py): classify_monospace, propagate_monospace
 - [`lib/pdf/pagecache.py`](#lib-pdf-pagecache-py): rawdict, words_in
-- [`lib/pdf/pipeline.py`](#lib-pdf-pipeline-py): PipelineResult, run_pipeline
+- [`lib/pdf/pipeline.py`](#lib-pdf-pipeline-py): PipelineResult, dropped_nomination_regions, run_pipeline
 - [`lib/pdf/poll.py`](#lib-pdf-poll-py): extract_poll_tables
 - [`lib/pdf/qa.py`](#lib-pdf-qa-py): QABatchResult, QAMetrics, compute_metrics, format_qa_report, run_qa_batch, write_qa_json_atomic
+- [`lib/pdf/records.py`](#lib-pdf-records-py): line_kind, periodic_runs, read_region, records_candidates
 - [`lib/pdf/relations.py`](#lib-pdf-relations-py): RelationRecord, Violation, check, record_for
 - [`lib/pdf/rowbands.py`](#lib-pdf-rowbands-py): merge_rule_bands, MAX_FILL, MIN_RULES, MIN_SEGMENT
 - [`lib/pdf/ruled.py`](#lib-pdf-ruled-py): drawn_spans, extract_ruled_tables, page_hrules
 - [`lib/pdf/runctx.py`](#lib-pdf-runctx-py): RunContext, current, run_scope, ERROR_MESSAGE_LIMIT
+- [`lib/pdf/scan.py`](#lib-pdf-scan-py): area_features, areas, band, info_of, run_scan, DOC_PRIOR, EARLY_NONE
+- [`lib/pdf/scan_model.py`](#lib-pdf-scan-model-py): likelihood, MODEL
 - [`lib/pdf/select.py`](#lib-pdf-select-py): candidate_from_section, candidates_agree, class_check, closed_exempt, conservation_error, cross_reader_continuation, join_split_words, mark_matrix, page_furniture, partial_reading, remove_table_regions, select_tables, ...
 - [`lib/pdf/spans.py`](#lib-pdf-spans-py): normalize_spans
 - [`lib/pdf/stacked.py`](#lib-pdf-stacked-py): split_stacked
@@ -1685,6 +1705,307 @@ def strip_pre_heading_fragments(sections: list[Section]) -> int:
 """Content checks on table readings."""
 ```
 
+<a id="lib-pdf-checks-layout-py"></a>
+
+## `lib/pdf/checks/_layout.py` ([source](../../src/tomd/lib/pdf/checks/_layout.py))
+
+Typed: 0 of 1 functions and methods (0%).
+
+```python
+"""Shared computation for the two layout checks (computed once per area)."""
+
+def layout_features(ctx) -> dict:
+    # untyped: ctx
+    # calls: classify.region_features
+    # called by: drawn_lines.run, text_alignment.run
+    ...
+
+DRAWN = ('hrules', 'vrules', 'row_fills', 'enclosing_fill')
+```
+
+<a id="lib-pdf-checks-base-py"></a>
+
+## `lib/pdf/checks/base.py` ([source](../../src/tomd/lib/pdf/checks/base.py))
+
+```python
+"""The scan's checks: one file each, loaded in a fixed order.
+
+Every check declares its name, the level(s) it serves, the kind of
+information it reads (stage 0: same-type checks are not independent
+witnesses), a cost tier and whether it is optional (network or money), and
+a function from the level's input to evidence items (feature -> value).
+Checks never change a grid; what they return goes into the evidence record
+and the scan's decision through the core.
+
+The registry is explicit and ordered (cheapest and most decisive first, as
+the effectiveness ledger ranks them), not filesystem order. Checks the ledger
+rates least effective (word gaps, footprint, caption: little unique
+contribution, about 30 of the scan's 78 ms per paper) form a last-resort
+tier, run only while an area is undecided; TOMD_SCAN_FULL=1 runs everything
+(training data and the ledger). Any check can be
+switched off: TOMD_CHECKS_OFF=name,name - the same switch the ledger uses to
+measure what each check contributes.
+"""
+
+@dataclass
+class AreaContext:
+    """What a region-level check may look at."""
+    page: object  # the fitz page
+    area: dict  # scan.areas() entry: page, bbox, cues, excl, readings, same_code
+    generator: str
+    doc_tagged: bool
+    measure: object = None  # docmeasure.DocMeasure (level 0)
+    cache: dict = field(default_factory=dict)
+
+@dataclass(frozen=True)
+class Check:
+    name: str
+    levels: tuple[str, ...]
+    info: str
+    cost: int  # 0 = microseconds .. 3 = network / model call
+    optional: bool
+    run: Callable[['AreaContext'], dict]
+    tier: int = 1  # 1 = effective (ledger); 2 = last resort, run only while undecided
+
+INFO = ...
+
+LEVELS = ...
+```
+
+<a id="lib-pdf-checks-caption-py"></a>
+
+## `lib/pdf/checks/caption.py` ([source](../../src/tomd/lib/pdf/checks/caption.py))
+
+Typed: 1 of 2 functions and methods (50%).
+
+```python
+"""Document: a "Table N" caption just above or below the area."""
+
+def has_caption(text_above: str, text_below: str) -> bool:
+    # called by: run
+    ...
+
+def run(ctx) -> dict:
+    # untyped: ctx
+    # calls: has_caption
+    ...
+
+CHECK = ...
+```
+
+<a id="lib-pdf-checks-codereader-py"></a>
+
+## `lib/pdf/checks/codereader.py` ([source](../../src/tomd/lib/pdf/checks/codereader.py))
+
+Typed: 5 of 5 functions and methods (100%).
+
+```python
+"""A lightweight reader for C++-like code lines (user, 2026-10-21): not a parser.
+
+Fed one line at a time per text stream (a column of code), it says for each line:
+
+  depth_before / depth_after   bracket depth ({}, and () [] for open constructs)
+  unit_start                   the line starts a top-level unit: a function, struct,
+                               class, union, enum, namespace or template block,
+                               concept, or a top-level declaration at depth 0
+  unit_name                    the unit's declared name (identifier), if any
+  unit_end                     a closing brace brings the depth back to 0
+  label                        a comment-only line ("// This paper:")
+  stmt_end                     the line ends a statement at depth 0 (';')
+  continues                    an open construct carries on: unbalanced brackets, or a
+                               trailing operator, comma or backslash
+  preproc                      a preprocessor line (#include, #define, ...)
+  not_cpp                      the line reads as another language or notation (Rust, Swift,
+                               assembly, grammar productions): the reader then keeps only the
+                               bracket balance and claims no unit (it never vetoes anything)
+
+C++ only (user): declarations, templates, attributes, requires-clauses, lambdas,
+contracts syntax (pre / post / contract_assert), preprocessor lines and comments.
+
+String and character literals and comments are stripped before counting.
+Deterministic, no dependency. Used as features of the line-boundary decision.
+"""
+
+class CodeStream:
+    """the state of one column of code"""
+    self.depth = 0  # braces
+    self.paren = 0  # () and []
+    self.in_block = False
+    self.pending_template = False
+    def __init__(self): ...
+    def feed(self, line: str) -> dict:
+        # calls: _strip
+        ...
+
+def looks_like_cpp(text: str) -> bool:
+    """C++ by its content (any font): a token pattern only code has - scope '::', member
+    '->', a template argument list, a call, braces or semicolons, C++ operators, or a
+    leading C++ keyword. Abstains (False) on plain words, numbers and math.
+    """
+
+def read_lines(lines: list[str]) -> list[dict]:
+    """per-line facts for one stream of code lines"""
+    # calls: CodeStream
+
+# + 1 private module-level name
+```
+
+<a id="lib-pdf-checks-coherence-py"></a>
+
+## `lib/pdf/checks/coherence.py` ([source](../../src/tomd/lib/pdf/checks/coherence.py))
+
+Typed: 1 of 9 functions and methods (11%).
+
+```python
+"""Meaning: column coherence of the area's best reading - items per cell,
+fragments, header vs body, the weakest column's shape uniformity, and the
+first column as a list of keys (local shape tier; no Jev).
+"""
+
+def column_coherence(rows, skip_header=True):
+    """Per column: share of the dominant shape among filled body cells, or None (abstain)."""
+    # untyped: rows, skip_header, return
+    # calls: shape
+    # called by: table_coherence
+
+def content_features(rows) -> dict:
+    # untyped: rows
+    # calls: shape
+    # called by: run
+    ...
+
+def fragment_share(rows):
+    """Fragments: body cells that start as a continuation (lowercase first word
+    after a cell above that ended mid-phrase) or end mid-phrase.
+    """
+    # untyped: rows, return
+    # calls: shape
+
+def header_contrast(rows):
+    """Header vs body: share of columns whose header cell is a different kind
+    from the column's body (a category over instances).
+    """
+    # untyped: rows, return
+    # calls: shape
+
+def merged_share(rows):
+    """Items per cell: the worst column's share of body cells holding several
+    items of the column's own single-item kind (identifiers, numbers, marks),
+    or several sentences. High means rows were merged.
+    """
+    # untyped: rows, return
+    # calls: shape
+
+def run(ctx) -> dict:
+    # untyped: ctx
+    # calls: content_features, _best_reading
+    ...
+
+def shape(cell: str) -> str:
+    # called by: column_coherence, content_features, fragment_share, header_contrast, merged_share
+    ...
+
+def table_coherence(rows):
+    # untyped: rows, return
+    # calls: column_coherence
+    ...
+
+CHECK = ...
+
+# + 1 private module-level name
+```
+
+<a id="lib-pdf-checks-data-or-format-py"></a>
+
+## `lib/pdf/checks/data_or_format.py` ([source](../../src/tomd/lib/pdf/checks/data_or_format.py))
+
+Typed: 0 of 3 functions and methods (0%).
+
+```python
+"""Meaning: tabular data or formatting? In data a cell's meaning depends on its
+row and its column (look a value up by row key and column header); in
+formatting the grid only places content (front matter, label: value
+entries, callouts, slide layouts). Features follow the web-table literature
+(cell length and type consistency down columns, rows x columns, single
+record, label: value pattern, large prose cells, borders), measured on the
+existing keys before use (train_dvf.py: cross-validated AUC 0.99).
+"""
+
+def features(rows, f) -> dict | None:
+    # untyped: rows, f
+    # called by: likelihood_data
+    ...
+
+def likelihood_data(rows, f) -> float | None:
+    """P(tabular data) for a reading, or None without one."""
+    # untyped: rows, f
+    # calls: features, scan_model.likelihood
+    # called by: scan.run_scan
+
+def run(ctx) -> dict:
+    # untyped: ctx
+    ...
+
+CHECK = ...
+```
+
+<a id="lib-pdf-checks-drawn-lines-py"></a>
+
+## `lib/pdf/checks/drawn_lines.py` ([source](../../src/tomd/lib/pdf/checks/drawn_lines.py))
+
+Typed: 0 of 1 functions and methods (0%).
+
+```python
+"""Drawing: rules, vertical lines, row shading and enclosing boxes in the area."""
+
+def run(ctx) -> dict:
+    # untyped: ctx
+    # calls: _layout.layout_features
+    ...
+
+CHECK = Check('drawn_lines', ('region',), 'paths', 1, False, run)
+```
+
+<a id="lib-pdf-checks-footprint-py"></a>
+
+## `lib/pdf/checks/footprint.py` ([source](../../src/tomd/lib/pdf/checks/footprint.py))
+
+Typed: 0 of 1 functions and methods (0%).
+
+```python
+"""Words: the area's text footprint against the prose measure: left and
+right inset (cell padding), and how many lines end on the right measure
+(justified prose does; cell text ends raggedly).
+"""
+
+def run(ctx) -> dict:
+    # untyped: ctx
+    # calls: wordgap.run
+    ...
+
+CHECK = ...
+```
+
+<a id="lib-pdf-checks-nominations-py"></a>
+
+## `lib/pdf/checks/nominations.py` ([source](../../src/tomd/lib/pdf/checks/nominations.py))
+
+Typed: 0 of 1 functions and methods (0%).
+
+```python
+"""Which scans nominated the area and which rules excluded it (the evidence
+record), with the number of independent information types among them.
+"""
+
+def run(ctx) -> dict:
+    # untyped: ctx
+    ...
+
+CHECK = Check('nominations', ('region',), 'record', 0, False, run)
+
+SOURCE_INFO = ...
+```
+
 <a id="lib-pdf-checks-plausible-py"></a>
 
 ## `lib/pdf/checks/plausible.py` ([source](../../src/tomd/lib/pdf/checks/plausible.py))
@@ -1740,6 +2061,93 @@ def sequence_order(rows) -> list:
 # + 1 private module-level name
 ```
 
+<a id="lib-pdf-checks-registry-py"></a>
+
+## `lib/pdf/checks/registry.py` ([source](../../src/tomd/lib/pdf/checks/registry.py))
+
+Typed: 2 of 2 functions and methods (100%).
+
+```python
+"""The scan's region checks, in a fixed order (cheapest and most decisive first)."""
+
+def run_region_checks(ctx: AreaContext, decided: Callable[[dict], bool] | None = None) -> dict:
+    """Tier 1 first; the last-resort tier only while decided(features) is False
+    . Tiers per generator family where the family's ledger says so.
+    Returns the features; "_skipped" lists the checks not run.
+    """
+    # calls: _tier
+    # called by: scan.area_features
+
+# Per-generator tiers (the ledger computed within each generator family on the development
+# sets, work/ledger_gen_*.txt): a last-resort check is effective for a family - unique AUC
+# >= 0.005 and more decisions fixed than harmed, in a family of 200+ areas - and runs in
+# tier 1 there. Families not listed use the global tiers.
+GENERATOR_TIER = ...
+
+# The ledger's order; every check is on (the ledger's off-switch is not ported).
+REGISTRY = ...
+
+# + 1 private module-level name
+```
+
+<a id="lib-pdf-checks-same-code-py"></a>
+
+## `lib/pdf/checks/same_code.py` ([source](../../src/tomd/lib/pdf/checks/same_code.py))
+
+Typed: 0 of 1 functions and methods (0%).
+
+```python
+"""Meaning: the largest code-pair similarity recorded in the area (weighted
+by size where it was computed; one-line blocks abstain upstream).
+"""
+
+def run(ctx) -> dict:
+    # untyped: ctx
+    ...
+
+CHECK = ...
+```
+
+<a id="lib-pdf-checks-text-alignment-py"></a>
+
+## `lib/pdf/checks/text_alignment.py` ([source](../../src/tomd/lib/pdf/checks/text_alignment.py))
+
+Typed: 0 of 1 functions and methods (0%).
+
+```python
+"""Alignment and shape of the text: rows, pieces per row, aligned starts,
+monospace and digit shares, size and position (the classifier's features).
+"""
+
+def run(ctx) -> dict:
+    # untyped: ctx
+    # calls: _layout.layout_features
+    ...
+
+CHECK = Check('text_alignment', ('region',), 'words', 1, False, run)
+```
+
+<a id="lib-pdf-checks-wordgap-py"></a>
+
+## `lib/pdf/checks/wordgap.py` ([source](../../src/tomd/lib/pdf/checks/wordgap.py))
+
+Typed: 0 of 1 functions and methods (0%).
+
+```python
+"""Words: gaps between neighbouring words in units of the document's normal
+space. Prose has uniform gaps (one space, or uniformly stretched when
+justified); table lines have bimodal gaps that recur at the same x.
+"""
+
+def run(ctx) -> dict:
+    # untyped: ctx
+    # calls: docmeasure.area_word_features
+    # called by: footprint.run
+    ...
+
+CHECK = ...
+```
+
 <a id="lib-pdf-classify-py"></a>
 
 ## `lib/pdf/classify.py` ([source](../../src/tomd/lib/pdf/classify.py))
@@ -1782,7 +2190,7 @@ def gate_tables(doc, pages, sections: list[Section]) -> dict:
     """
     # untyped: doc, pages
     # calls: summary.generator, region_features, pagecache.words_in, validate.verify_layout, validate.verify_pieces, fullwidth.apply, runctx.current, fit.fit, fit.fit_rows, ruled.page_hrules, relations.record_for, plausible.plausibility, +4 more
-    # called by: pipeline.run_pipeline
+    # called by: pipeline._build_scan_tables, pipeline.run_pipeline
 
 def image_share(page, bbox) -> float:
     """The share of bbox covered by images drawn on the page (union approximated by the sum,
@@ -1800,7 +2208,7 @@ def region_features(page, bbox, sources, flags, gen: str, doc_tagged: bool):
     """(features, text lines) of one table area. Shared with the PoC's training."""
     # untyped: page, bbox, sources, flags, return
     # calls: text_rows
-    # called by: gate_tables
+    # called by: _layout.layout_features, gate_tables
 
 def text_rows(page, rect):
     """Text rows in rect: [(top, bottom, [(x0, x1, text, mono)])], pieces split at wide gaps."""
@@ -2290,6 +2698,7 @@ def content_candidates(pages, regions, specialists=None, rules_by_page=None) -> 
     """
     # untyped: pages, regions, specialists, rules_by_page
     # calls: page_text, page_hrules, build, _region_rules, _rotated_header, _cell_lines, types.TableCandidate
+    # called by: pipeline._build_scan_tables, pipeline._content_readings
 
 def gutters(lines_pieces, x_lo, x_hi):
     """x intervals crossed by at most _SPAN_LINES lines' pieces."""
@@ -2308,7 +2717,7 @@ def page_text(page) -> tuple[list[tuple], list[tuple]]:
     """
     # untyped: page
     # calls: pagecache._dedup_words
-    # called by: content_candidates, page_words
+    # called by: content_candidates, page_words, _Page.__init__
 
 def page_words(page) -> list[tuple]:
     """(x0, y0, x1, y1, text, monospace) for every horizontal word on the page."""
@@ -2323,7 +2732,7 @@ def pieces_of(line):
 def visual_lines(words):
     """words: (x0, y0, x1, y1, text) -> lines of words sorted left to right."""
     # untyped: words, return
-    # called by: _rotated_header, build
+    # called by: _rotated_header, build, extent._row_from
 
 SPECIALISTS = {'code_rows': True, 'separators': True}
 
@@ -2477,11 +2886,84 @@ def extract_docling_tables(pdf_path: Path) -> dict[int, list[dict]]:
 # + 8 private module-level names
 ```
 
+<a id="lib-pdf-docmeasure-py"></a>
+
+## `lib/pdf/docmeasure.py` ([source](../../src/tomd/lib/pdf/docmeasure.py))
+
+Typed: 3 of 6 functions and methods (50%).
+
+```python
+"""Level 0: what ordinary prose looks like in this document.
+
+Measured once per paper from the body text (lines of multi-line blocks with
+several words): the prose measure (left and right text edges, robust
+percentiles), whether the prose is justified (right edges pile up on the
+measure), and the normal space between words per text height. Everything
+below compares against it: a table's text is inset from the measure (cell
+padding) and ends raggedly per column; its lines have bimodal word gaps
+(one space inside cells, several between cells, recurring at the same x),
+where prose has uniform gaps (one space, or uniformly stretched when
+justified).
+"""
+
+@dataclass
+class DocMeasure:
+    left: float = 0.0
+    right: float = 0.0
+    justified: float = 0.0  # share of prose lines ending on the right measure
+    space: dict = field(default_factory=dict)  # text height (pt, rounded) -> normal word space
+    known: bool = False
+    def word_space(self, height: float) -> float: ...
+
+def area_word_features(words, m: DocMeasure) -> dict:
+    """Word-gap and footprint features of the words in one area."""
+    # untyped: words
+    # calls: visual_lines, gap_stats
+    # called by: wordgap.run
+
+def gap_stats(line, m: DocMeasure) -> dict | None:
+    """One visual line's word gaps in units of the document's normal space."""
+    # untyped: line
+    # called by: area_word_features
+
+def hyphenates(page_words: list[list]) -> bool:
+    """Does the document break words with a hyphen at line ends? Evidence: a
+    line ending in "word-" whose join with the next line's first word appears
+    elsewhere in the document unhyphenated ("compari-" + "son", "comparison"
+    seen elsewhere). Two or more such breaks: it hyphenates. None: a line-end
+    hyphen is the word's own ("Use-" + "cases"). One: undecided, treated as
+    hyphenating (the earlier behaviour). Measured on the keys: 4 to 223 such
+    breaks in hyphenating papers (LaTeX, and Word with hyphenation on), 0 in
+    papers that never hyphenate. The maker alone does not tell (Word can do
+    either).
+    """
+
+def measure(page_words: list[list]) -> DocMeasure:
+    """page_words: per page, fitz "words" tuples (x0, y0, x1, y1, text, block, line, n)."""
+    # calls: visual_lines, DocMeasure
+    # called by: pipeline.run_pipeline
+
+def visual_lines(words):
+    """Words (x0, y0, x1, y1, text, ...) sharing a baseline, left to right."""
+    # untyped: words, return
+    # called by: area_word_features, measure
+```
+
+<a id="lib-pdf-dvf-model-py"></a>
+
+## `lib/pdf/dvf_model.py` ([source](../../src/tomd/lib/pdf/dvf_model.py))
+
+```python
+"""Data-vs-formatting model, fitted by train_dvf.py on the existing keys."""
+
+MODEL = ...
+```
+
 <a id="lib-pdf-emit-py"></a>
 
 ## `lib/pdf/emit.py` ([source](../../src/tomd/lib/pdf/emit.py))
 
-Typed: 43 of 47 functions and methods (91%).
+Typed: 43 of 48 functions and methods (89%).
 
 ```python
 """Markdown and companion prompts file generation."""
@@ -2550,6 +3032,16 @@ def renumber_uncertain_markers(md: str) -> str:
     starts two lines below the marker.
     """
     # called by: api.convert_paper_full, emit_markdown, pipeline._insert_after_front_matter
+
+def table_use(rows) -> str:
+    """What a grid is used for (conventions decided by a person, 2026-10-19):
+    "label-value" - repeated per-item "label: value" entries (not a table);
+    "contents" - a contents page or reference list laid out in a grid (not a table);
+    "heading" - a numbered heading of the standard's wording and its stable name;
+    "table" - everything else.
+    """
+    # untyped: rows
+    # called by: pipeline._build_scan_tables
 
 # The single Markdown unordered-list marker this converter emits, at every
 # nesting depth. "-" over "*" because the HTML renderer already emits "-", the
@@ -2620,6 +3112,8 @@ class Record:
     readings: list[tuple] = field(default_factory=list)
     # readers, checks and specialists that raised: never swallowed silently
     errors: list[dict] = field(default_factory=list)
+    # what ordinary prose looks like in this document (docmeasure.measure), for the region scan
+    doc_measure: DocMeasure | None = None
     def exclude(self, scan: str, page: int, bbox: Box, rule: str, info: str, value=None) -> None:
         # untyped: value
         # calls: Entry
@@ -2636,6 +3130,51 @@ class Record:
 
 # Exceptions that mean the code is wrong, not the PDF: the release gate fails on any of them.
 CODE_ERRORS = ...
+```
+
+<a id="lib-pdf-extent-py"></a>
+
+## `lib/pdf/extent.py` ([source](../../src/tomd/lib/pdf/extent.py))
+
+Typed: 1 of 20 functions and methods (5%).
+
+```python
+"""The extent step: where each reader's table stops, and the rows just outside it.
+
+Runs after every reader, before selection, with the pages at hand.
+
+Stop reason (evidence): for every candidate, at its top and bottom, the
+reader's own extent rule and what lies just beyond (page edge, a drawn rule,
+the gap to the next text, that text). Readers do not record why they stop;
+this is the one place that does.
+
+Rows just outside a reading (user, from the cut-short diagnosis: "Alignment
+of text over the columns is a common reason"; background colour; rules that
+keep separating the columns; a header placed under its columns):
+  alignment   a short label row directly above (or below) the body whose
+              pieces each start at, or are centred over, a body column, and
+              that covers at least two columns
+  dividers    the body's vertical column dividers continue through the row
+              (the row is inside the drawn table even above its first
+              horizontal rule)
+  shading     a filled band spanning the table's width directly above or
+              below the body holds the row (a header or title band)
+Dividers and shading are drawn paths - the same information type as rules -
+so they set extent; they are not an independent witness. A row above becomes
+the first row; a label row below the body (short labels, unlike the body's
+cells) is the table's header, placed first and marked as found under the
+columns. Tagged and poll readings are left alone (the tag tree and the poll
+vocabulary state their own extent).
+"""
+
+def extend(cands: list[TableCandidate], pages: dict) -> None:
+    # calls: runctx.current, _Page, _beyond, _row_height, _overlaps, _block, _kind, _pieces, _row_from
+    # called by: pipeline.run_pipeline
+    ...
+
+EXTENT_RULE = ...
+
+# + 19 private module-level names
 ```
 
 <a id="lib-pdf-extract-py"></a>
@@ -2786,6 +3325,91 @@ def grid_of(page, bbox):
     # called by: fit
 
 # + 6 private module-level names
+```
+
+<a id="lib-pdf-flag-py"></a>
+
+## `lib/pdf/flag.py` ([source](../../src/tomd/lib/pdf/flag.py))
+
+Typed: 9 of 17 functions and methods (52%).
+
+```python
+"""Mark text that is probably a table but was not extracted as one.
+
+The table sources only emit what passes their checks, so a real table can
+reach the output as plain paragraphs or code with no warning. This module
+looks at what is left after table selection and marks the sections in
+table-like areas uncertain (their text is kept as it is), so a reader or an
+LLM pass knows to rebuild them. Two kinds of evidence:
+
+  - a drawing or tag source found a table there, but the rule checks
+    rejected its reading (select_tables' `rejected` list);
+  - the text itself is laid out like a table: a run of rows split into
+    columns by wide gaps, with the columns starting at the same x positions
+    from row to row, or a vote line ("SF F N A SA", "Favor: 8 ...").
+
+Nothing here decides cell boundaries; it only says "look here".
+"""
+
+def aligned_regions(blocks: list[Block]) -> list[Region]:
+    """Tables without rules found by their columns, as the vision readers find
+    them: text in three or more columns whose starts line up down consecutive
+    rows (left-aligned cells), with no line running across a column start.
+    A header row just above (centred labels) joins the region. Code listings,
+    contents pages and front matter are left out; what remains is read by the
+    content reader and checked like any other reading.
+    """
+    # calls: _rows, _is_not_table
+    # called by: pipeline._content_readings
+
+def dropped_uncovered(rejected: list[TableCandidate], tables: list[Section]) -> list[str]:
+    """Every dropped candidate (any source, any reason) that no kept table
+    covers, for the prompts file: nothing a reader found is erased, but only
+    misread-looking ones are marked in the Markdown (rejected_regions).
+    """
+    # called by: pipeline.run_pipeline
+
+def flag_possible_tables(sections: list[Section], regions: list[Region]) -> int:
+    """Mark sections inside a region; returns how many. Locality: a section is cut at page
+    breaks, so its lines on other pages never inherit a mark.
+    """
+    # calls: _line_in, runctx.current, _split_at_region
+    # called by: pipeline.run_pipeline
+
+def gutter_regions(blocks: list[Block]) -> list[Region]:
+    """Tables found by their negative space: a vertical whitespace gutter.
+
+    A table without rules still leaves an empty vertical strip between its
+    columns that runs down consecutive lines, with text on both sides.
+    Running text has none (it fills the measure and wraps), and neither do
+    lists or headings. Each run of at least _GUTTER_ROWS lines with text on
+    both sides of one gutter is a region, unless it is two-column prose
+    (sentences on both sides), code with aligned comments, a contents page
+    or title-page metadata.
+    """
+    # calls: _rows, _prose, _is_not_table
+    # called by: pipeline.run_pipeline
+
+def outside_view_regions(sections: list[Section]) -> list[Region]:
+    """Tables seen from the outside, against the paper's own prose: a block
+    that is set apart (its rows fill much less than the prose measure) AND
+    two-dimensional (most rows hold 2+ pieces whose positions recur on other
+    rows). A block that is set apart but one-dimensional is a quote or a
+    list; prose fills the measure. Measured on the tuning sets before use.
+    """
+    # calls: _visual_rows, _pieces
+    # called by: pipeline.run_pipeline
+
+def rejected_regions(rejected: list[TableCandidate], tables: list[Section]) -> list[Region]:
+    """Areas of rejected drawing/tag tables that no selected table covers."""
+    # called by: pipeline.run_pipeline
+
+def text_regions(blocks: list[Block]) -> list[Region]:
+    """Table-like areas in the remaining text."""
+    # calls: _rows, _is_not_table, _is_table_row, _shared_starts
+    # called by: pipeline.run_pipeline
+
+# + 10 private module-level names
 ```
 
 <a id="lib-pdf-fullwidth-py"></a>
@@ -3379,7 +4003,7 @@ def words_in(page, bbox):
 
 ## `lib/pdf/pipeline.py` ([source](../../src/tomd/lib/pdf/pipeline.py))
 
-Typed: 29 of 40 functions and methods (72%).
+Typed: 29 of 45 functions and methods (64%).
 
 ```python
 """PDF to Markdown converter - pipeline entry point."""
@@ -3432,6 +4056,16 @@ class PipelineResult:
         """
         # called by: run_pipeline
 
+def dropped_nomination_regions(record, tables) -> list:
+    """Every area a reader or scan nominated and a rule then excluded, where no
+    kept table covers it, as a possible-table region: a drop never leaves the
+    text silent, except for the rules that say it is not a table at all.
+    (page, bbox, reason, rows) like every mark region.
+    """
+    # untyped: record, tables
+    # calls: _overlap
+    # called by: run_pipeline
+
 def run_pipeline(path: Path, *, ml_tables: bool = False, visualize: bool = False, extract_vector: bool = False, whiteout_text: bool = False) -> PipelineResult:
     """Run the full PDF conversion pipeline, returning all intermediate data.
 
@@ -3446,9 +4080,9 @@ def run_pipeline(path: Path, *, ml_tables: bool = False, visualize: bool = False
     effect when ``extract_vector`` is False.
     labels inside vector figures render as pixels alongside body text.
     """
-    # calls: PipelineResult, images._VectorExtractionStats, _enforce_skip_contract, PipelineResult.for_skip, _is_slide_deck, _is_standards_draft, extract.extract_mupdf, extract.extract_spatial, cleanup.get_edge_items, extract.collect_links, extract.attach_links, images.extract_page_images, +79 more
+    # calls: PipelineResult, images._VectorExtractionStats, _enforce_skip_contract, PipelineResult.for_skip, _is_slide_deck, _is_standards_draft, extract.extract_mupdf, extract.extract_spatial, cleanup.get_edge_items, extract.collect_links, extract.attach_links, images.extract_page_images, +91 more
 
-# + 38 private module-level names
+# + 42 private module-level names
 ```
 
 <a id="lib-pdf-poll-py"></a>
@@ -3573,6 +4207,60 @@ def write_qa_json_atomic(path: Path, results: Sequence[QAMetrics]) -> None:
     """Atomically write per-paper QA metrics as JSON."""
 
 # + 12 private module-level names
+```
+
+<a id="lib-pdf-records-py"></a>
+
+## `lib/pdf/records.py` ([source](../../src/tomd/lib/pdf/records.py))
+
+Typed: 4 of 7 functions and methods (57%).
+
+```python
+"""Content record-pattern reader: a table seen as runs of records that share a
+schema of kinds, with no geometry.
+
+The text layer gives a region's lines in reading order. Each line has a kind
+(an identifier such as P1234R0 or [expr.add], a date, a number, a check mark,
+code, words). In most PDFs a table's cells come out one per line, so a table
+reads as a sequence whose kinds repeat with a period: name, number, number,
+name, number, number, ... A run of at least three periods with at least two
+kinds in a period is a run of records; the period is the column count and
+each period a row. The k lines just before the run become the header when
+they are short labels.
+
+Rows and columns come from the text's own pattern (meaning), not from
+positions, so this is a different way to see a table from every other
+reader. Measured on the answer keys first: alone it is noisy (code listings
+repeat too), so it reads only regions other cues nominated, never votes for
+HIGH, and is an alternative that escalation may switch to when the emitted
+reading fails verification and this one passes.
+"""
+
+def line_kind(text: str) -> str:
+    """One kind for a line: its tokens' kind when they all share one, else 'mixed'."""
+    # calls: _token_kind
+    # called by: read_region
+
+def periodic_runs(kinds: list[str]) -> list[tuple[int, int, int]]:
+    """(start, period, records) for runs whose kinds repeat with a period, longest first."""
+    # called by: read_region
+
+def read_region(page, page_num: int, bbox) -> list[TableCandidate]:
+    """Every run of records in the region (longest first, not overlapping), each
+    with its header and its own box; none unless together they cover most of
+    the region's lines (a region holding two stacked tables reads as two).
+    """
+    # untyped: page, bbox
+    # calls: _lines_in, line_kind, _text, periodic_runs, types.TableCandidate
+    # called by: records_candidates
+
+def records_candidates(pages, regions) -> list[TableCandidate]:
+    """The record-pattern reading of every located region (page, bbox)."""
+    # untyped: pages, regions
+    # calls: read_region
+    # called by: pipeline._content_readings
+
+# + 3 private module-level names
 ```
 
 <a id="lib-pdf-relations-py"></a>
@@ -3777,7 +4465,7 @@ def current() -> RunContext:
     as in unit tests) a detached context is returned, so recording never fails.
     """
     # calls: RunContext
-    # called by: classify.gate_tables, codepair.find_code_pairs, pipeline._filter_sections_inside_vector_images, pipeline.run_pipeline, ruled._bands_to_table, ruled._column_ruled_tables, ruled._mark_icon_cells, ruled.extract_ruled_tables, select._continuation_votes, select.cross_reader_continuation, select.select_tables, select.stitch_pages, +1 more
+    # called by: classify.gate_tables, codepair.find_code_pairs, extent.extend, flag.flag_possible_tables, pipeline._content_readings, pipeline._filter_sections_inside_vector_images, pipeline.run_pipeline, ruled._bands_to_table, ruled._column_ruled_tables, ruled._mark_icon_cells, ruled.extract_ruled_tables, select._continuation_votes, +4 more
 
 @contextlib.contextmanager
 def run_scope():
@@ -3788,6 +4476,95 @@ def run_scope():
 
 # Longest exception message kept in a reader-error entry.
 ERROR_MESSAGE_LIMIT = 300
+```
+
+<a id="lib-pdf-scan-py"></a>
+
+## `lib/pdf/scan.py` ([source](../../src/tomd/lib/pdf/scan.py))
+
+Typed: 3 of 9 functions and methods (33%).
+
+```python
+"""The region scan: check every piece that makes a table, then decide.
+
+1. Areas: every place any scan nominated or excluded (the evidence record),
+   merged per page. Nominating is not deciding; nothing nominated is lost.
+2. Features per area, each with its information type (words, paths, tree,
+   meaning, document): the classifier's layout features, which scans saw it
+   and which rules excluded it, content checks on the best reading in the
+   area (items per cell, fragments, header vs body, column shapes, first
+   column as keys, shared code), and document cues (a caption nearby).
+3. Likelihood that the area is a table: a logistic model fitted on the
+   existing truth (scan_model.py), so it is fast and explainable; the top
+   supporting and opposing features are recorded with the decision.
+4. Bands: high (and two independent information types) -> may be trusted;
+   middle -> build, UNCERTAIN; low -> possible-table mark; none -> recorded.
+"""
+
+def area_features(page, a, generator: str, doc_tagged: bool, measure=None, decided=None) -> dict:
+    """Every enabled region-level check's evidence for one area (checks/); the
+    last-resort tier only while decided(features) is False.
+    """
+    # untyped: page, a, measure, decided
+    # calls: registry.run_region_checks
+    # called by: run_scan
+
+def areas(record) -> list[dict]:
+    """Nominated and excluded places, merged per page (half the smaller one overlapping)."""
+    # untyped: record
+    # calls: _inter, _area
+    # called by: run_scan
+
+def band(p: float, info_types: int) -> str:
+    # called by: run_scan
+    ...
+
+def info_of(name: str) -> str:
+    # called by: run_scan
+    ...
+
+def run_scan(path, record, tables, builds: list | None = None) -> list:
+    """Score every area in the evidence record and decide by band.
+
+    Emitted tables get their likelihood and top features in metadata; a HIGH
+    table the scan rates below LOW is downgraded (reason recorded). Areas
+    without a table come back as possible-table regions (page, bbox, reason,
+    rows) for the build and mark bands; the rest are only recorded.
+    """
+    # untyped: path, record, tables
+    # calls: summary.generator, areas, _inter, _area, _table_boxes, scan_model.likelihood, _at_mean, area_features, info_of, band, data_or_format.likelihood_data
+    # called by: pipeline.run_pipeline
+
+# information type of each feature family (stage 0: same-type features do not
+# stack like independent witnesses)
+# document priors: what the whole document is (tagged at all, which generator made it, how its
+# prose is set) describes the document, not this area; they shape the likelihood but never
+# count as an independent witness for an area
+DOC_PRIOR = 'document prior'
+
+# early stop (ledger ordering): an area whose likelihood without the last-resort
+# tier is below this is not a table whatever that tier says. Measured on the
+# 4991 tuning areas: below 0.02 (24% of areas) the full likelihood never
+# exceeded 0.043 (LOW is 0.3); at 0.05 one area reached 0.26, too close.
+EARLY_NONE = 0.02
+
+# + 4 private module-level names
+```
+
+<a id="lib-pdf-scan-model-py"></a>
+
+## `lib/pdf/scan_model.py` ([source](../../src/tomd/lib/pdf/scan_model.py))
+
+Typed: 1 of 1 functions and methods (100%).
+
+```python
+"""Region scan model, fitted by train_scan.py on the existing truth sets, and how it is applied."""
+
+def likelihood(x: dict, model: dict) -> tuple[float, list[tuple[str, float]]]:
+    """P(table) and the features that pushed it most (signed contributions)."""
+    # called by: data_or_format.likelihood_data, scan.run_scan
+
+MODEL = ...
 ```
 
 <a id="lib-pdf-select-py"></a>
@@ -3905,7 +4682,7 @@ def page_furniture(blocks: list[Block], min_pages: int = 3) -> frozenset:
     stripping missed (a header block holding the page number).
     """
     # calls: _furniture_key
-    # called by: select_tables
+    # called by: pipeline._build_scan_tables, select_tables
 
 def partial_reading(primary: TableCandidate, other: TableCandidate) -> bool:
     """True when `other` is tomd's text-position reading of part of a fully
@@ -3974,7 +4751,7 @@ def stitch_pages(cands: list[TableCandidate], blocks: list[Block], furniture: fr
     that the PDF repeats on the continuation is dropped.
     """
     # calls: _new_header, _same_columns, _continuation_votes, _text_outside, _same_header, _carry, types.TableCandidate, runctx.current
-    # called by: select_tables
+    # called by: pipeline._build_scan_tables, select_tables
 
 def table_flags(cand: TableCandidate) -> list[str]:
     """Rule-based sanity checks. Flags in BAD_TABLE_FLAGS mean the grid is
@@ -3997,14 +4774,6 @@ BAD_TABLE_FLAGS = ...
 # a closed drawn grid's lines fix its cells: empty, merged and full-width cells are the
 # author's layout there, not a misread (the content checks still apply)
 CLOSED_GRID_EXEMPT = ...
-
-# Readers whose readings are kept (flagged, reason "rule-check") when they fail
-# the rule checks and no other reading covers their region. During the port,
-# the readers that read those layouts in tomd-tables (polls, drawn rules, the
-# content reader) and the marks for dropped readings (flag.py) are not here
-# yet; once they are, this set is emptied and such readings are dropped as
-# there, their text kept as prose and marked.
-KEPT_WHEN_UNREPLACED = frozenset({'tomd'})
 
 # Vote labels and their side: +1 for, 0 neutral, -1 against. A header is a
 # line made only of these, in that order (for ... neutral ... against):
@@ -4225,7 +4994,7 @@ def build(sections, discards: list[tuple[str, str, str]], reader_errors: list[di
 
 def generator(meta: dict) -> str:
     """The PDF producer's family, from the document metadata."""
-    # called by: classify.gate_tables, pipeline.run_pipeline
+    # called by: classify.gate_tables, pipeline.run_pipeline, scan.run_scan
 
 def header_comment(s: dict) -> str:
     """The one-line ``tomd:summary`` comment written after the front matter."""
@@ -5816,12 +6585,17 @@ class MarkdownWriter:
 
 - `absorb_cross_page_spec_rows`: [`lib/pdf/docling_backend.py`](#lib-pdf-docling-backend-py)
 - `add_header_above`: [`lib/pdf/validate.py`](#lib-pdf-validate-py)
+- `aligned_regions`: [`lib/pdf/flag.py`](#lib-pdf-flag-py)
 - `ALLOWED_LINK_SCHEMES`: [`lib/shared.py`](#lib-shared-py)
 - `ALLOWED_REASON_KEYS`: [`lib/pdf/vector_images.py`](#lib-pdf-vector-images-py)
 - `anchors_path`: [`lib/golden_qa.py`](#lib-golden-qa-py)
 - `apply`: [`lib/pdf/fullwidth.py`](#lib-pdf-fullwidth-py)
 - `apply_pdf_metadata_fallbacks`: [`lib/metadata_yaml/extract.py`](#lib-metadata-yaml-extract-py)
 - `apply_strip_leading_h1`: [`lib/shared.py`](#lib-shared-py)
+- `area_features`: [`lib/pdf/scan.py`](#lib-pdf-scan-py)
+- `area_word_features`: [`lib/pdf/docmeasure.py`](#lib-pdf-docmeasure-py)
+- `AreaContext`: [`lib/pdf/checks/base.py`](#lib-pdf-checks-base-py)
+- `areas`: [`lib/pdf/scan.py`](#lib-pdf-scan-py)
 - `ascii_escape`: [`lib/shared.py`](#lib-shared-py)
 - `assign`: [`lib/pdf/levels.py`](#lib-pdf-levels-py)
 - `attach_links`: [`lib/pdf/extract.py`](#lib-pdf-extract-py)
@@ -5829,6 +6603,7 @@ class MarkdownWriter:
 - `AxisReport`: [`lib/golden_qa.py`](#lib-golden-qa-py)
 - `AxisScore`: [`lib/golden_compare.py`](#lib-golden-compare-py)
 - `BAD_TABLE_FLAGS`: [`lib/pdf/select.py`](#lib-pdf-select-py)
+- `band`: [`lib/pdf/scan.py`](#lib-pdf-scan-py)
 - `BatchRunResult`: [`lib/batch.py`](#lib-batch-py)
 - `bless_stem`: [`lib/golden_qa.py`](#lib-golden-qa-py)
 - `Block`: [`lib/golden_compare.py`](#lib-golden-compare-py)
@@ -5848,6 +6623,16 @@ class MarkdownWriter:
 - `cell_style`: [`lib/tables.py`](#lib-tables-py)
 - `cell_text`: [`lib/pdf/validate.py`](#lib-pdf-validate-py)
 - `CellAlign`: [`domain/table.py`](#domain-table-py)
+- `Check`: [`lib/pdf/checks/base.py`](#lib-pdf-checks-base-py)
+- `CHECK`: [`lib/pdf/checks/caption.py`](#lib-pdf-checks-caption-py)
+- `CHECK`: [`lib/pdf/checks/coherence.py`](#lib-pdf-checks-coherence-py)
+- `CHECK`: [`lib/pdf/checks/data_or_format.py`](#lib-pdf-checks-data-or-format-py)
+- `CHECK`: [`lib/pdf/checks/drawn_lines.py`](#lib-pdf-checks-drawn-lines-py)
+- `CHECK`: [`lib/pdf/checks/footprint.py`](#lib-pdf-checks-footprint-py)
+- `CHECK`: [`lib/pdf/checks/nominations.py`](#lib-pdf-checks-nominations-py)
+- `CHECK`: [`lib/pdf/checks/same_code.py`](#lib-pdf-checks-same-code-py)
+- `CHECK`: [`lib/pdf/checks/text_alignment.py`](#lib-pdf-checks-text-alignment-py)
+- `CHECK`: [`lib/pdf/checks/wordgap.py`](#lib-pdf-checks-wordgap-py)
 - `check`: [`lib/pdf/relations.py`](#lib-pdf-relations-py)
 - `check_paper_content`: [`lib/check_content.py`](#lib-check-content-py)
 - `CheckContentArgError`: [`errors.py`](#errors-py)
@@ -5864,11 +6649,13 @@ class MarkdownWriter:
 - `CodeCell`: [`domain/table.py`](#domain-table-py)
 - `CodeGrid`: [`lib/pdf/code_grid.py`](#lib-pdf-code-grid-py)
 - `CodeSpan`: [`domain/span.py`](#domain-span-py)
+- `CodeStream`: [`lib/pdf/checks/codereader.py`](#lib-pdf-checks-codereader-py)
 - `collect_glyph_candidates`: [`lib/pdf/glyphs.py`](#lib-pdf-glyphs-py)
 - `collect_hyphen_evidence`: [`lib/pdf/cleanup.py`](#lib-pdf-cleanup-py)
 - `collect_line_drawings`: [`lib/pdf/wording.py`](#lib-pdf-wording-py)
 - `collect_links`: [`lib/pdf/extract.py`](#lib-pdf-extract-py)
 - `collect_text_emoji_bboxes`: [`lib/pdf/glyphs.py`](#lib-pdf-glyphs-py)
+- `column_coherence`: [`lib/pdf/checks/coherence.py`](#lib-pdf-checks-coherence-py)
 - `column_type`: [`lib/pdf/checks/plausible.py`](#lib-pdf-checks-plausible-py)
 - `comment`: [`lib/pdf/levels.py`](#lib-pdf-levels-py)
 - `COMMON_LAYOUTS`: [`lib/pdf/summary.py`](#lib-pdf-summary-py)
@@ -5882,6 +6669,7 @@ class MarkdownWriter:
 - `conservation_error`: [`lib/pdf/select.py`](#lib-pdf-select-py)
 - `ContainerSpan`: [`domain/span.py`](#domain-span-py)
 - `content_candidates`: [`lib/pdf/content.py`](#lib-pdf-content-py)
+- `content_features`: [`lib/pdf/checks/coherence.py`](#lib-pdf-checks-coherence-py)
 - `ContentCheckBatchResult`: [`lib/check_content.py`](#lib-check-content-py)
 - `ContentCheckResult`: [`lib/check_content.py`](#lib-check-content-py)
 - `convert_html`: [`lib/html/convert.py`](#lib-html-convert-py)
@@ -5908,14 +6696,20 @@ class MarkdownWriter:
 - `DOC_FIELD_RE`: [`lib/pdf/types.py`](#lib-pdf-types-py)
 - `DOC_NUM_PATTERN`: [`lib/shared.py`](#lib-shared-py)
 - `DOC_NUM_RE`: [`lib/shared.py`](#lib-shared-py)
+- `DOC_PRIOR`: [`lib/pdf/scan.py`](#lib-pdf-scan-py)
 - `docling_available`: [`lib/pdf/docling_backend.py`](#lib-pdf-docling-backend-py)
+- `DocMeasure`: [`lib/pdf/docmeasure.py`](#lib-pdf-docmeasure-py)
 - `DocumentWriter`: [`writers/base.py`](#writers-base-py)
 - `download_source`: [`lib/golden_qa.py`](#lib-golden-qa-py)
 - `draft_issues`: [`lib/golden_gaps.py`](#lib-golden-gaps-py)
+- `DRAWN`: [`lib/pdf/checks/_layout.py`](#lib-pdf-checks-layout-py)
 - `drawn_spans`: [`lib/pdf/ruled.py`](#lib-pdf-ruled-py)
 - `drop_glyphs_in_code_and_tables`: [`lib/pdf/glyphs.py`](#lib-pdf-glyphs-py)
 - `drop_leaked_toc_entries`: [`lib/pdf/structure.py`](#lib-pdf-structure-py)
+- `dropped_nomination_regions`: [`lib/pdf/pipeline.py`](#lib-pdf-pipeline-py)
+- `dropped_uncovered`: [`lib/pdf/flag.py`](#lib-pdf-flag-py)
 - `duplication`: [`lib/pdf/checks/plausible.py`](#lib-pdf-checks-plausible-py)
+- `EARLY_NONE`: [`lib/pdf/scan.py`](#lib-pdf-scan-py)
 - `EDGE_BAND_BOTTOM_FRACTION`: [`lib/pdf/types.py`](#lib-pdf-types-py)
 - `EDGE_ITEMS_PER_PAGE`: [`lib/pdf/types.py`](#lib-pdf-types-py)
 - `ElementKind`: [`domain/elements.py`](#domain-elements-py)
@@ -5932,6 +6726,8 @@ class MarkdownWriter:
 - `escalate`: [`lib/pdf/validate.py`](#lib-pdf-validate-py)
 - `escape_leading_atx`: [`lib/pdf/cleanup.py`](#lib-pdf-cleanup-py)
 - `exclude_table_regions`: [`lib/pdf/table.py`](#lib-pdf-table-py)
+- `extend`: [`lib/pdf/extent.py`](#lib-pdf-extent-py)
+- `EXTENT_RULE`: [`lib/pdf/extent.py`](#lib-pdf-extent-py)
 - `extract_docling_tables`: [`lib/pdf/docling_backend.py`](#lib-pdf-docling-backend-py)
 - `extract_metadata`: [`lib/html/extract.py`](#lib-html-extract-py)
 - `extract_metadata`: [`lib/metadata_yaml/extract.py`](#lib-metadata-yaml-extract-py)
@@ -5949,6 +6745,7 @@ class MarkdownWriter:
 - `facts_path`: [`lib/golden_qa.py`](#lib-golden-qa-py)
 - `FALLBACK_BODY_SIZE`: [`lib/pdf/types.py`](#lib-pdf-types-py)
 - `FALLBACK_FONT_SIZE`: [`lib/pdf/types.py`](#lib-pdf-types-py)
+- `features`: [`lib/pdf/checks/data_or_format.py`](#lib-pdf-checks-data-or-format-py)
 - `fidelity_verdict`: [`lib/golden_qa.py`](#lib-golden-qa-py)
 - `FidelityVerdict`: [`lib/golden_qa.py`](#lib-golden-qa-py)
 - `FigureEdge`: [`lib/pdf/types.py`](#lib-pdf-types-py)
@@ -5963,6 +6760,7 @@ class MarkdownWriter:
 - `find_toc_indices`: [`lib/toc.py`](#lib-toc-py)
 - `fit`: [`lib/pdf/fit.py`](#lib-pdf-fit-py)
 - `fit_rows`: [`lib/pdf/fit.py`](#lib-pdf-fit-py)
+- `flag_possible_tables`: [`lib/pdf/flag.py`](#lib-pdf-flag-py)
 - `FLAGS`: [`lib/pdf/classify.py`](#lib-pdf-classify-py)
 - `format_batch_finished`: [`lib/batch.py`](#lib-batch-py)
 - `format_batch_progress_line`: [`lib/batch.py`](#lib-batch-py)
@@ -5973,14 +6771,17 @@ class MarkdownWriter:
 - `format_front_matter`: [`lib/metadata_yaml/format.py`](#lib-metadata-yaml-format-py)
 - `format_qa_report`: [`lib/pdf/qa.py`](#lib-pdf-qa-py)
 - `format_uncertainty_marker`: [`lib/pdf/vector_images.py`](#lib-pdf-vector-images-py)
+- `fragment_share`: [`lib/pdf/checks/coherence.py`](#lib-pdf-checks-coherence-py)
 - `FRONT_MATTER_ORDER`: [`lib/metadata_yaml/format.py`](#lib-metadata-yaml-format-py)
 - `FRONT_MATTER_RE`: [`lib/metadata_yaml/format.py`](#lib-metadata-yaml-format-py)
 - `full_width_rows`: [`lib/pdf/fullwidth.py`](#lib-pdf-fullwidth-py)
 - `fuzzy_match_label`: [`lib/similarity.py`](#lib-similarity-py)
 - `Gap`: [`lib/golden_gaps.py`](#lib-golden-gaps-py)
+- `gap_stats`: [`lib/pdf/docmeasure.py`](#lib-pdf-docmeasure-py)
 - `gate_tables`: [`lib/pdf/classify.py`](#lib-pdf-classify-py)
 - `generate_ideal`: [`lib/golden_qa.py`](#lib-golden-qa-py)
 - `generator`: [`lib/pdf/summary.py`](#lib-pdf-summary-py)
+- `GENERATOR_TIER`: [`lib/pdf/checks/registry.py`](#lib-pdf-checks-registry-py)
 - `GENERATORS`: [`lib/pdf/classify.py`](#lib-pdf-classify-py)
 - `get_edge_items`: [`lib/pdf/cleanup.py`](#lib-pdf-cleanup-py)
 - `GLYPH_FONT_SENTINEL`: [`lib/pdf/glyphs.py`](#lib-pdf-glyphs-py)
@@ -5989,18 +6790,24 @@ class MarkdownWriter:
 - `GlyphCandidate`: [`lib/pdf/glyphs.py`](#lib-pdf-glyphs-py)
 - `GlyphPassStats`: [`lib/pdf/glyphs.py`](#lib-pdf-glyphs-py)
 - `grid_of`: [`lib/pdf/fit.py`](#lib-pdf-fit-py)
+- `gutter_regions`: [`lib/pdf/flag.py`](#lib-pdf-flag-py)
 - `gutters`: [`lib/pdf/content.py`](#lib-pdf-content-py)
+- `has_caption`: [`lib/pdf/checks/caption.py`](#lib-pdf-checks-caption-py)
 - `has_dot_leader`: [`lib/toc.py`](#lib-toc-py)
 - `header_comment`: [`lib/pdf/summary.py`](#lib-pdf-summary-py)
+- `header_contrast`: [`lib/pdf/checks/coherence.py`](#lib-pdf-checks-coherence-py)
 - `Heading`: [`domain/elements.py`](#domain-elements-py)
 - `heading_confidence`: [`lib/pdf/structure.py`](#lib-pdf-structure-py)
 - `HtmlImagesResult`: [`lib/html/images.py`](#lib-html-images-py)
+- `hyphenates`: [`lib/pdf/docmeasure.py`](#lib-pdf-docmeasure-py)
 - `HyphenEvidence`: [`lib/pdf/cleanup.py`](#lib-pdf-cleanup-py)
 - `ideal_path`: [`lib/golden_qa.py`](#lib-golden-qa-py)
 - `IMAGE_GRID_SHARE`: [`lib/pdf/classify.py`](#lib-pdf-classify-py)
 - `image_share`: [`lib/pdf/classify.py`](#lib-pdf-classify-py)
 - `ImageElement`: [`domain/elements.py`](#domain-elements-py)
 - `implicit_role_for`: [`lib/wording_policy.py`](#lib-wording-policy-py)
+- `INFO`: [`lib/pdf/checks/base.py`](#lib-pdf-checks-base-py)
+- `info_of`: [`lib/pdf/scan.py`](#lib-pdf-scan-py)
 - `inject_glyph_spans`: [`lib/pdf/glyphs.py`](#lib-pdf-glyphs-py)
 - `InsertedSpan`: [`domain/span.py`](#domain-span-py)
 - `is_code_comparison`: [`lib/pdf/emit.py`](#lib-pdf-emit-py)
@@ -6016,13 +6823,17 @@ class MarkdownWriter:
 - `is_wording_rgb`: [`lib/pdf/wording.py`](#lib-pdf-wording-py)
 - `issue_for_stem`: [`lib/golden_qa.py`](#lib-golden-qa-py)
 - `join_split_words`: [`lib/pdf/select.py`](#lib-pdf-select-py)
-- `KEPT_WHEN_UNREPLACED`: [`lib/pdf/select.py`](#lib-pdf-select-py)
 - `KNOWN_GENERATORS`: [`lib/pdf/summary.py`](#lib-pdf-summary-py)
 - `KNOWN_SECTIONS`: [`lib/pdf/types.py`](#lib-pdf-types-py)
+- `layout_features`: [`lib/pdf/checks/_layout.py`](#lib-pdf-checks-layout-py)
 - `LAYOUT_TREE`: [`lib/pdf/classify_trees.py`](#lib-pdf-classify-trees-py)
 - `LEGACY_FENCE_MARKER`: [`lib/wording_markup.py`](#lib-wording-markup-py)
 - `LEGACY_WORDING_FENCE_RE`: [`lib/wording_markup.py`](#lib-wording-markup-py)
+- `LEVELS`: [`lib/pdf/checks/base.py`](#lib-pdf-checks-base-py)
+- `likelihood`: [`lib/pdf/scan_model.py`](#lib-pdf-scan-model-py)
+- `likelihood_data`: [`lib/pdf/checks/data_or_format.py`](#lib-pdf-checks-data-or-format-py)
 - `Line`: [`lib/pdf/types.py`](#lib-pdf-types-py)
+- `line_kind`: [`lib/pdf/records.py`](#lib-pdf-records-py)
 - `LINE_SPACING_RATIO`: [`lib/pdf/types.py`](#lib-pdf-types-py)
 - `LineBreakSpan`: [`domain/span.py`](#domain-span-py)
 - `LinkSpan`: [`domain/span.py`](#domain-span-py)
@@ -6032,12 +6843,15 @@ class MarkdownWriter:
 - `ListItem`: [`domain/elements.py`](#domain-elements-py)
 - `load_html_images`: [`lib/html/images.py`](#lib-html-images-py)
 - `locate_gaps`: [`lib/golden_gaps.py`](#lib-golden-gaps-py)
+- `looks_like_cpp`: [`lib/pdf/checks/codereader.py`](#lib-pdf-checks-codereader-py)
 - `main`: [`cli.py`](#cli-py)
 - `mark_matrix`: [`lib/pdf/select.py`](#lib-pdf-select-py)
 - `MarkdownWriter`: [`writers/markdown/writer.py`](#writers-markdown-writer-py)
 - `MAX_FILL`: [`lib/pdf/rowbands.py`](#lib-pdf-rowbands-py)
 - `maybe_normalize_code_line`: [`lib/pdf/code_format.py`](#lib-pdf-code-format-py)
+- `measure`: [`lib/pdf/docmeasure.py`](#lib-pdf-docmeasure-py)
 - `merge_rule_bands`: [`lib/pdf/rowbands.py`](#lib-pdf-rowbands-py)
+- `merged_share`: [`lib/pdf/checks/coherence.py`](#lib-pdf-checks-coherence-py)
 - `MIN_IMAGE_DIM_PT`: [`lib/pdf/images.py`](#lib-pdf-images-py)
 - `MIN_RULES`: [`lib/pdf/rowbands.py`](#lib-pdf-rowbands-py)
 - `MIN_SEGMENT`: [`lib/pdf/rowbands.py`](#lib-pdf-rowbands-py)
@@ -6045,6 +6859,8 @@ class MarkdownWriter:
 - `MIN_UNCERTAIN_WORDS`: [`lib/pdf/types.py`](#lib-pdf-types-py)
 - `MisalignedRegion`: [`lib/check_content.py`](#lib-check-content-py)
 - `MIXED_TABLE_MARKER`: [`lib/tables.py`](#lib-tables-py)
+- `MODEL`: [`lib/pdf/dvf_model.py`](#lib-pdf-dvf-model-py)
+- `MODEL`: [`lib/pdf/scan_model.py`](#lib-pdf-scan-model-py)
 - `NAMES`: [`lib/pdf/levels.py`](#lib-pdf-levels-py)
 - `normalize`: [`lib/golden_compare.py`](#lib-golden-compare-py)
 - `normalize_code_line`: [`lib/pdf/code_format.py`](#lib-pdf-code-format-py)
@@ -6055,6 +6871,7 @@ class MarkdownWriter:
 - `normalize_whitespace`: [`lib/pdf/cleanup.py`](#lib-pdf-cleanup-py)
 - `NormalizedDoc`: [`lib/golden_compare.py`](#lib-golden-compare-py)
 - `NUMBERED_LIST_RE`: [`lib/pdf/types.py`](#lib-pdf-types-py)
+- `outside_view_regions`: [`lib/pdf/flag.py`](#lib-pdf-flag-py)
 - `override_revision_from_filename`: [`lib/shared.py`](#lib-shared-py)
 - `page_furniture`: [`lib/pdf/select.py`](#lib-pdf-select-py)
 - `page_hrules`: [`lib/pdf/content.py`](#lib-pdf-content-py)
@@ -6071,6 +6888,7 @@ class MarkdownWriter:
 - `parse_front_matter`: [`lib/metadata_yaml/format.py`](#lib-metadata-yaml-format-py)
 - `parse_html`: [`lib/html/extract.py`](#lib-html-extract-py)
 - `partial_reading`: [`lib/pdf/select.py`](#lib-pdf-select-py)
+- `periodic_runs`: [`lib/pdf/records.py`](#lib-pdf-records-py)
 - `pieces_of`: [`lib/pdf/content.py`](#lib-pdf-content-py)
 - `PipelineResult`: [`lib/pdf/pipeline.py`](#lib-pdf-pipeline-py)
 - `plausibility`: [`lib/pdf/checks/plausible.py`](#lib-pdf-checks-plausible-py)
@@ -6082,6 +6900,8 @@ class MarkdownWriter:
 - `QABatchResult`: [`lib/pdf/qa.py`](#lib-pdf-qa-py)
 - `QAMetrics`: [`lib/pdf/qa.py`](#lib-pdf-qa-py)
 - `rawdict`: [`lib/pdf/pagecache.py`](#lib-pdf-pagecache-py)
+- `read_lines`: [`lib/pdf/checks/codereader.py`](#lib-pdf-checks-codereader-py)
+- `read_region`: [`lib/pdf/records.py`](#lib-pdf-records-py)
 - `REASON_ASPECT_EXTREME`: [`lib/pdf/vector_images.py`](#lib-pdf-vector-images-py)
 - `REASON_BBOX_TOO_LARGE`: [`lib/pdf/vector_images.py`](#lib-pdf-vector-images-py)
 - `REASON_CLUSTERS_OVERFLOW`: [`lib/pdf/vector_images.py`](#lib-pdf-vector-images-py)
@@ -6094,7 +6914,10 @@ class MarkdownWriter:
 - `ReblessOutcome`: [`lib/golden_qa.py`](#lib-golden-qa-py)
 - `Record`: [`lib/pdf/evidence.py`](#lib-pdf-evidence-py)
 - `record_for`: [`lib/pdf/relations.py`](#lib-pdf-relations-py)
+- `records_candidates`: [`lib/pdf/records.py`](#lib-pdf-records-py)
 - `region_features`: [`lib/pdf/classify.py`](#lib-pdf-classify-py)
+- `REGISTRY`: [`lib/pdf/checks/registry.py`](#lib-pdf-checks-registry-py)
+- `rejected_regions`: [`lib/pdf/flag.py`](#lib-pdf-flag-py)
 - `RelationRecord`: [`lib/pdf/relations.py`](#lib-pdf-relations-py)
 - `remove_table_regions`: [`lib/pdf/select.py`](#lib-pdf-select-py)
 - `render_body`: [`lib/html/render.py`](#lib-html-render-py)
@@ -6108,10 +6931,21 @@ class MarkdownWriter:
 - `resegment_rows`: [`lib/pdf/validate.py`](#lib-pdf-validate-py)
 - `review_ideal`: [`lib/golden_qa.py`](#lib-golden-qa-py)
 - `review_skill_text`: [`lib/golden_qa.py`](#lib-golden-qa-py)
+- `run`: [`lib/pdf/checks/caption.py`](#lib-pdf-checks-caption-py)
+- `run`: [`lib/pdf/checks/coherence.py`](#lib-pdf-checks-coherence-py)
+- `run`: [`lib/pdf/checks/data_or_format.py`](#lib-pdf-checks-data-or-format-py)
+- `run`: [`lib/pdf/checks/drawn_lines.py`](#lib-pdf-checks-drawn-lines-py)
+- `run`: [`lib/pdf/checks/footprint.py`](#lib-pdf-checks-footprint-py)
+- `run`: [`lib/pdf/checks/nominations.py`](#lib-pdf-checks-nominations-py)
+- `run`: [`lib/pdf/checks/same_code.py`](#lib-pdf-checks-same-code-py)
+- `run`: [`lib/pdf/checks/text_alignment.py`](#lib-pdf-checks-text-alignment-py)
+- `run`: [`lib/pdf/checks/wordgap.py`](#lib-pdf-checks-wordgap-py)
 - `run_content_check_batch`: [`lib/check_content.py`](#lib-check-content-py)
 - `run_parallel_batch`: [`lib/batch.py`](#lib-batch-py)
 - `run_pipeline`: [`lib/pdf/pipeline.py`](#lib-pdf-pipeline-py)
 - `run_qa_batch`: [`lib/pdf/qa.py`](#lib-pdf-qa-py)
+- `run_region_checks`: [`lib/pdf/checks/registry.py`](#lib-pdf-checks-registry-py)
+- `run_scan`: [`lib/pdf/scan.py`](#lib-pdf-scan-py)
 - `run_scope`: [`lib/pdf/runctx.py`](#lib-pdf-runctx-py)
 - `RunContext`: [`lib/pdf/runctx.py`](#lib-pdf-runctx-py)
 - `RUNNING_FOOTER_MAX_WORDS`: [`lib/pdf/types.py`](#lib-pdf-types-py)
@@ -6128,6 +6962,7 @@ class MarkdownWriter:
 - `SectionKind`: [`lib/pdf/types.py`](#lib-pdf-types-py)
 - `select_tables`: [`lib/pdf/select.py`](#lib-pdf-select-py)
 - `sequence_order`: [`lib/pdf/checks/plausible.py`](#lib-pdf-checks-plausible-py)
+- `shape`: [`lib/pdf/checks/coherence.py`](#lib-pdf-checks-coherence-py)
 - `should_emit_marker`: [`lib/pdf/vector_images.py`](#lib-pdf-vector-images-py)
 - `SHOWN_FROM`: [`lib/pdf/levels.py`](#lib-pdf-levels-py)
 - `similar`: [`lib/similarity.py`](#lib-similarity-py)
@@ -6135,6 +6970,7 @@ class MarkdownWriter:
 - `SkipReason`: [`domain/document.py`](#domain-document-py)
 - `SkipReason`: [`lib/pdf/types.py`](#lib-pdf-types-py)
 - `source_dir`: [`lib/golden_qa.py`](#lib-golden-qa-py)
+- `SOURCE_INFO`: [`lib/pdf/checks/nominations.py`](#lib-pdf-checks-nominations-py)
 - `SOURCES`: [`lib/pdf/classify.py`](#lib-pdf-classify-py)
 - `Span`: [`domain/span.py`](#domain-span-py)
 - `Span`: [`lib/pdf/types.py`](#lib-pdf-types-py)
@@ -6172,9 +7008,11 @@ class MarkdownWriter:
 - `switch_reader`: [`lib/pdf/validate.py`](#lib-pdf-validate-py)
 - `Table`: [`domain/table.py`](#domain-table-py)
 - `TABLE_CLOSE`: [`lib/tables.py`](#lib-tables-py)
+- `table_coherence`: [`lib/pdf/checks/coherence.py`](#lib-pdf-checks-coherence-py)
 - `table_flags`: [`lib/pdf/select.py`](#lib-pdf-select-py)
 - `TABLE_OPEN`: [`lib/tables.py`](#lib-tables-py)
 - `TABLE_TREE`: [`lib/pdf/classify_trees.py`](#lib-pdf-classify-trees-py)
+- `table_use`: [`lib/pdf/emit.py`](#lib-pdf-emit-py)
 - `TableCandidate`: [`lib/pdf/types.py`](#lib-pdf-types-py)
 - `TableKind`: [`lib/pdf/table.py`](#lib-pdf-table-py)
 - `TableRow`: [`domain/table.py`](#domain-table-py)
@@ -6182,6 +7020,7 @@ class MarkdownWriter:
 - `TableStrategy`: [`lib/pdf/table.py`](#lib-pdf-table-py)
 - `TERMINAL_PUNCTUATION`: [`lib/pdf/types.py`](#lib-pdf-types-py)
 - `text_cell`: [`lib/tables.py`](#lib-tables-py)
+- `text_regions`: [`lib/pdf/flag.py`](#lib-pdf-flag-py)
 - `text_rows`: [`lib/pdf/classify.py`](#lib-pdf-classify-py)
 - `TextCell`: [`domain/table.py`](#domain-table-py)
 - `TextSpan`: [`domain/span.py`](#domain-span-py)
@@ -6203,6 +7042,7 @@ class MarkdownWriter:
 - `verify_pieces`: [`lib/pdf/validate.py`](#lib-pdf-validate-py)
 - `Violation`: [`lib/pdf/relations.py`](#lib-pdf-relations-py)
 - `visual_lines`: [`lib/pdf/content.py`](#lib-pdf-content-py)
+- `visual_lines`: [`lib/pdf/docmeasure.py`](#lib-pdf-docmeasure-py)
 - `vote_header`: [`lib/pdf/select.py`](#lib-pdf-select-py)
 - `VOTE_LABELS`: [`lib/pdf/select.py`](#lib-pdf-select-py)
 - `weak_note`: [`lib/pdf/dimensions.py`](#lib-pdf-dimensions-py)

@@ -1581,3 +1581,41 @@ def _table_prompt(sections: list[Section], idx: int) -> str:
     if ctx_after:
         parts += ["", "Context (following confident section):", f"> {ctx_after}"]
     return "\n".join(parts)
+
+
+_LABEL_CELL = re.compile(r"^[A-Za-z][\w ./()-]{0,40}:$")
+_PAGE_CELL = re.compile(r"^\d{1,4}$")
+_SECTION_LEAD = re.compile(r"^\s*(\d+(\.\d+)*\.?|[A-Z](\.\d+)*\.?|n\.m(\.\d+)*|\?\?(\.\?+)*)\s+\S")
+_STABLE_NAME = re.compile(r"^\s*\[[a-z][\w.:-]*\]\s*$")
+
+
+def table_use(rows) -> str:
+    """What a grid is used for (conventions decided by a person, 2026-10-19):
+    "label-value" - repeated per-item "label: value" entries (not a table);
+    "contents" - a contents page or reference list laid out in a grid (not a table);
+    "heading" - a numbered heading of the standard's wording and its stable name;
+    "table" - everything else."""
+    texts = [[" ".join(s.text for s in c if s.text != "\n").strip() for c in r] for r in rows]
+    if not texts:
+        return "table"
+    ncol = max(len(r) for r in texts)
+    labels = [r[0] for r in texts if r and r[0]]
+    if ncol == 2 and labels and sum(bool(_LABEL_CELL.match(t)) for t in labels) >= 0.6 * len(texts):
+        return "label-value"
+    last = [r[-1] for r in texts if r and r[-1]]
+    nums = [int(t) for t in last if _PAGE_CELL.match(t)]
+    if ncol <= 3 and len(nums) >= 3 and len(nums) >= 0.7 * len(texts) and nums == sorted(nums):
+        return "contents"
+    # the standard's own contents style: a section number and title, then its stable name
+    # ("13.10 Function template specializations | [temp.fct.spec]"), with no page numbers
+    if (ncol <= 3 and len(texts) >= 3
+            and sum(1 for r in texts if r and _SECTION_LEAD.match(r[0]) and _STABLE_NAME.search(r[-1] or ""))
+            >= 0.7 * len(texts)):
+        return "contents"
+    # a heading of the standard's wording read as a row: "7.2 Properties of expressions",
+    # its stable name "[expr.prop]" set at the right margin
+    if (len(texts) <= 2 and ncol <= 3
+            and all(r and _SECTION_LEAD.match(r[0]) and _STABLE_NAME.search(r[-1] or "")
+                    and all(not c for c in r[1:-1]) for r in texts)):
+        return "heading"
+    return "table"

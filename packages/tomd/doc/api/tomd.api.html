@@ -13,8 +13,8 @@ pre{font:12.5px/1.5 ui-monospace,SFMono-Regular,Menlo,monospace;white-space:pre-
 a.t{color:inherit;text-decoration:underline dotted}a.ln{color:var(--mut);font-size:11px;text-decoration:none;margin-left:6px}
 @media(max-width:800px){nav{position:static;width:auto;border:0}main{margin-left:0}}
 </style></head><body>
-<nav><b>tomd API surface</b><a class="m" href="#init-py">__init__.py</a><a class="m" href="#api-py">api.py</a><a class="i" href="#api.ConvertedPaper">class ConvertedPaper</a><a class="i" href="#api.convert_paper">convert_paper</a><a class="i" href="#api.convert_paper_full">convert_paper_full</a><a class="m" href="#cli-py">cli.py</a><a class="i" href="#cli.main">main</a><a class="m" href="#domain-init-py">domain/__init__.py</a><a class="m" href="#domain-document-py">domain/document.py</a><a class="i" href="#domain.document.ConvertedPaper">class ConvertedPaper</a><a class="i" href="#domain.document.PaperDocument">class PaperDocument</a><a class="i" href="#domain.document.SkipReason">class SkipReason</a><a class="m" href="#domain-elements-py">domain/elements.py</a><a class="i" href="#domain.elements.BlockElement">class BlockElement</a><a class="i" href="#domain.elements.Blockquote">class Blockquote</a><a class="i" href="#domain.elements.CodeBlock">class CodeBlock</a><a class="i" href="#domain.elements.ElementKind">class ElementKind</a><a class="i" href="#domain.elements.Heading">class Heading</a><a class="i" href="#domain.elements.ImageElement">class ImageElement</a><a class="i" href="#domain.elements.ListBlock">class ListBlock</a><a class="i" href="#domain.elements.ListItem">class ListItem</a><a class="i" href="#domain.elements.Paragraph">class Paragraph</a><a class="i" href="#domain.elements.ThematicBreak">class ThematicBreak</a><a class="i" href="#domain.elements.UncertainElement">class UncertainElement</a><a class="i" href="#domain.elements.WordingBlock">class WordingBlock</a><a class="m" href="#domain-image-py">domain/image.py</a><a class="i" href="#domain.image.ExtractedImage">class ExtractedImage</a><a class="m" href="#domain-metadata-py">domain/metadata.py</a><a class="i" href="#domain.metadata.PaperMetadata">class PaperMetadata</a><a class="m" href="#domain-span-py">domain/span.py</a><a class="i" href="#domain.span.CodeSpan">class CodeSpan</a><a class="i" href="#domain.span.ContainerSpan">class ContainerSpan</a><a class="i" href="#domain.span.DeletedSpan">class DeletedSpan</a><a class="i" href="#domain.span.EmphasisSpan">class EmphasisSpan</a><a class="i" href="#domain.span.InsertedSpan">class InsertedSpan</a><a class="i" href="#domain.span.LineBreakSpan">class LineBreakSpan</a><a class="i" href="#domain.span.LinkSpan">class LinkSpan</a><a class="i" href="#domain.span.Span">class Span</a><a class="i" href="#domain.span.StrongSpan">class StrongSpan</a><a class="i" href="#domain.span.SubscriptSpan">class SubscriptSpan</a><a class="i" href="#domain.span.SuperscriptSpan">class SuperscriptSpan</a><a class="i" href="#domain.span.TextSpan">class TextSpan</a><a class="m" href="#domain-table-py">domain/table.py</a><a class="i" href="#domain.table.Cell">class Cell</a><a class="i" href="#domain.table.CellAlign">class CellAlign</a><a class="i" href="#domain.table.CodeCell">class CodeCell</a><a class="i" href="#domain.table.Table">class Table</a><a class="i" href="#domain.table.TableRow">class TableRow</a><a class="i" href="#domain.table.TableStrategy">class TableStrategy</a><a class="i" href="#domain.table.TextCell">class TextCell</a><a class="m" href="#errors-py">errors.py</a><a class="i" href="#errors.CheckContentArgError">class CheckContentArgError</a><a class="i" href="#errors.TomdError">class TomdError</a><a class="i" href="#errors.UnsupportedSourceFormatError">class UnsupportedSourceFormatError</a><a class="m" href="#lib-init-py">lib/__init__.py</a><a class="m" href="#lib-batch-py">lib/batch.py</a><a class="i" href="#lib.batch.BatchRunResult">class BatchRunResult</a><a class="i" href="#lib.batch.format_batch_finished">format_batch_finished</a><a class="i" href="#lib.batch.format_batch_progress_line">format_batch_progress_line</a><a class="i" href="#lib.batch.format_batch_timeout">format_batch_timeout</a><a class="i" href="#lib.batch.run_parallel_batch">run_parallel_batch</a><a class="m" href="#lib-body-init-py">lib/body/__init__.py</a><a class="m" href="#lib-body-abstract-py">lib/body/abstract.py</a><a class="i" href="#lib.body.abstract.dedup_abstract">dedup_abstract</a><a class="i" href="#lib.body.abstract.promote_abstract_from_uncertain">promote_abstract_from_uncertain</a><a class="i" href="#lib.body.abstract.reorder_abstract_in_uncertain">reorder_abstract_in_uncertain</a><a class="i" href="#lib.body.abstract.rescue_stranded_abstract_body">rescue_stranded_abstract_body</a><a class="i" href="#lib.body.abstract.strip_metadata_from_uncertain">strip_metadata_from_uncertain</a><a class="m" href="#lib-check-content-py">lib/check_content.py</a><a class="i" href="#lib.check_content.ContentCheckBatchResult">class ContentCheckBatchResult</a><a class="i" href="#lib.check_content.ContentCheckResult">class ContentCheckResult</a><a class="i" href="#lib.check_content.MisalignedRegion">class MisalignedRegion</a><a class="i" href="#lib.check_content.check_paper_content">check_paper_content</a><a class="i" href="#lib.check_content.compute_content_coverage">compute_content_coverage</a><a class="i" href="#lib.check_content.format_content_check_report">format_content_check_report</a><a class="i" href="#lib.check_content.run_content_check_batch">run_content_check_batch</a><a class="i" href="#lib.check_content.write_content_check_json_atomic">write_content_check_json_atomic</a><a class="m" href="#lib-golden-compare-py">lib/golden_compare.py</a><a class="i" href="#lib.golden_compare.AxisScore">class AxisScore</a><a class="i" href="#lib.golden_compare.Block">class Block</a><a class="i" href="#lib.golden_compare.ListEntry">class ListEntry</a><a class="i" href="#lib.golden_compare.NormalizedDoc">class NormalizedDoc</a><a class="i" href="#lib.golden_compare.StructuralScore">class StructuralScore</a><a class="i" href="#lib.golden_compare.compare">compare</a><a class="i" href="#lib.golden_compare.normalize">normalize</a><a class="m" href="#lib-golden-gaps-py">lib/golden_gaps.py</a><a class="i" href="#lib.golden_gaps.Gap">class Gap</a><a class="i" href="#lib.golden_gaps.draft_issues">draft_issues</a><a class="i" href="#lib.golden_gaps.locate_gaps">locate_gaps</a><a class="m" href="#lib-golden-qa-py">lib/golden_qa.py</a><a class="i" href="#lib.golden_qa.AxisReport">class AxisReport</a><a class="i" href="#lib.golden_qa.FidelityVerdict">class FidelityVerdict</a><a class="i" href="#lib.golden_qa.ReblessOutcome">class ReblessOutcome</a><a class="i" href="#lib.golden_qa.ScoreResult">class ScoreResult</a><a class="i" href="#lib.golden_qa.anchors_path">anchors_path</a><a class="i" href="#lib.golden_qa.bless_stem">bless_stem</a><a class="i" href="#lib.golden_qa.build_review_prompt">build_review_prompt</a><a class="i" href="#lib.golden_qa.download_source">download_source</a><a class="i" href="#lib.golden_qa.facts_path">facts_path</a><a class="i" href="#lib.golden_qa.fidelity_verdict">fidelity_verdict</a><a class="i" href="#lib.golden_qa.find_source">find_source</a><a class="i" href="#lib.golden_qa.generate_ideal">generate_ideal</a><a class="i" href="#lib.golden_qa.ideal_path">ideal_path</a><a class="i" href="#lib.golden_qa.is_unedited_seed">is_unedited_seed</a><a class="i" href="#lib.golden_qa.issue_for_stem">issue_for_stem</a><a class="i" href="#lib.golden_qa.rebless_stems">rebless_stems</a><a class="i" href="#lib.golden_qa.render_pdf_pages">render_pdf_pages</a><a class="i" href="#lib.golden_qa.review_ideal">review_ideal</a><a class="i" href="#lib.golden_qa.review_skill_text">review_skill_text</a><a class="i" href="#lib.golden_qa.score_report">score_report</a><a class="i" href="#lib.golden_qa.score_result">score_result</a><a class="i" href="#lib.golden_qa.score_stem">score_stem</a><a class="i" href="#lib.golden_qa.source_dir">source_dir</a><a class="i" href="#lib.golden_qa.stage_source">stage_source</a><a class="i" href="#lib.golden_qa.tomd_markdown">tomd_markdown</a><a class="i" href="#lib.golden_qa.validate_anchors_json">validate_anchors_json</a><a class="i" href="#lib.golden_qa.validate_facts_jsonl">validate_facts_jsonl</a><a class="m" href="#lib-html-init-py">lib/html/__init__.py</a><a class="m" href="#lib-html-convert-py">lib/html/convert.py</a><a class="i" href="#lib.html.convert.convert_html">convert_html</a><a class="m" href="#lib-html-extract-py">lib/html/extract.py</a><a class="i" href="#lib.html.extract.detect_generator">detect_generator</a><a class="i" href="#lib.html.extract.extract_metadata">extract_metadata</a><a class="i" href="#lib.html.extract.parse_html">parse_html</a><a class="i" href="#lib.html.extract.strip_boilerplate">strip_boilerplate</a><a class="m" href="#lib-html-images-py">lib/html/images.py</a><a class="i" href="#lib.html.images.HtmlImagesResult">class HtmlImagesResult</a><a class="i" href="#lib.html.images.load_html_images">load_html_images</a><a class="m" href="#lib-html-render-py">lib/html/render.py</a><a class="i" href="#lib.html.render.render_body">render_body</a><a class="m" href="#lib-metadata-yaml-init-py">lib/metadata_yaml/__init__.py</a><a class="m" href="#lib-metadata-yaml-extract-py">lib/metadata_yaml/extract.py</a><a class="i" href="#lib.metadata_yaml.extract.apply_pdf_metadata_fallbacks">apply_pdf_metadata_fallbacks</a><a class="i" href="#lib.metadata_yaml.extract.enrich_pdf_reply_to">enrich_pdf_reply_to</a><a class="i" href="#lib.metadata_yaml.extract.extract_metadata">extract_metadata</a><a class="m" href="#lib-metadata-yaml-format-py">lib/metadata_yaml/format.py</a><a class="i" href="#lib.metadata_yaml.format.format_front_matter">format_front_matter</a><a class="i" href="#lib.metadata_yaml.format.parse_front_matter">parse_front_matter</a><a class="i" href="#lib.metadata_yaml.format.sanitize_metadata">sanitize_metadata</a><a class="i" href="#lib.metadata_yaml.format.strip_front_matter">strip_front_matter</a><a class="m" href="#lib-metadata-yaml-strip-py">lib/metadata_yaml/strip.py</a><a class="i" href="#lib.metadata_yaml.strip.strip_metadata_headings">strip_metadata_headings</a><a class="i" href="#lib.metadata_yaml.strip.strip_pre_content_paragraphs">strip_pre_content_paragraphs</a><a class="i" href="#lib.metadata_yaml.strip.strip_pre_heading_fragments">strip_pre_heading_fragments</a><a class="m" href="#lib-pdf-init-py">lib/pdf/__init__.py</a><a class="m" href="#lib-pdf-fitz-lock-py">lib/pdf/_fitz_lock.py</a><a class="m" href="#lib-pdf-checks-init-py">lib/pdf/checks/__init__.py</a><a class="m" href="#lib-pdf-checks-plausible-py">lib/pdf/checks/plausible.py</a><a class="i" href="#lib.pdf.checks.plausible.column_type">column_type</a><a class="i" href="#lib.pdf.checks.plausible.duplication">duplication</a><a class="i" href="#lib.pdf.checks.plausible.plausibility">plausibility</a><a class="i" href="#lib.pdf.checks.plausible.poll_counts">poll_counts</a><a class="i" href="#lib.pdf.checks.plausible.sequence_order">sequence_order</a><a class="m" href="#lib-pdf-classify-py">lib/pdf/classify.py</a><a class="i" href="#lib.pdf.classify.gate_tables">gate_tables</a><a class="i" href="#lib.pdf.classify.image_share">image_share</a><a class="i" href="#lib.pdf.classify.predict">predict</a><a class="i" href="#lib.pdf.classify.region_features">region_features</a><a class="i" href="#lib.pdf.classify.text_rows">text_rows</a><a class="m" href="#lib-pdf-classify-trees-py">lib/pdf/classify_trees.py</a><a class="m" href="#lib-pdf-cleanup-py">lib/pdf/cleanup.py</a><a class="i" href="#lib.pdf.cleanup.DehyphenatedPair">class DehyphenatedPair</a><a class="i" href="#lib.pdf.cleanup.HyphenEvidence">class HyphenEvidence</a><a class="i" href="#lib.pdf.cleanup.cleanup_text">cleanup_text</a><a class="i" href="#lib.pdf.cleanup.collect_hyphen_evidence">collect_hyphen_evidence</a><a class="i" href="#lib.pdf.cleanup.dehyphenate_pair">dehyphenate_pair</a><a class="i" href="#lib.pdf.cleanup.detect_repeating">detect_repeating</a><a class="i" href="#lib.pdf.cleanup.escape_leading_atx">escape_leading_atx</a><a class="i" href="#lib.pdf.cleanup.find_hidden_regions">find_hidden_regions</a><a class="i" href="#lib.pdf.cleanup.get_edge_items">get_edge_items</a><a class="i" href="#lib.pdf.cleanup.normalize_whitespace">normalize_whitespace</a><a class="i" href="#lib.pdf.cleanup.strip_hidden_blocks">strip_hidden_blocks</a><a class="i" href="#lib.pdf.cleanup.strip_repeating">strip_repeating</a><a class="m" href="#lib-pdf-code-format-py">lib/pdf/code_format.py</a><a class="i" href="#lib.pdf.code_format.is_diagram_block">is_diagram_block</a><a class="i" href="#lib.pdf.code_format.maybe_normalize_code_line">maybe_normalize_code_line</a><a class="i" href="#lib.pdf.code_format.normalize_code_line">normalize_code_line</a><a class="m" href="#lib-pdf-code-grid-py">lib/pdf/code_grid.py</a><a class="i" href="#lib.pdf.code_grid.CodeGrid">class CodeGrid</a><a class="m" href="#lib-pdf-codepair-py">lib/pdf/codepair.py</a><a class="i" href="#lib.pdf.codepair.find_code_pairs">find_code_pairs</a><a class="i" href="#lib.pdf.codepair.same_code">same_code</a><a class="m" href="#lib-pdf-content-py">lib/pdf/content.py</a><a class="i" href="#lib.pdf.content.build">build</a><a class="i" href="#lib.pdf.content.build_text">build_text</a><a class="i" href="#lib.pdf.content.content_candidates">content_candidates</a><a class="i" href="#lib.pdf.content.gutters">gutters</a><a class="i" href="#lib.pdf.content.page_hrules">page_hrules</a><a class="i" href="#lib.pdf.content.page_text">page_text</a><a class="i" href="#lib.pdf.content.page_words">page_words</a><a class="i" href="#lib.pdf.content.pieces_of">pieces_of</a><a class="i" href="#lib.pdf.content.visual_lines">visual_lines</a><a class="m" href="#lib-pdf-dimensions-py">lib/pdf/dimensions.py</a><a class="i" href="#lib.pdf.dimensions.dimensions">dimensions</a><a class="i" href="#lib.pdf.dimensions.weak_note">weak_note</a><a class="m" href="#lib-pdf-docling-backend-py">lib/pdf/docling_backend.py</a><a class="i" href="#lib.pdf.docling_backend.absorb_cross_page_spec_rows">absorb_cross_page_spec_rows</a><a class="i" href="#lib.pdf.docling_backend.discover_tables_with_docling">discover_tables_with_docling</a><a class="i" href="#lib.pdf.docling_backend.docling_available">docling_available</a><a class="i" href="#lib.pdf.docling_backend.enrich_tables_with_docling">enrich_tables_with_docling</a><a class="i" href="#lib.pdf.docling_backend.extract_docling_tables">extract_docling_tables</a><a class="m" href="#lib-pdf-emit-py">lib/pdf/emit.py</a><a class="i" href="#lib.pdf.emit.emit_markdown">emit_markdown</a><a class="i" href="#lib.pdf.emit.emit_prompts">emit_prompts</a><a class="i" href="#lib.pdf.emit.is_code_comparison">is_code_comparison</a><a class="i" href="#lib.pdf.emit.is_flagged_table">is_flagged_table</a><a class="i" href="#lib.pdf.emit.renumber_uncertain_markers">renumber_uncertain_markers</a><a class="m" href="#lib-pdf-emoji-data-py">lib/pdf/emoji_data.py</a><a class="m" href="#lib-pdf-evidence-py">lib/pdf/evidence.py</a><a class="i" href="#lib.pdf.evidence.Entry">class Entry</a><a class="i" href="#lib.pdf.evidence.Record">class Record</a><a class="m" href="#lib-pdf-extract-py">lib/pdf/extract.py</a><a class="i" href="#lib.pdf.extract.attach_links">attach_links</a><a class="i" href="#lib.pdf.extract.collect_links">collect_links</a><a class="i" href="#lib.pdf.extract.extract_mupdf">extract_mupdf</a><a class="i" href="#lib.pdf.extract.extract_spatial">extract_spatial</a><a class="m" href="#lib-pdf-figures-py">lib/pdf/figures.py</a><a class="i" href="#lib.pdf.figures.detect_figure_regions">detect_figure_regions</a><a class="m" href="#lib-pdf-fit-py">lib/pdf/fit.py</a><a class="i" href="#lib.pdf.fit.fit">fit</a><a class="i" href="#lib.pdf.fit.fit_rows">fit_rows</a><a class="i" href="#lib.pdf.fit.grid_of">grid_of</a><a class="m" href="#lib-pdf-fullwidth-py">lib/pdf/fullwidth.py</a><a class="i" href="#lib.pdf.fullwidth.apply">apply</a><a class="i" href="#lib.pdf.fullwidth.full_width_rows">full_width_rows</a><a class="m" href="#lib-pdf-glyphs-py">lib/pdf/glyphs.py</a><a class="i" href="#lib.pdf.glyphs.GlyphCandidate">class GlyphCandidate</a><a class="i" href="#lib.pdf.glyphs.GlyphPassStats">class GlyphPassStats</a><a class="i" href="#lib.pdf.glyphs.collect_glyph_candidates">collect_glyph_candidates</a><a class="i" href="#lib.pdf.glyphs.collect_text_emoji_bboxes">collect_text_emoji_bboxes</a><a class="i" href="#lib.pdf.glyphs.drop_glyphs_in_code_and_tables">drop_glyphs_in_code_and_tables</a><a class="i" href="#lib.pdf.glyphs.filter_coincident">filter_coincident</a><a class="i" href="#lib.pdf.glyphs.glyph_to_char">glyph_to_char</a><a class="i" href="#lib.pdf.glyphs.inject_glyph_spans">inject_glyph_spans</a><a class="i" href="#lib.pdf.glyphs.is_glyph_only_block">is_glyph_only_block</a><a class="m" href="#lib-pdf-images-py">lib/pdf/images.py</a><a class="i" href="#lib.pdf.images.ExtractedImage">class ExtractedImage</a><a class="i" href="#lib.pdf.images.ExtractionResult">class ExtractionResult</a><a class="i" href="#lib.pdf.images.VectorUncertaintyStats">class VectorUncertaintyStats</a><a class="i" href="#lib.pdf.images.extract_page_images">extract_page_images</a><a class="i" href="#lib.pdf.images.finalize_extraction">finalize_extraction</a><a class="m" href="#lib-pdf-levels-py">lib/pdf/levels.py</a><a class="i" href="#lib.pdf.levels.assign">assign</a><a class="i" href="#lib.pdf.levels.cell_markers">cell_markers</a><a class="i" href="#lib.pdf.levels.comment">comment</a><a class="m" href="#lib-pdf-mono-py">lib/pdf/mono.py</a><a class="i" href="#lib.pdf.mono.classify_monospace">classify_monospace</a><a class="i" href="#lib.pdf.mono.propagate_monospace">propagate_monospace</a><a class="m" href="#lib-pdf-pagecache-py">lib/pdf/pagecache.py</a><a class="i" href="#lib.pdf.pagecache.rawdict">rawdict</a><a class="i" href="#lib.pdf.pagecache.words_in">words_in</a><a class="m" href="#lib-pdf-pipeline-py">lib/pdf/pipeline.py</a><a class="i" href="#lib.pdf.pipeline.PipelineResult">class PipelineResult</a><a class="i" href="#lib.pdf.pipeline.run_pipeline">run_pipeline</a><a class="m" href="#lib-pdf-poll-py">lib/pdf/poll.py</a><a class="i" href="#lib.pdf.poll.extract_poll_tables">extract_poll_tables</a><a class="m" href="#lib-pdf-qa-py">lib/pdf/qa.py</a><a class="i" href="#lib.pdf.qa.QABatchResult">class QABatchResult</a><a class="i" href="#lib.pdf.qa.QAMetrics">class QAMetrics</a><a class="i" href="#lib.pdf.qa.compute_metrics">compute_metrics</a><a class="i" href="#lib.pdf.qa.format_qa_report">format_qa_report</a><a class="i" href="#lib.pdf.qa.run_qa_batch">run_qa_batch</a><a class="i" href="#lib.pdf.qa.write_qa_json_atomic">write_qa_json_atomic</a><a class="m" href="#lib-pdf-relations-py">lib/pdf/relations.py</a><a class="i" href="#lib.pdf.relations.RelationRecord">class RelationRecord</a><a class="i" href="#lib.pdf.relations.Violation">class Violation</a><a class="i" href="#lib.pdf.relations.check">check</a><a class="i" href="#lib.pdf.relations.record_for">record_for</a><a class="m" href="#lib-pdf-rowbands-py">lib/pdf/rowbands.py</a><a class="i" href="#lib.pdf.rowbands.merge_rule_bands">merge_rule_bands</a><a class="m" href="#lib-pdf-ruled-py">lib/pdf/ruled.py</a><a class="i" href="#lib.pdf.ruled.drawn_spans">drawn_spans</a><a class="i" href="#lib.pdf.ruled.extract_ruled_tables">extract_ruled_tables</a><a class="i" href="#lib.pdf.ruled.page_hrules">page_hrules</a><a class="m" href="#lib-pdf-runctx-py">lib/pdf/runctx.py</a><a class="i" href="#lib.pdf.runctx.RunContext">class RunContext</a><a class="i" href="#lib.pdf.runctx.current">current</a><a class="i" href="#lib.pdf.runctx.run_scope">run_scope</a><a class="m" href="#lib-pdf-select-py">lib/pdf/select.py</a><a class="i" href="#lib.pdf.select.candidate_from_section">candidate_from_section</a><a class="i" href="#lib.pdf.select.candidates_agree">candidates_agree</a><a class="i" href="#lib.pdf.select.class_check">class_check</a><a class="i" href="#lib.pdf.select.closed_exempt">closed_exempt</a><a class="i" href="#lib.pdf.select.conservation_error">conservation_error</a><a class="i" href="#lib.pdf.select.cross_reader_continuation">cross_reader_continuation</a><a class="i" href="#lib.pdf.select.join_split_words">join_split_words</a><a class="i" href="#lib.pdf.select.mark_matrix">mark_matrix</a><a class="i" href="#lib.pdf.select.page_furniture">page_furniture</a><a class="i" href="#lib.pdf.select.partial_reading">partial_reading</a><a class="i" href="#lib.pdf.select.remove_table_regions">remove_table_regions</a><a class="i" href="#lib.pdf.select.select_tables">select_tables</a><a class="i" href="#lib.pdf.select.sparse_mapping">sparse_mapping</a><a class="i" href="#lib.pdf.select.split_at_headers">split_at_headers</a><a class="i" href="#lib.pdf.select.stitch_pages">stitch_pages</a><a class="i" href="#lib.pdf.select.table_flags">table_flags</a><a class="i" href="#lib.pdf.select.vote_header">vote_header</a><a class="i" href="#lib.pdf.select.witness">witness</a><a class="m" href="#lib-pdf-spans-py">lib/pdf/spans.py</a><a class="i" href="#lib.pdf.spans.normalize_spans">normalize_spans</a><a class="m" href="#lib-pdf-stacked-py">lib/pdf/stacked.py</a><a class="i" href="#lib.pdf.stacked.split_stacked">split_stacked</a><a class="m" href="#lib-pdf-structure-py">lib/pdf/structure.py</a><a class="i" href="#lib.pdf.structure.compare_extractions">compare_extractions</a><a class="i" href="#lib.pdf.structure.drop_leaked_toc_entries">drop_leaked_toc_entries</a><a class="i" href="#lib.pdf.structure.heading_confidence">heading_confidence</a><a class="i" href="#lib.pdf.structure.structure_body">structure_body</a><a class="i" href="#lib.pdf.structure.structure_sections">structure_sections</a><a class="m" href="#lib-pdf-summary-py">lib/pdf/summary.py</a><a class="i" href="#lib.pdf.summary.build">build</a><a class="i" href="#lib.pdf.summary.generator">generator</a><a class="i" href="#lib.pdf.summary.header_comment">header_comment</a><a class="i" href="#lib.pdf.summary.prompt_elements">prompt_elements</a><a class="i" href="#lib.pdf.summary.unfamiliarity">unfamiliarity</a><a class="m" href="#lib-pdf-table-py">lib/pdf/table.py</a><a class="i" href="#lib.pdf.table.TableKind">class TableKind</a><a class="i" href="#lib.pdf.table.TableStrategy">class TableStrategy</a><a class="i" href="#lib.pdf.table.detect_tables">detect_tables</a><a class="i" href="#lib.pdf.table.exclude_table_regions">exclude_table_regions</a><a class="m" href="#lib-pdf-tagged-py">lib/pdf/tagged.py</a><a class="i" href="#lib.pdf.tagged.extract_tagged_tables">extract_tagged_tables</a><a class="m" href="#lib-pdf-types-py">lib/pdf/types.py</a><a class="i" href="#lib.pdf.types.Block">class Block</a><a class="i" href="#lib.pdf.types.Confidence">class Confidence</a><a class="i" href="#lib.pdf.types.FigureEdge">class FigureEdge</a><a class="i" href="#lib.pdf.types.FigureGraph">class FigureGraph</a><a class="i" href="#lib.pdf.types.FigureNode">class FigureNode</a><a class="i" href="#lib.pdf.types.FigureRegion">class FigureRegion</a><a class="i" href="#lib.pdf.types.Line">class Line</a><a class="i" href="#lib.pdf.types.PageEdgeItem">class PageEdgeItem</a><a class="i" href="#lib.pdf.types.Section">class Section</a><a class="i" href="#lib.pdf.types.SectionKind">class SectionKind</a><a class="i" href="#lib.pdf.types.SkipReason">class SkipReason</a><a class="i" href="#lib.pdf.types.Span">class Span</a><a class="i" href="#lib.pdf.types.TableCandidate">class TableCandidate</a><a class="i" href="#lib.pdf.types.compute_bbox">compute_bbox</a><a class="i" href="#lib.pdf.types.is_readable">is_readable</a><a class="m" href="#lib-pdf-validate-py">lib/pdf/validate.py</a><a class="i" href="#lib.pdf.validate.add_header_above">add_header_above</a><a class="i" href="#lib.pdf.validate.cell_text">cell_text</a><a class="i" href="#lib.pdf.validate.escalate">escalate</a><a class="i" href="#lib.pdf.validate.resegment_rows">resegment_rows</a><a class="i" href="#lib.pdf.validate.split_hidden_column">split_hidden_column</a><a class="i" href="#lib.pdf.validate.split_stacked_rows">split_stacked_rows</a><a class="i" href="#lib.pdf.validate.switch_reader">switch_reader</a><a class="i" href="#lib.pdf.validate.verify_layout">verify_layout</a><a class="i" href="#lib.pdf.validate.verify_pieces">verify_pieces</a><a class="m" href="#lib-pdf-vector-images-py">lib/pdf/vector_images.py</a><a class="i" href="#lib.pdf.vector_images.extract_page_vector_images">extract_page_vector_images</a><a class="i" href="#lib.pdf.vector_images.format_uncertainty_marker">format_uncertainty_marker</a><a class="i" href="#lib.pdf.vector_images.should_emit_marker">should_emit_marker</a><a class="m" href="#lib-pdf-wg21-py">lib/pdf/wg21.py</a><a class="i" href="#lib.pdf.wg21.extract_metadata_from_blocks">extract_metadata_from_blocks</a><a class="m" href="#lib-pdf-wording-py">lib/pdf/wording.py</a><a class="i" href="#lib.pdf.wording.classify_wording">classify_wording</a><a class="i" href="#lib.pdf.wording.collect_line_drawings">collect_line_drawings</a><a class="i" href="#lib.pdf.wording.is_foreign_chromatic">is_foreign_chromatic</a><a class="i" href="#lib.pdf.wording.is_green_ins">is_green_ins</a><a class="i" href="#lib.pdf.wording.is_red_del">is_red_del</a><a class="i" href="#lib.pdf.wording.is_wording_rgb">is_wording_rgb</a><a class="m" href="#lib-pdf-wording-emit-py">lib/pdf/wording_emit.py</a><a class="m" href="#lib-shared-py">lib/shared.py</a><a class="i" href="#lib.shared.apply_strip_leading_h1">apply_strip_leading_h1</a><a class="i" href="#lib.shared.ascii_escape">ascii_escape</a><a class="i" href="#lib.shared.dedup_paragraphs">dedup_paragraphs</a><a class="i" href="#lib.shared.deobfuscate_email">deobfuscate_email</a><a class="i" href="#lib.shared.enrich_reply_to_names">enrich_reply_to_names</a><a class="i" href="#lib.shared.normalize_date">normalize_date</a><a class="i" href="#lib.shared.override_revision_from_filename">override_revision_from_filename</a><a class="i" href="#lib.shared.parse_author_lines">parse_author_lines</a><a class="i" href="#lib.shared.strip_format_chars">strip_format_chars</a><a class="i" href="#lib.shared.strip_freeform_metadata_lines">strip_freeform_metadata_lines</a><a class="i" href="#lib.shared.strip_leading_h1">strip_leading_h1</a><a class="i" href="#lib.shared.strip_orphan_toc_list">strip_orphan_toc_list</a><a class="i" href="#lib.shared.strip_redundant_body_meta">strip_redundant_body_meta</a><a class="m" href="#lib-similarity-py">lib/similarity.py</a><a class="i" href="#lib.similarity.fuzzy_match_label">fuzzy_match_label</a><a class="i" href="#lib.similarity.similar">similar</a><a class="i" href="#lib.similarity.word_jaccard">word_jaccard</a><a class="m" href="#lib-tables-py">lib/tables.py</a><a class="i" href="#lib.tables.cell_style">cell_style</a><a class="i" href="#lib.tables.code_cell">code_cell</a><a class="i" href="#lib.tables.text_cell">text_cell</a><a class="m" href="#lib-toc-py">lib/toc.py</a><a class="i" href="#lib.toc.find_toc_indices">find_toc_indices</a><a class="i" href="#lib.toc.has_dot_leader">has_dot_leader</a><a class="i" href="#lib.toc.is_toc_label">is_toc_label</a><a class="i" href="#lib.toc.normalize_toc_entry">normalize_toc_entry</a><a class="m" href="#lib-wording-cleanup-py">lib/wording_cleanup.py</a><a class="i" href="#lib.wording_cleanup.strip_redundant_tags">strip_redundant_tags</a><a class="m" href="#lib-wording-markup-py">lib/wording_markup.py</a><a class="i" href="#lib.wording_markup.wording_tag_open">wording_tag_open</a><a class="m" href="#lib-wording-policy-py">lib/wording_policy.py</a><a class="i" href="#lib.wording_policy.implicit_role_for">implicit_role_for</a><a class="m" href="#writers-init-py">writers/__init__.py</a><a class="m" href="#writers-base-py">writers/base.py</a><a class="i" href="#writers.base.DocumentWriter">class DocumentWriter</a><a class="m" href="#writers-markdown-init-py">writers/markdown/__init__.py</a><a class="m" href="#writers-markdown-blocks-py">writers/markdown/blocks.py</a><a class="i" href="#writers.markdown.blocks.strip_redundant_roles">strip_redundant_roles</a><a class="i" href="#writers.markdown.blocks.write_element">write_element</a><a class="m" href="#writers-markdown-front-matter-py">writers/markdown/front_matter.py</a><a class="i" href="#writers.markdown.front_matter.write_front_matter">write_front_matter</a><a class="m" href="#writers-markdown-normalizers-py">writers/markdown/normalizers.py</a><a class="i" href="#writers.markdown.normalizers.normalize_front_matter">normalize_front_matter</a><a class="i" href="#writers.markdown.normalizers.strip_body_metadata_text">strip_body_metadata_text</a><a class="i" href="#writers.markdown.normalizers.strip_toc">strip_toc</a><a class="m" href="#writers-markdown-spans-py">writers/markdown/spans.py</a><a class="i" href="#writers.markdown.spans.format_code_span">format_code_span</a><a class="i" href="#writers.markdown.spans.write_span">write_span</a><a class="i" href="#writers.markdown.spans.write_spans">write_spans</a><a class="m" href="#writers-markdown-tables-py">writers/markdown/tables.py</a><a class="i" href="#writers.markdown.tables.write_table">write_table</a><a class="m" href="#writers-markdown-writer-py">writers/markdown/writer.py</a><a class="i" href="#writers.markdown.writer.MarkdownWriter">class MarkdownWriter</a></nav>
-<main><h1>tomd API surface</h1><p class="sum">89 modules, 88 classes, 237 functions, 86 methods, 355 fields. Typed: 880 of 1047 functions and methods (84%). Declarations, docstrings and comments only; no function bodies.</p>
+<nav><b>tomd API surface</b><a class="m" href="#init-py">__init__.py</a><a class="m" href="#api-py">api.py</a><a class="i" href="#api.ConvertedPaper">class ConvertedPaper</a><a class="i" href="#api.convert_paper">convert_paper</a><a class="i" href="#api.convert_paper_full">convert_paper_full</a><a class="m" href="#cli-py">cli.py</a><a class="i" href="#cli.main">main</a><a class="m" href="#domain-init-py">domain/__init__.py</a><a class="m" href="#domain-document-py">domain/document.py</a><a class="i" href="#domain.document.ConvertedPaper">class ConvertedPaper</a><a class="i" href="#domain.document.PaperDocument">class PaperDocument</a><a class="i" href="#domain.document.SkipReason">class SkipReason</a><a class="m" href="#domain-elements-py">domain/elements.py</a><a class="i" href="#domain.elements.BlockElement">class BlockElement</a><a class="i" href="#domain.elements.Blockquote">class Blockquote</a><a class="i" href="#domain.elements.CodeBlock">class CodeBlock</a><a class="i" href="#domain.elements.ElementKind">class ElementKind</a><a class="i" href="#domain.elements.Heading">class Heading</a><a class="i" href="#domain.elements.ImageElement">class ImageElement</a><a class="i" href="#domain.elements.ListBlock">class ListBlock</a><a class="i" href="#domain.elements.ListItem">class ListItem</a><a class="i" href="#domain.elements.Paragraph">class Paragraph</a><a class="i" href="#domain.elements.ThematicBreak">class ThematicBreak</a><a class="i" href="#domain.elements.UncertainElement">class UncertainElement</a><a class="i" href="#domain.elements.WordingBlock">class WordingBlock</a><a class="m" href="#domain-image-py">domain/image.py</a><a class="i" href="#domain.image.ExtractedImage">class ExtractedImage</a><a class="m" href="#domain-metadata-py">domain/metadata.py</a><a class="i" href="#domain.metadata.PaperMetadata">class PaperMetadata</a><a class="m" href="#domain-span-py">domain/span.py</a><a class="i" href="#domain.span.CodeSpan">class CodeSpan</a><a class="i" href="#domain.span.ContainerSpan">class ContainerSpan</a><a class="i" href="#domain.span.DeletedSpan">class DeletedSpan</a><a class="i" href="#domain.span.EmphasisSpan">class EmphasisSpan</a><a class="i" href="#domain.span.InsertedSpan">class InsertedSpan</a><a class="i" href="#domain.span.LineBreakSpan">class LineBreakSpan</a><a class="i" href="#domain.span.LinkSpan">class LinkSpan</a><a class="i" href="#domain.span.Span">class Span</a><a class="i" href="#domain.span.StrongSpan">class StrongSpan</a><a class="i" href="#domain.span.SubscriptSpan">class SubscriptSpan</a><a class="i" href="#domain.span.SuperscriptSpan">class SuperscriptSpan</a><a class="i" href="#domain.span.TextSpan">class TextSpan</a><a class="m" href="#domain-table-py">domain/table.py</a><a class="i" href="#domain.table.Cell">class Cell</a><a class="i" href="#domain.table.CellAlign">class CellAlign</a><a class="i" href="#domain.table.CodeCell">class CodeCell</a><a class="i" href="#domain.table.Table">class Table</a><a class="i" href="#domain.table.TableRow">class TableRow</a><a class="i" href="#domain.table.TableStrategy">class TableStrategy</a><a class="i" href="#domain.table.TextCell">class TextCell</a><a class="m" href="#errors-py">errors.py</a><a class="i" href="#errors.CheckContentArgError">class CheckContentArgError</a><a class="i" href="#errors.TomdError">class TomdError</a><a class="i" href="#errors.UnsupportedSourceFormatError">class UnsupportedSourceFormatError</a><a class="m" href="#lib-init-py">lib/__init__.py</a><a class="m" href="#lib-batch-py">lib/batch.py</a><a class="i" href="#lib.batch.BatchRunResult">class BatchRunResult</a><a class="i" href="#lib.batch.format_batch_finished">format_batch_finished</a><a class="i" href="#lib.batch.format_batch_progress_line">format_batch_progress_line</a><a class="i" href="#lib.batch.format_batch_timeout">format_batch_timeout</a><a class="i" href="#lib.batch.run_parallel_batch">run_parallel_batch</a><a class="m" href="#lib-body-init-py">lib/body/__init__.py</a><a class="m" href="#lib-body-abstract-py">lib/body/abstract.py</a><a class="i" href="#lib.body.abstract.dedup_abstract">dedup_abstract</a><a class="i" href="#lib.body.abstract.promote_abstract_from_uncertain">promote_abstract_from_uncertain</a><a class="i" href="#lib.body.abstract.reorder_abstract_in_uncertain">reorder_abstract_in_uncertain</a><a class="i" href="#lib.body.abstract.rescue_stranded_abstract_body">rescue_stranded_abstract_body</a><a class="i" href="#lib.body.abstract.strip_metadata_from_uncertain">strip_metadata_from_uncertain</a><a class="m" href="#lib-check-content-py">lib/check_content.py</a><a class="i" href="#lib.check_content.ContentCheckBatchResult">class ContentCheckBatchResult</a><a class="i" href="#lib.check_content.ContentCheckResult">class ContentCheckResult</a><a class="i" href="#lib.check_content.MisalignedRegion">class MisalignedRegion</a><a class="i" href="#lib.check_content.check_paper_content">check_paper_content</a><a class="i" href="#lib.check_content.compute_content_coverage">compute_content_coverage</a><a class="i" href="#lib.check_content.format_content_check_report">format_content_check_report</a><a class="i" href="#lib.check_content.run_content_check_batch">run_content_check_batch</a><a class="i" href="#lib.check_content.write_content_check_json_atomic">write_content_check_json_atomic</a><a class="m" href="#lib-golden-compare-py">lib/golden_compare.py</a><a class="i" href="#lib.golden_compare.AxisScore">class AxisScore</a><a class="i" href="#lib.golden_compare.Block">class Block</a><a class="i" href="#lib.golden_compare.ListEntry">class ListEntry</a><a class="i" href="#lib.golden_compare.NormalizedDoc">class NormalizedDoc</a><a class="i" href="#lib.golden_compare.StructuralScore">class StructuralScore</a><a class="i" href="#lib.golden_compare.compare">compare</a><a class="i" href="#lib.golden_compare.normalize">normalize</a><a class="m" href="#lib-golden-gaps-py">lib/golden_gaps.py</a><a class="i" href="#lib.golden_gaps.Gap">class Gap</a><a class="i" href="#lib.golden_gaps.draft_issues">draft_issues</a><a class="i" href="#lib.golden_gaps.locate_gaps">locate_gaps</a><a class="m" href="#lib-golden-qa-py">lib/golden_qa.py</a><a class="i" href="#lib.golden_qa.AxisReport">class AxisReport</a><a class="i" href="#lib.golden_qa.FidelityVerdict">class FidelityVerdict</a><a class="i" href="#lib.golden_qa.ReblessOutcome">class ReblessOutcome</a><a class="i" href="#lib.golden_qa.ScoreResult">class ScoreResult</a><a class="i" href="#lib.golden_qa.anchors_path">anchors_path</a><a class="i" href="#lib.golden_qa.bless_stem">bless_stem</a><a class="i" href="#lib.golden_qa.build_review_prompt">build_review_prompt</a><a class="i" href="#lib.golden_qa.download_source">download_source</a><a class="i" href="#lib.golden_qa.facts_path">facts_path</a><a class="i" href="#lib.golden_qa.fidelity_verdict">fidelity_verdict</a><a class="i" href="#lib.golden_qa.find_source">find_source</a><a class="i" href="#lib.golden_qa.generate_ideal">generate_ideal</a><a class="i" href="#lib.golden_qa.ideal_path">ideal_path</a><a class="i" href="#lib.golden_qa.is_unedited_seed">is_unedited_seed</a><a class="i" href="#lib.golden_qa.issue_for_stem">issue_for_stem</a><a class="i" href="#lib.golden_qa.rebless_stems">rebless_stems</a><a class="i" href="#lib.golden_qa.render_pdf_pages">render_pdf_pages</a><a class="i" href="#lib.golden_qa.review_ideal">review_ideal</a><a class="i" href="#lib.golden_qa.review_skill_text">review_skill_text</a><a class="i" href="#lib.golden_qa.score_report">score_report</a><a class="i" href="#lib.golden_qa.score_result">score_result</a><a class="i" href="#lib.golden_qa.score_stem">score_stem</a><a class="i" href="#lib.golden_qa.source_dir">source_dir</a><a class="i" href="#lib.golden_qa.stage_source">stage_source</a><a class="i" href="#lib.golden_qa.tomd_markdown">tomd_markdown</a><a class="i" href="#lib.golden_qa.validate_anchors_json">validate_anchors_json</a><a class="i" href="#lib.golden_qa.validate_facts_jsonl">validate_facts_jsonl</a><a class="m" href="#lib-html-init-py">lib/html/__init__.py</a><a class="m" href="#lib-html-convert-py">lib/html/convert.py</a><a class="i" href="#lib.html.convert.convert_html">convert_html</a><a class="m" href="#lib-html-extract-py">lib/html/extract.py</a><a class="i" href="#lib.html.extract.detect_generator">detect_generator</a><a class="i" href="#lib.html.extract.extract_metadata">extract_metadata</a><a class="i" href="#lib.html.extract.parse_html">parse_html</a><a class="i" href="#lib.html.extract.strip_boilerplate">strip_boilerplate</a><a class="m" href="#lib-html-images-py">lib/html/images.py</a><a class="i" href="#lib.html.images.HtmlImagesResult">class HtmlImagesResult</a><a class="i" href="#lib.html.images.load_html_images">load_html_images</a><a class="m" href="#lib-html-render-py">lib/html/render.py</a><a class="i" href="#lib.html.render.render_body">render_body</a><a class="m" href="#lib-metadata-yaml-init-py">lib/metadata_yaml/__init__.py</a><a class="m" href="#lib-metadata-yaml-extract-py">lib/metadata_yaml/extract.py</a><a class="i" href="#lib.metadata_yaml.extract.apply_pdf_metadata_fallbacks">apply_pdf_metadata_fallbacks</a><a class="i" href="#lib.metadata_yaml.extract.enrich_pdf_reply_to">enrich_pdf_reply_to</a><a class="i" href="#lib.metadata_yaml.extract.extract_metadata">extract_metadata</a><a class="m" href="#lib-metadata-yaml-format-py">lib/metadata_yaml/format.py</a><a class="i" href="#lib.metadata_yaml.format.format_front_matter">format_front_matter</a><a class="i" href="#lib.metadata_yaml.format.parse_front_matter">parse_front_matter</a><a class="i" href="#lib.metadata_yaml.format.sanitize_metadata">sanitize_metadata</a><a class="i" href="#lib.metadata_yaml.format.strip_front_matter">strip_front_matter</a><a class="m" href="#lib-metadata-yaml-strip-py">lib/metadata_yaml/strip.py</a><a class="i" href="#lib.metadata_yaml.strip.strip_metadata_headings">strip_metadata_headings</a><a class="i" href="#lib.metadata_yaml.strip.strip_pre_content_paragraphs">strip_pre_content_paragraphs</a><a class="i" href="#lib.metadata_yaml.strip.strip_pre_heading_fragments">strip_pre_heading_fragments</a><a class="m" href="#lib-pdf-init-py">lib/pdf/__init__.py</a><a class="m" href="#lib-pdf-fitz-lock-py">lib/pdf/_fitz_lock.py</a><a class="m" href="#lib-pdf-checks-init-py">lib/pdf/checks/__init__.py</a><a class="m" href="#lib-pdf-checks-layout-py">lib/pdf/checks/_layout.py</a><a class="i" href="#lib.pdf.checks._layout.layout_features">layout_features</a><a class="m" href="#lib-pdf-checks-base-py">lib/pdf/checks/base.py</a><a class="i" href="#lib.pdf.checks.base.AreaContext">class AreaContext</a><a class="i" href="#lib.pdf.checks.base.Check">class Check</a><a class="m" href="#lib-pdf-checks-caption-py">lib/pdf/checks/caption.py</a><a class="i" href="#lib.pdf.checks.caption.has_caption">has_caption</a><a class="i" href="#lib.pdf.checks.caption.run">run</a><a class="m" href="#lib-pdf-checks-codereader-py">lib/pdf/checks/codereader.py</a><a class="i" href="#lib.pdf.checks.codereader.CodeStream">class CodeStream</a><a class="i" href="#lib.pdf.checks.codereader.looks_like_cpp">looks_like_cpp</a><a class="i" href="#lib.pdf.checks.codereader.read_lines">read_lines</a><a class="m" href="#lib-pdf-checks-coherence-py">lib/pdf/checks/coherence.py</a><a class="i" href="#lib.pdf.checks.coherence.column_coherence">column_coherence</a><a class="i" href="#lib.pdf.checks.coherence.content_features">content_features</a><a class="i" href="#lib.pdf.checks.coherence.fragment_share">fragment_share</a><a class="i" href="#lib.pdf.checks.coherence.header_contrast">header_contrast</a><a class="i" href="#lib.pdf.checks.coherence.merged_share">merged_share</a><a class="i" href="#lib.pdf.checks.coherence.run">run</a><a class="i" href="#lib.pdf.checks.coherence.shape">shape</a><a class="i" href="#lib.pdf.checks.coherence.table_coherence">table_coherence</a><a class="m" href="#lib-pdf-checks-data-or-format-py">lib/pdf/checks/data_or_format.py</a><a class="i" href="#lib.pdf.checks.data_or_format.features">features</a><a class="i" href="#lib.pdf.checks.data_or_format.likelihood_data">likelihood_data</a><a class="i" href="#lib.pdf.checks.data_or_format.run">run</a><a class="m" href="#lib-pdf-checks-drawn-lines-py">lib/pdf/checks/drawn_lines.py</a><a class="i" href="#lib.pdf.checks.drawn_lines.run">run</a><a class="m" href="#lib-pdf-checks-footprint-py">lib/pdf/checks/footprint.py</a><a class="i" href="#lib.pdf.checks.footprint.run">run</a><a class="m" href="#lib-pdf-checks-nominations-py">lib/pdf/checks/nominations.py</a><a class="i" href="#lib.pdf.checks.nominations.run">run</a><a class="m" href="#lib-pdf-checks-plausible-py">lib/pdf/checks/plausible.py</a><a class="i" href="#lib.pdf.checks.plausible.column_type">column_type</a><a class="i" href="#lib.pdf.checks.plausible.duplication">duplication</a><a class="i" href="#lib.pdf.checks.plausible.plausibility">plausibility</a><a class="i" href="#lib.pdf.checks.plausible.poll_counts">poll_counts</a><a class="i" href="#lib.pdf.checks.plausible.sequence_order">sequence_order</a><a class="m" href="#lib-pdf-checks-registry-py">lib/pdf/checks/registry.py</a><a class="i" href="#lib.pdf.checks.registry.run_region_checks">run_region_checks</a><a class="m" href="#lib-pdf-checks-same-code-py">lib/pdf/checks/same_code.py</a><a class="i" href="#lib.pdf.checks.same_code.run">run</a><a class="m" href="#lib-pdf-checks-text-alignment-py">lib/pdf/checks/text_alignment.py</a><a class="i" href="#lib.pdf.checks.text_alignment.run">run</a><a class="m" href="#lib-pdf-checks-wordgap-py">lib/pdf/checks/wordgap.py</a><a class="i" href="#lib.pdf.checks.wordgap.run">run</a><a class="m" href="#lib-pdf-classify-py">lib/pdf/classify.py</a><a class="i" href="#lib.pdf.classify.gate_tables">gate_tables</a><a class="i" href="#lib.pdf.classify.image_share">image_share</a><a class="i" href="#lib.pdf.classify.predict">predict</a><a class="i" href="#lib.pdf.classify.region_features">region_features</a><a class="i" href="#lib.pdf.classify.text_rows">text_rows</a><a class="m" href="#lib-pdf-classify-trees-py">lib/pdf/classify_trees.py</a><a class="m" href="#lib-pdf-cleanup-py">lib/pdf/cleanup.py</a><a class="i" href="#lib.pdf.cleanup.DehyphenatedPair">class DehyphenatedPair</a><a class="i" href="#lib.pdf.cleanup.HyphenEvidence">class HyphenEvidence</a><a class="i" href="#lib.pdf.cleanup.cleanup_text">cleanup_text</a><a class="i" href="#lib.pdf.cleanup.collect_hyphen_evidence">collect_hyphen_evidence</a><a class="i" href="#lib.pdf.cleanup.dehyphenate_pair">dehyphenate_pair</a><a class="i" href="#lib.pdf.cleanup.detect_repeating">detect_repeating</a><a class="i" href="#lib.pdf.cleanup.escape_leading_atx">escape_leading_atx</a><a class="i" href="#lib.pdf.cleanup.find_hidden_regions">find_hidden_regions</a><a class="i" href="#lib.pdf.cleanup.get_edge_items">get_edge_items</a><a class="i" href="#lib.pdf.cleanup.normalize_whitespace">normalize_whitespace</a><a class="i" href="#lib.pdf.cleanup.strip_hidden_blocks">strip_hidden_blocks</a><a class="i" href="#lib.pdf.cleanup.strip_repeating">strip_repeating</a><a class="m" href="#lib-pdf-code-format-py">lib/pdf/code_format.py</a><a class="i" href="#lib.pdf.code_format.is_diagram_block">is_diagram_block</a><a class="i" href="#lib.pdf.code_format.maybe_normalize_code_line">maybe_normalize_code_line</a><a class="i" href="#lib.pdf.code_format.normalize_code_line">normalize_code_line</a><a class="m" href="#lib-pdf-code-grid-py">lib/pdf/code_grid.py</a><a class="i" href="#lib.pdf.code_grid.CodeGrid">class CodeGrid</a><a class="m" href="#lib-pdf-codepair-py">lib/pdf/codepair.py</a><a class="i" href="#lib.pdf.codepair.find_code_pairs">find_code_pairs</a><a class="i" href="#lib.pdf.codepair.same_code">same_code</a><a class="m" href="#lib-pdf-content-py">lib/pdf/content.py</a><a class="i" href="#lib.pdf.content.build">build</a><a class="i" href="#lib.pdf.content.build_text">build_text</a><a class="i" href="#lib.pdf.content.content_candidates">content_candidates</a><a class="i" href="#lib.pdf.content.gutters">gutters</a><a class="i" href="#lib.pdf.content.page_hrules">page_hrules</a><a class="i" href="#lib.pdf.content.page_text">page_text</a><a class="i" href="#lib.pdf.content.page_words">page_words</a><a class="i" href="#lib.pdf.content.pieces_of">pieces_of</a><a class="i" href="#lib.pdf.content.visual_lines">visual_lines</a><a class="m" href="#lib-pdf-dimensions-py">lib/pdf/dimensions.py</a><a class="i" href="#lib.pdf.dimensions.dimensions">dimensions</a><a class="i" href="#lib.pdf.dimensions.weak_note">weak_note</a><a class="m" href="#lib-pdf-docling-backend-py">lib/pdf/docling_backend.py</a><a class="i" href="#lib.pdf.docling_backend.absorb_cross_page_spec_rows">absorb_cross_page_spec_rows</a><a class="i" href="#lib.pdf.docling_backend.discover_tables_with_docling">discover_tables_with_docling</a><a class="i" href="#lib.pdf.docling_backend.docling_available">docling_available</a><a class="i" href="#lib.pdf.docling_backend.enrich_tables_with_docling">enrich_tables_with_docling</a><a class="i" href="#lib.pdf.docling_backend.extract_docling_tables">extract_docling_tables</a><a class="m" href="#lib-pdf-docmeasure-py">lib/pdf/docmeasure.py</a><a class="i" href="#lib.pdf.docmeasure.DocMeasure">class DocMeasure</a><a class="i" href="#lib.pdf.docmeasure.area_word_features">area_word_features</a><a class="i" href="#lib.pdf.docmeasure.gap_stats">gap_stats</a><a class="i" href="#lib.pdf.docmeasure.hyphenates">hyphenates</a><a class="i" href="#lib.pdf.docmeasure.measure">measure</a><a class="i" href="#lib.pdf.docmeasure.visual_lines">visual_lines</a><a class="m" href="#lib-pdf-dvf-model-py">lib/pdf/dvf_model.py</a><a class="m" href="#lib-pdf-emit-py">lib/pdf/emit.py</a><a class="i" href="#lib.pdf.emit.emit_markdown">emit_markdown</a><a class="i" href="#lib.pdf.emit.emit_prompts">emit_prompts</a><a class="i" href="#lib.pdf.emit.is_code_comparison">is_code_comparison</a><a class="i" href="#lib.pdf.emit.is_flagged_table">is_flagged_table</a><a class="i" href="#lib.pdf.emit.renumber_uncertain_markers">renumber_uncertain_markers</a><a class="i" href="#lib.pdf.emit.table_use">table_use</a><a class="m" href="#lib-pdf-emoji-data-py">lib/pdf/emoji_data.py</a><a class="m" href="#lib-pdf-evidence-py">lib/pdf/evidence.py</a><a class="i" href="#lib.pdf.evidence.Entry">class Entry</a><a class="i" href="#lib.pdf.evidence.Record">class Record</a><a class="m" href="#lib-pdf-extent-py">lib/pdf/extent.py</a><a class="i" href="#lib.pdf.extent.extend">extend</a><a class="m" href="#lib-pdf-extract-py">lib/pdf/extract.py</a><a class="i" href="#lib.pdf.extract.attach_links">attach_links</a><a class="i" href="#lib.pdf.extract.collect_links">collect_links</a><a class="i" href="#lib.pdf.extract.extract_mupdf">extract_mupdf</a><a class="i" href="#lib.pdf.extract.extract_spatial">extract_spatial</a><a class="m" href="#lib-pdf-figures-py">lib/pdf/figures.py</a><a class="i" href="#lib.pdf.figures.detect_figure_regions">detect_figure_regions</a><a class="m" href="#lib-pdf-fit-py">lib/pdf/fit.py</a><a class="i" href="#lib.pdf.fit.fit">fit</a><a class="i" href="#lib.pdf.fit.fit_rows">fit_rows</a><a class="i" href="#lib.pdf.fit.grid_of">grid_of</a><a class="m" href="#lib-pdf-flag-py">lib/pdf/flag.py</a><a class="i" href="#lib.pdf.flag.aligned_regions">aligned_regions</a><a class="i" href="#lib.pdf.flag.dropped_uncovered">dropped_uncovered</a><a class="i" href="#lib.pdf.flag.flag_possible_tables">flag_possible_tables</a><a class="i" href="#lib.pdf.flag.gutter_regions">gutter_regions</a><a class="i" href="#lib.pdf.flag.outside_view_regions">outside_view_regions</a><a class="i" href="#lib.pdf.flag.rejected_regions">rejected_regions</a><a class="i" href="#lib.pdf.flag.text_regions">text_regions</a><a class="m" href="#lib-pdf-fullwidth-py">lib/pdf/fullwidth.py</a><a class="i" href="#lib.pdf.fullwidth.apply">apply</a><a class="i" href="#lib.pdf.fullwidth.full_width_rows">full_width_rows</a><a class="m" href="#lib-pdf-glyphs-py">lib/pdf/glyphs.py</a><a class="i" href="#lib.pdf.glyphs.GlyphCandidate">class GlyphCandidate</a><a class="i" href="#lib.pdf.glyphs.GlyphPassStats">class GlyphPassStats</a><a class="i" href="#lib.pdf.glyphs.collect_glyph_candidates">collect_glyph_candidates</a><a class="i" href="#lib.pdf.glyphs.collect_text_emoji_bboxes">collect_text_emoji_bboxes</a><a class="i" href="#lib.pdf.glyphs.drop_glyphs_in_code_and_tables">drop_glyphs_in_code_and_tables</a><a class="i" href="#lib.pdf.glyphs.filter_coincident">filter_coincident</a><a class="i" href="#lib.pdf.glyphs.glyph_to_char">glyph_to_char</a><a class="i" href="#lib.pdf.glyphs.inject_glyph_spans">inject_glyph_spans</a><a class="i" href="#lib.pdf.glyphs.is_glyph_only_block">is_glyph_only_block</a><a class="m" href="#lib-pdf-images-py">lib/pdf/images.py</a><a class="i" href="#lib.pdf.images.ExtractedImage">class ExtractedImage</a><a class="i" href="#lib.pdf.images.ExtractionResult">class ExtractionResult</a><a class="i" href="#lib.pdf.images.VectorUncertaintyStats">class VectorUncertaintyStats</a><a class="i" href="#lib.pdf.images.extract_page_images">extract_page_images</a><a class="i" href="#lib.pdf.images.finalize_extraction">finalize_extraction</a><a class="m" href="#lib-pdf-levels-py">lib/pdf/levels.py</a><a class="i" href="#lib.pdf.levels.assign">assign</a><a class="i" href="#lib.pdf.levels.cell_markers">cell_markers</a><a class="i" href="#lib.pdf.levels.comment">comment</a><a class="m" href="#lib-pdf-mono-py">lib/pdf/mono.py</a><a class="i" href="#lib.pdf.mono.classify_monospace">classify_monospace</a><a class="i" href="#lib.pdf.mono.propagate_monospace">propagate_monospace</a><a class="m" href="#lib-pdf-pagecache-py">lib/pdf/pagecache.py</a><a class="i" href="#lib.pdf.pagecache.rawdict">rawdict</a><a class="i" href="#lib.pdf.pagecache.words_in">words_in</a><a class="m" href="#lib-pdf-pipeline-py">lib/pdf/pipeline.py</a><a class="i" href="#lib.pdf.pipeline.PipelineResult">class PipelineResult</a><a class="i" href="#lib.pdf.pipeline.dropped_nomination_regions">dropped_nomination_regions</a><a class="i" href="#lib.pdf.pipeline.run_pipeline">run_pipeline</a><a class="m" href="#lib-pdf-poll-py">lib/pdf/poll.py</a><a class="i" href="#lib.pdf.poll.extract_poll_tables">extract_poll_tables</a><a class="m" href="#lib-pdf-qa-py">lib/pdf/qa.py</a><a class="i" href="#lib.pdf.qa.QABatchResult">class QABatchResult</a><a class="i" href="#lib.pdf.qa.QAMetrics">class QAMetrics</a><a class="i" href="#lib.pdf.qa.compute_metrics">compute_metrics</a><a class="i" href="#lib.pdf.qa.format_qa_report">format_qa_report</a><a class="i" href="#lib.pdf.qa.run_qa_batch">run_qa_batch</a><a class="i" href="#lib.pdf.qa.write_qa_json_atomic">write_qa_json_atomic</a><a class="m" href="#lib-pdf-records-py">lib/pdf/records.py</a><a class="i" href="#lib.pdf.records.line_kind">line_kind</a><a class="i" href="#lib.pdf.records.periodic_runs">periodic_runs</a><a class="i" href="#lib.pdf.records.read_region">read_region</a><a class="i" href="#lib.pdf.records.records_candidates">records_candidates</a><a class="m" href="#lib-pdf-relations-py">lib/pdf/relations.py</a><a class="i" href="#lib.pdf.relations.RelationRecord">class RelationRecord</a><a class="i" href="#lib.pdf.relations.Violation">class Violation</a><a class="i" href="#lib.pdf.relations.check">check</a><a class="i" href="#lib.pdf.relations.record_for">record_for</a><a class="m" href="#lib-pdf-rowbands-py">lib/pdf/rowbands.py</a><a class="i" href="#lib.pdf.rowbands.merge_rule_bands">merge_rule_bands</a><a class="m" href="#lib-pdf-ruled-py">lib/pdf/ruled.py</a><a class="i" href="#lib.pdf.ruled.drawn_spans">drawn_spans</a><a class="i" href="#lib.pdf.ruled.extract_ruled_tables">extract_ruled_tables</a><a class="i" href="#lib.pdf.ruled.page_hrules">page_hrules</a><a class="m" href="#lib-pdf-runctx-py">lib/pdf/runctx.py</a><a class="i" href="#lib.pdf.runctx.RunContext">class RunContext</a><a class="i" href="#lib.pdf.runctx.current">current</a><a class="i" href="#lib.pdf.runctx.run_scope">run_scope</a><a class="m" href="#lib-pdf-scan-py">lib/pdf/scan.py</a><a class="i" href="#lib.pdf.scan.area_features">area_features</a><a class="i" href="#lib.pdf.scan.areas">areas</a><a class="i" href="#lib.pdf.scan.band">band</a><a class="i" href="#lib.pdf.scan.info_of">info_of</a><a class="i" href="#lib.pdf.scan.run_scan">run_scan</a><a class="m" href="#lib-pdf-scan-model-py">lib/pdf/scan_model.py</a><a class="i" href="#lib.pdf.scan_model.likelihood">likelihood</a><a class="m" href="#lib-pdf-select-py">lib/pdf/select.py</a><a class="i" href="#lib.pdf.select.candidate_from_section">candidate_from_section</a><a class="i" href="#lib.pdf.select.candidates_agree">candidates_agree</a><a class="i" href="#lib.pdf.select.class_check">class_check</a><a class="i" href="#lib.pdf.select.closed_exempt">closed_exempt</a><a class="i" href="#lib.pdf.select.conservation_error">conservation_error</a><a class="i" href="#lib.pdf.select.cross_reader_continuation">cross_reader_continuation</a><a class="i" href="#lib.pdf.select.join_split_words">join_split_words</a><a class="i" href="#lib.pdf.select.mark_matrix">mark_matrix</a><a class="i" href="#lib.pdf.select.page_furniture">page_furniture</a><a class="i" href="#lib.pdf.select.partial_reading">partial_reading</a><a class="i" href="#lib.pdf.select.remove_table_regions">remove_table_regions</a><a class="i" href="#lib.pdf.select.select_tables">select_tables</a><a class="i" href="#lib.pdf.select.sparse_mapping">sparse_mapping</a><a class="i" href="#lib.pdf.select.split_at_headers">split_at_headers</a><a class="i" href="#lib.pdf.select.stitch_pages">stitch_pages</a><a class="i" href="#lib.pdf.select.table_flags">table_flags</a><a class="i" href="#lib.pdf.select.vote_header">vote_header</a><a class="i" href="#lib.pdf.select.witness">witness</a><a class="m" href="#lib-pdf-spans-py">lib/pdf/spans.py</a><a class="i" href="#lib.pdf.spans.normalize_spans">normalize_spans</a><a class="m" href="#lib-pdf-stacked-py">lib/pdf/stacked.py</a><a class="i" href="#lib.pdf.stacked.split_stacked">split_stacked</a><a class="m" href="#lib-pdf-structure-py">lib/pdf/structure.py</a><a class="i" href="#lib.pdf.structure.compare_extractions">compare_extractions</a><a class="i" href="#lib.pdf.structure.drop_leaked_toc_entries">drop_leaked_toc_entries</a><a class="i" href="#lib.pdf.structure.heading_confidence">heading_confidence</a><a class="i" href="#lib.pdf.structure.structure_body">structure_body</a><a class="i" href="#lib.pdf.structure.structure_sections">structure_sections</a><a class="m" href="#lib-pdf-summary-py">lib/pdf/summary.py</a><a class="i" href="#lib.pdf.summary.build">build</a><a class="i" href="#lib.pdf.summary.generator">generator</a><a class="i" href="#lib.pdf.summary.header_comment">header_comment</a><a class="i" href="#lib.pdf.summary.prompt_elements">prompt_elements</a><a class="i" href="#lib.pdf.summary.unfamiliarity">unfamiliarity</a><a class="m" href="#lib-pdf-table-py">lib/pdf/table.py</a><a class="i" href="#lib.pdf.table.TableKind">class TableKind</a><a class="i" href="#lib.pdf.table.TableStrategy">class TableStrategy</a><a class="i" href="#lib.pdf.table.detect_tables">detect_tables</a><a class="i" href="#lib.pdf.table.exclude_table_regions">exclude_table_regions</a><a class="m" href="#lib-pdf-tagged-py">lib/pdf/tagged.py</a><a class="i" href="#lib.pdf.tagged.extract_tagged_tables">extract_tagged_tables</a><a class="m" href="#lib-pdf-types-py">lib/pdf/types.py</a><a class="i" href="#lib.pdf.types.Block">class Block</a><a class="i" href="#lib.pdf.types.Confidence">class Confidence</a><a class="i" href="#lib.pdf.types.FigureEdge">class FigureEdge</a><a class="i" href="#lib.pdf.types.FigureGraph">class FigureGraph</a><a class="i" href="#lib.pdf.types.FigureNode">class FigureNode</a><a class="i" href="#lib.pdf.types.FigureRegion">class FigureRegion</a><a class="i" href="#lib.pdf.types.Line">class Line</a><a class="i" href="#lib.pdf.types.PageEdgeItem">class PageEdgeItem</a><a class="i" href="#lib.pdf.types.Section">class Section</a><a class="i" href="#lib.pdf.types.SectionKind">class SectionKind</a><a class="i" href="#lib.pdf.types.SkipReason">class SkipReason</a><a class="i" href="#lib.pdf.types.Span">class Span</a><a class="i" href="#lib.pdf.types.TableCandidate">class TableCandidate</a><a class="i" href="#lib.pdf.types.compute_bbox">compute_bbox</a><a class="i" href="#lib.pdf.types.is_readable">is_readable</a><a class="m" href="#lib-pdf-validate-py">lib/pdf/validate.py</a><a class="i" href="#lib.pdf.validate.add_header_above">add_header_above</a><a class="i" href="#lib.pdf.validate.cell_text">cell_text</a><a class="i" href="#lib.pdf.validate.escalate">escalate</a><a class="i" href="#lib.pdf.validate.resegment_rows">resegment_rows</a><a class="i" href="#lib.pdf.validate.split_hidden_column">split_hidden_column</a><a class="i" href="#lib.pdf.validate.split_stacked_rows">split_stacked_rows</a><a class="i" href="#lib.pdf.validate.switch_reader">switch_reader</a><a class="i" href="#lib.pdf.validate.verify_layout">verify_layout</a><a class="i" href="#lib.pdf.validate.verify_pieces">verify_pieces</a><a class="m" href="#lib-pdf-vector-images-py">lib/pdf/vector_images.py</a><a class="i" href="#lib.pdf.vector_images.extract_page_vector_images">extract_page_vector_images</a><a class="i" href="#lib.pdf.vector_images.format_uncertainty_marker">format_uncertainty_marker</a><a class="i" href="#lib.pdf.vector_images.should_emit_marker">should_emit_marker</a><a class="m" href="#lib-pdf-wg21-py">lib/pdf/wg21.py</a><a class="i" href="#lib.pdf.wg21.extract_metadata_from_blocks">extract_metadata_from_blocks</a><a class="m" href="#lib-pdf-wording-py">lib/pdf/wording.py</a><a class="i" href="#lib.pdf.wording.classify_wording">classify_wording</a><a class="i" href="#lib.pdf.wording.collect_line_drawings">collect_line_drawings</a><a class="i" href="#lib.pdf.wording.is_foreign_chromatic">is_foreign_chromatic</a><a class="i" href="#lib.pdf.wording.is_green_ins">is_green_ins</a><a class="i" href="#lib.pdf.wording.is_red_del">is_red_del</a><a class="i" href="#lib.pdf.wording.is_wording_rgb">is_wording_rgb</a><a class="m" href="#lib-pdf-wording-emit-py">lib/pdf/wording_emit.py</a><a class="m" href="#lib-shared-py">lib/shared.py</a><a class="i" href="#lib.shared.apply_strip_leading_h1">apply_strip_leading_h1</a><a class="i" href="#lib.shared.ascii_escape">ascii_escape</a><a class="i" href="#lib.shared.dedup_paragraphs">dedup_paragraphs</a><a class="i" href="#lib.shared.deobfuscate_email">deobfuscate_email</a><a class="i" href="#lib.shared.enrich_reply_to_names">enrich_reply_to_names</a><a class="i" href="#lib.shared.normalize_date">normalize_date</a><a class="i" href="#lib.shared.override_revision_from_filename">override_revision_from_filename</a><a class="i" href="#lib.shared.parse_author_lines">parse_author_lines</a><a class="i" href="#lib.shared.strip_format_chars">strip_format_chars</a><a class="i" href="#lib.shared.strip_freeform_metadata_lines">strip_freeform_metadata_lines</a><a class="i" href="#lib.shared.strip_leading_h1">strip_leading_h1</a><a class="i" href="#lib.shared.strip_orphan_toc_list">strip_orphan_toc_list</a><a class="i" href="#lib.shared.strip_redundant_body_meta">strip_redundant_body_meta</a><a class="m" href="#lib-similarity-py">lib/similarity.py</a><a class="i" href="#lib.similarity.fuzzy_match_label">fuzzy_match_label</a><a class="i" href="#lib.similarity.similar">similar</a><a class="i" href="#lib.similarity.word_jaccard">word_jaccard</a><a class="m" href="#lib-tables-py">lib/tables.py</a><a class="i" href="#lib.tables.cell_style">cell_style</a><a class="i" href="#lib.tables.code_cell">code_cell</a><a class="i" href="#lib.tables.text_cell">text_cell</a><a class="m" href="#lib-toc-py">lib/toc.py</a><a class="i" href="#lib.toc.find_toc_indices">find_toc_indices</a><a class="i" href="#lib.toc.has_dot_leader">has_dot_leader</a><a class="i" href="#lib.toc.is_toc_label">is_toc_label</a><a class="i" href="#lib.toc.normalize_toc_entry">normalize_toc_entry</a><a class="m" href="#lib-wording-cleanup-py">lib/wording_cleanup.py</a><a class="i" href="#lib.wording_cleanup.strip_redundant_tags">strip_redundant_tags</a><a class="m" href="#lib-wording-markup-py">lib/wording_markup.py</a><a class="i" href="#lib.wording_markup.wording_tag_open">wording_tag_open</a><a class="m" href="#lib-wording-policy-py">lib/wording_policy.py</a><a class="i" href="#lib.wording_policy.implicit_role_for">implicit_role_for</a><a class="m" href="#writers-init-py">writers/__init__.py</a><a class="m" href="#writers-base-py">writers/base.py</a><a class="i" href="#writers.base.DocumentWriter">class DocumentWriter</a><a class="m" href="#writers-markdown-init-py">writers/markdown/__init__.py</a><a class="m" href="#writers-markdown-blocks-py">writers/markdown/blocks.py</a><a class="i" href="#writers.markdown.blocks.strip_redundant_roles">strip_redundant_roles</a><a class="i" href="#writers.markdown.blocks.write_element">write_element</a><a class="m" href="#writers-markdown-front-matter-py">writers/markdown/front_matter.py</a><a class="i" href="#writers.markdown.front_matter.write_front_matter">write_front_matter</a><a class="m" href="#writers-markdown-normalizers-py">writers/markdown/normalizers.py</a><a class="i" href="#writers.markdown.normalizers.normalize_front_matter">normalize_front_matter</a><a class="i" href="#writers.markdown.normalizers.strip_body_metadata_text">strip_body_metadata_text</a><a class="i" href="#writers.markdown.normalizers.strip_toc">strip_toc</a><a class="m" href="#writers-markdown-spans-py">writers/markdown/spans.py</a><a class="i" href="#writers.markdown.spans.format_code_span">format_code_span</a><a class="i" href="#writers.markdown.spans.write_span">write_span</a><a class="i" href="#writers.markdown.spans.write_spans">write_spans</a><a class="m" href="#writers-markdown-tables-py">writers/markdown/tables.py</a><a class="i" href="#writers.markdown.tables.write_table">write_table</a><a class="m" href="#writers-markdown-writer-py">writers/markdown/writer.py</a><a class="i" href="#writers.markdown.writer.MarkdownWriter">class MarkdownWriter</a></nav>
+<main><h1>tomd API surface</h1><p class="sum">109 modules, 92 classes, 285 functions, 89 methods, 378 fields. Typed: 910 of 1141 functions and methods (79%). Declarations, docstrings and comments only; no function bodies.</p>
 <h2 id="init-py">__init__.py<a class="src" href="../../src/tomd/__init__.py">source</a></h2><pre><span class="d">&quot;&quot;&quot;tomd: PDF and HTML to Markdown converter for WG21 papers.&quot;&quot;&quot;</span></pre><h2 id="api-py">api.py<a class="src" href="../../src/tomd/api.py">source</a></h2><p class="sum">Typed: 7 of 9 functions and methods (77%).</p><pre><span class="d">&quot;&quot;&quot;Public tomd API: convert a staged paper source to markdown.</span>
 <span class="d"></span>
 <span class="d">``convert_paper(paper_id, source_path, meta)`` is the only supported</span>
@@ -1318,7 +1318,220 @@ a.t{color:inherit;text-decoration:underline dotted}a.ln{color:var(--mut);font-si
 <span class="d">    &quot;&quot;&quot;</span>
     <span class="c"># called by: </span><a class="t" href="#lib.pdf.pipeline.run_pipeline">pipeline.run_pipeline</a><span class="c"></span>
 
-<span class="c"># + 4 private module-level names</span></pre><h2 id="lib-pdf-init-py">lib/pdf/__init__.py<a class="src" href="../../src/tomd/lib/pdf/__init__.py">source</a></h2><pre><span class="d">&quot;&quot;&quot;PDF to Markdown converter.&quot;&quot;&quot;</span></pre><h2 id="lib-pdf-fitz-lock-py">lib/pdf/_fitz_lock.py<a class="src" href="../../src/tomd/lib/pdf/_fitz_lock.py">source</a></h2><pre><span class="d">&quot;&quot;&quot;Shared process-wide lock that must be held for all PyMuPDF (fitz) sessions.&quot;&quot;&quot;</span></pre><h2 id="lib-pdf-checks-init-py">lib/pdf/checks/__init__.py<a class="src" href="../../src/tomd/lib/pdf/checks/__init__.py">source</a></h2><pre><span class="d">&quot;&quot;&quot;Content checks on table readings.&quot;&quot;&quot;</span></pre><h2 id="lib-pdf-checks-plausible-py">lib/pdf/checks/plausible.py<a class="src" href="../../src/tomd/lib/pdf/checks/plausible.py">source</a></h2><p class="sum">Typed: 0 of 6 functions and methods (0%).</p><pre><span class="d">&quot;&quot;&quot;Content plausibility: does the reading make sense as data? A meaning-based</span>
+<span class="c"># + 4 private module-level names</span></pre><h2 id="lib-pdf-init-py">lib/pdf/__init__.py<a class="src" href="../../src/tomd/lib/pdf/__init__.py">source</a></h2><pre><span class="d">&quot;&quot;&quot;PDF to Markdown converter.&quot;&quot;&quot;</span></pre><h2 id="lib-pdf-fitz-lock-py">lib/pdf/_fitz_lock.py<a class="src" href="../../src/tomd/lib/pdf/_fitz_lock.py">source</a></h2><pre><span class="d">&quot;&quot;&quot;Shared process-wide lock that must be held for all PyMuPDF (fitz) sessions.&quot;&quot;&quot;</span></pre><h2 id="lib-pdf-checks-init-py">lib/pdf/checks/__init__.py<a class="src" href="../../src/tomd/lib/pdf/checks/__init__.py">source</a></h2><pre><span class="d">&quot;&quot;&quot;Content checks on table readings.&quot;&quot;&quot;</span></pre><h2 id="lib-pdf-checks-layout-py">lib/pdf/checks/_layout.py<a class="src" href="../../src/tomd/lib/pdf/checks/_layout.py">source</a></h2><p class="sum">Typed: 0 of 1 functions and methods (0%).</p><pre><span class="d">&quot;&quot;&quot;Shared computation for the two layout checks (computed once per area).&quot;&quot;&quot;</span>
+
+<span class="k">def </span><span class="n" id="lib.pdf.checks._layout.layout_features">layout_features</span>(ctx) -&gt; dict:<a class="ln" href="../../src/tomd/lib/pdf/checks/_layout.py#L12">_layout.py:12</a>
+    <span class="c u"># untyped: ctx</span>
+    <span class="c"># calls: </span><a class="t" href="#lib.pdf.classify.region_features">classify.region_features</a><span class="c"></span>
+    <span class="c"># called by: </span><a class="t" href="#lib.pdf.checks.drawn_lines.run">drawn_lines.run</a>, <a class="t" href="#lib.pdf.checks.text_alignment.run">text_alignment.run</a><span class="c"></span>
+    ...
+
+<span class="n" id="lib.pdf.checks._layout.DRAWN">DRAWN</span> = (&#x27;hrules&#x27;, &#x27;vrules&#x27;, &#x27;row_fills&#x27;, &#x27;enclosing_fill&#x27;)<a class="ln" href="../../src/tomd/lib/pdf/checks/_layout.py#L21">_layout.py:21</a></pre><h2 id="lib-pdf-checks-base-py">lib/pdf/checks/base.py<a class="src" href="../../src/tomd/lib/pdf/checks/base.py">source</a></h2><pre><span class="d">&quot;&quot;&quot;The scan&#x27;s checks: one file each, loaded in a fixed order.</span>
+<span class="d"></span>
+<span class="d">Every check declares its name, the level(s) it serves, the kind of</span>
+<span class="d">information it reads (stage 0: same-type checks are not independent</span>
+<span class="d">witnesses), a cost tier and whether it is optional (network or money), and</span>
+<span class="d">a function from the level&#x27;s input to evidence items (feature -&gt; value).</span>
+<span class="d">Checks never change a grid; what they return goes into the evidence record</span>
+<span class="d">and the scan&#x27;s decision through the core.</span>
+<span class="d"></span>
+<span class="d">The registry is explicit and ordered (cheapest and most decisive first, as</span>
+<span class="d">the effectiveness ledger ranks them), not filesystem order. Checks the ledger</span>
+<span class="d">rates least effective (word gaps, footprint, caption: little unique</span>
+<span class="d">contribution, about 30 of the scan&#x27;s 78 ms per paper) form a last-resort</span>
+<span class="d">tier, run only while an area is undecided; TOMD_SCAN_FULL=1 runs everything</span>
+<span class="d">(training data and the ledger). Any check can be</span>
+<span class="d">switched off: TOMD_CHECKS_OFF=name,name - the same switch the ledger uses to</span>
+<span class="d">measure what each check contributes.</span>
+<span class="d">&quot;&quot;&quot;</span>
+
+<span class="k">@dataclass</span>
+<span class="k">class </span><span class="n" id="lib.pdf.checks.base.AreaContext">AreaContext</span>:<a class="ln" href="../../src/tomd/lib/pdf/checks/base.py#L45">base.py:45</a>
+<span class="d">    &quot;&quot;&quot;What a region-level check may look at.&quot;&quot;&quot;</span>
+    <span class="n" id="lib.pdf.checks.base.AreaContext.page">page</span>: object  <span class="c"># the fitz page</span><a class="ln" href="../../src/tomd/lib/pdf/checks/base.py#L47">base.py:47</a>
+    <span class="n" id="lib.pdf.checks.base.AreaContext.area">area</span>: dict  <span class="c"># scan.areas() entry: page, bbox, cues, excl, readings, same_code</span><a class="ln" href="../../src/tomd/lib/pdf/checks/base.py#L48">base.py:48</a>
+    <span class="n" id="lib.pdf.checks.base.AreaContext.generator">generator</span>: str<a class="ln" href="../../src/tomd/lib/pdf/checks/base.py#L49">base.py:49</a>
+    <span class="n" id="lib.pdf.checks.base.AreaContext.doc_tagged">doc_tagged</span>: bool<a class="ln" href="../../src/tomd/lib/pdf/checks/base.py#L50">base.py:50</a>
+    <span class="n" id="lib.pdf.checks.base.AreaContext.measure">measure</span>: object = None  <span class="c"># docmeasure.DocMeasure (level 0)</span><a class="ln" href="../../src/tomd/lib/pdf/checks/base.py#L51">base.py:51</a>
+    <span class="n" id="lib.pdf.checks.base.AreaContext.cache">cache</span>: dict = field(default_factory=dict)<a class="ln" href="../../src/tomd/lib/pdf/checks/base.py#L52">base.py:52</a>
+
+<span class="k">@dataclass(frozen=True)</span>
+<span class="k">class </span><span class="n" id="lib.pdf.checks.base.Check">Check</span>:<a class="ln" href="../../src/tomd/lib/pdf/checks/base.py#L34">base.py:34</a>
+    <span class="n" id="lib.pdf.checks.base.Check.name">name</span>: str<a class="ln" href="../../src/tomd/lib/pdf/checks/base.py#L35">base.py:35</a>
+    <span class="n" id="lib.pdf.checks.base.Check.levels">levels</span>: tuple[str, ...]<a class="ln" href="../../src/tomd/lib/pdf/checks/base.py#L36">base.py:36</a>
+    <span class="n" id="lib.pdf.checks.base.Check.info">info</span>: str<a class="ln" href="../../src/tomd/lib/pdf/checks/base.py#L37">base.py:37</a>
+    <span class="n" id="lib.pdf.checks.base.Check.cost">cost</span>: int  <span class="c"># 0 = microseconds .. 3 = network / model call</span><a class="ln" href="../../src/tomd/lib/pdf/checks/base.py#L38">base.py:38</a>
+    <span class="n" id="lib.pdf.checks.base.Check.optional">optional</span>: bool<a class="ln" href="../../src/tomd/lib/pdf/checks/base.py#L39">base.py:39</a>
+    <span class="n" id="lib.pdf.checks.base.Check.run">run</span>: Callable[[&#x27;<a class="t" href="#lib.pdf.checks.base.AreaContext">AreaContext</a>&#x27;], dict]<a class="ln" href="../../src/tomd/lib/pdf/checks/base.py#L40">base.py:40</a>
+    <span class="n" id="lib.pdf.checks.base.Check.tier">tier</span>: int = 1  <span class="c"># 1 = effective (ledger); 2 = last resort, run only while undecided</span><a class="ln" href="../../src/tomd/lib/pdf/checks/base.py#L41">base.py:41</a>
+
+<span class="n" id="lib.pdf.checks.base.INFO">INFO</span> = ...<a class="ln" href="../../src/tomd/lib/pdf/checks/base.py#L30">base.py:30</a>
+
+<span class="n" id="lib.pdf.checks.base.LEVELS">LEVELS</span> = ...<a class="ln" href="../../src/tomd/lib/pdf/checks/base.py#L29">base.py:29</a></pre><h2 id="lib-pdf-checks-caption-py">lib/pdf/checks/caption.py<a class="src" href="../../src/tomd/lib/pdf/checks/caption.py">source</a></h2><p class="sum">Typed: 1 of 2 functions and methods (50%).</p><pre><span class="d">&quot;&quot;&quot;Document: a &quot;Table N&quot; caption just above or below the area.&quot;&quot;&quot;</span>
+
+<span class="k">def </span><span class="n" id="lib.pdf.checks.caption.has_caption">has_caption</span>(text_above: str, text_below: str) -&gt; bool:<a class="ln" href="../../src/tomd/lib/pdf/checks/caption.py#L18">caption.py:18</a>
+    <span class="c"># called by: </span><a class="t" href="#lib.pdf.checks.caption.run">run</a><span class="c"></span>
+    ...
+
+<span class="k">def </span><span class="n" id="lib.pdf.checks.caption.run">run</span>(ctx) -&gt; dict:<a class="ln" href="../../src/tomd/lib/pdf/checks/caption.py#L22">caption.py:22</a>
+    <span class="c u"># untyped: ctx</span>
+    <span class="c"># calls: </span><a class="t" href="#lib.pdf.checks.caption.has_caption">has_caption</a><span class="c"></span>
+    ...
+
+<span class="n" id="lib.pdf.checks.caption.CHECK">CHECK</span> = ...<a class="ln" href="../../src/tomd/lib/pdf/checks/caption.py#L29">caption.py:29</a></pre><h2 id="lib-pdf-checks-codereader-py">lib/pdf/checks/codereader.py<a class="src" href="../../src/tomd/lib/pdf/checks/codereader.py">source</a></h2><p class="sum">Typed: 5 of 5 functions and methods (100%).</p><pre><span class="d">&quot;&quot;&quot;A lightweight reader for C++-like code lines (user, 2026-10-21): not a parser.</span>
+<span class="d"></span>
+<span class="d">Fed one line at a time per text stream (a column of code), it says for each line:</span>
+<span class="d"></span>
+<span class="d">  depth_before / depth_after   bracket depth ({}, and () [] for open constructs)</span>
+<span class="d">  unit_start                   the line starts a top-level unit: a function, struct,</span>
+<span class="d">                               class, union, enum, namespace or template block,</span>
+<span class="d">                               concept, or a top-level declaration at depth 0</span>
+<span class="d">  unit_name                    the unit&#x27;s declared name (identifier), if any</span>
+<span class="d">  unit_end                     a closing brace brings the depth back to 0</span>
+<span class="d">  label                        a comment-only line (&quot;// This paper:&quot;)</span>
+<span class="d">  stmt_end                     the line ends a statement at depth 0 (&#x27;;&#x27;)</span>
+<span class="d">  continues                    an open construct carries on: unbalanced brackets, or a</span>
+<span class="d">                               trailing operator, comma or backslash</span>
+<span class="d">  preproc                      a preprocessor line (#include, #define, ...)</span>
+<span class="d">  not_cpp                      the line reads as another language or notation (Rust, Swift,</span>
+<span class="d">                               assembly, grammar productions): the reader then keeps only the</span>
+<span class="d">                               bracket balance and claims no unit (it never vetoes anything)</span>
+<span class="d"></span>
+<span class="d">C++ only (user): declarations, templates, attributes, requires-clauses, lambdas,</span>
+<span class="d">contracts syntax (pre / post / contract_assert), preprocessor lines and comments.</span>
+<span class="d"></span>
+<span class="d">String and character literals and comments are stripped before counting.</span>
+<span class="d">Deterministic, no dependency. Used as features of the line-boundary decision.</span>
+<span class="d">&quot;&quot;&quot;</span>
+
+<span class="k">class </span><span class="n" id="lib.pdf.checks.codereader.CodeStream">CodeStream</span>:<a class="ln" href="../../src/tomd/lib/pdf/checks/codereader.py#L83">codereader.py:83</a>
+<span class="d">    &quot;&quot;&quot;the state of one column of code&quot;&quot;&quot;</span>
+    <span class="k">self.</span><span class="n" id="lib.pdf.checks.codereader.CodeStream.depth">depth</span> = 0  <span class="c"># braces</span><a class="ln" href="../../src/tomd/lib/pdf/checks/codereader.py#L87">codereader.py:87</a>
+    <span class="k">self.</span><span class="n" id="lib.pdf.checks.codereader.CodeStream.paren">paren</span> = 0  <span class="c"># () and []</span><a class="ln" href="../../src/tomd/lib/pdf/checks/codereader.py#L88">codereader.py:88</a>
+    <span class="k">self.</span><span class="n" id="lib.pdf.checks.codereader.CodeStream.in_block">in_block</span> = False<a class="ln" href="../../src/tomd/lib/pdf/checks/codereader.py#L89">codereader.py:89</a>
+    <span class="k">self.</span><span class="n" id="lib.pdf.checks.codereader.CodeStream.pending_template">pending_template</span> = False<a class="ln" href="../../src/tomd/lib/pdf/checks/codereader.py#L90">codereader.py:90</a>
+    <span class="k">def </span><span class="n" id="lib.pdf.checks.codereader.CodeStream.__init__">__init__</span>(self): ...<a class="ln" href="../../src/tomd/lib/pdf/checks/codereader.py#L86">codereader.py:86</a>
+    <span class="k">def </span><span class="n" id="lib.pdf.checks.codereader.CodeStream.feed">feed</span>(self, line: str) -&gt; dict:<a class="ln" href="../../src/tomd/lib/pdf/checks/codereader.py#L92">codereader.py:92</a>
+        <span class="c"># calls: </span>_strip<span class="c"></span>
+        ...
+
+<span class="k">def </span><span class="n" id="lib.pdf.checks.codereader.looks_like_cpp">looks_like_cpp</span>(text: str) -&gt; bool:<a class="ln" href="../../src/tomd/lib/pdf/checks/codereader.py#L149">codereader.py:149</a>
+<span class="d">    &quot;&quot;&quot;C++ by its content (any font): a token pattern only code has - scope &#x27;::&#x27;, member</span>
+<span class="d">    &#x27;-&gt;&#x27;, a template argument list, a call, braces or semicolons, C++ operators, or a</span>
+<span class="d">    leading C++ keyword. Abstains (False) on plain words, numbers and math.</span>
+<span class="d">    &quot;&quot;&quot;</span>
+
+<span class="k">def </span><span class="n" id="lib.pdf.checks.codereader.read_lines">read_lines</span>(lines: list[str]) -&gt; list[dict]:<a class="ln" href="../../src/tomd/lib/pdf/checks/codereader.py#L139">codereader.py:139</a>
+<span class="d">    &quot;&quot;&quot;per-line facts for one stream of code lines&quot;&quot;&quot;</span>
+    <span class="c"># calls: </span><a class="t" href="#lib.pdf.checks.codereader.CodeStream">CodeStream</a><span class="c"></span>
+
+<span class="c"># + 1 private module-level name</span></pre><h2 id="lib-pdf-checks-coherence-py">lib/pdf/checks/coherence.py<a class="src" href="../../src/tomd/lib/pdf/checks/coherence.py">source</a></h2><p class="sum">Typed: 1 of 9 functions and methods (11%).</p><pre><span class="d">&quot;&quot;&quot;Meaning: column coherence of the area&#x27;s best reading - items per cell,</span>
+<span class="d">fragments, header vs body, the weakest column&#x27;s shape uniformity, and the</span>
+<span class="d">first column as a list of keys (local shape tier; no Jev).</span>
+<span class="d">&quot;&quot;&quot;</span>
+
+<span class="k">def </span><span class="n" id="lib.pdf.checks.coherence.column_coherence">column_coherence</span>(rows, skip_header=True):<a class="ln" href="../../src/tomd/lib/pdf/checks/coherence.py#L40">coherence.py:40</a>
+<span class="d">    &quot;&quot;&quot;Per column: share of the dominant shape among filled body cells, or None (abstain).&quot;&quot;&quot;</span>
+    <span class="c u"># untyped: rows, skip_header, return</span>
+    <span class="c"># calls: </span><a class="t" href="#lib.pdf.checks.coherence.shape">shape</a><span class="c"></span>
+    <span class="c"># called by: </span><a class="t" href="#lib.pdf.checks.coherence.table_coherence">table_coherence</a><span class="c"></span>
+
+<span class="k">def </span><span class="n" id="lib.pdf.checks.coherence.content_features">content_features</span>(rows) -&gt; dict:<a class="ln" href="../../src/tomd/lib/pdf/checks/coherence.py#L135">coherence.py:135</a>
+    <span class="c u"># untyped: rows</span>
+    <span class="c"># calls: </span><a class="t" href="#lib.pdf.checks.coherence.shape">shape</a><span class="c"></span>
+    <span class="c"># called by: </span><a class="t" href="#lib.pdf.checks.coherence.run">run</a><span class="c"></span>
+    ...
+
+<span class="k">def </span><span class="n" id="lib.pdf.checks.coherence.fragment_share">fragment_share</span>(rows):<a class="ln" href="../../src/tomd/lib/pdf/checks/coherence.py#L90">coherence.py:90</a>
+<span class="d">    &quot;&quot;&quot;Fragments: body cells that start as a continuation (lowercase first word</span>
+<span class="d">    after a cell above that ended mid-phrase) or end mid-phrase.</span>
+<span class="d">    &quot;&quot;&quot;</span>
+    <span class="c u"># untyped: rows, return</span>
+    <span class="c"># calls: </span><a class="t" href="#lib.pdf.checks.coherence.shape">shape</a><span class="c"></span>
+
+<span class="k">def </span><span class="n" id="lib.pdf.checks.coherence.header_contrast">header_contrast</span>(rows):<a class="ln" href="../../src/tomd/lib/pdf/checks/coherence.py#L107">coherence.py:107</a>
+<span class="d">    &quot;&quot;&quot;Header vs body: share of columns whose header cell is a different kind</span>
+<span class="d">    from the column&#x27;s body (a category over instances).</span>
+<span class="d">    &quot;&quot;&quot;</span>
+    <span class="c u"># untyped: rows, return</span>
+    <span class="c"># calls: </span><a class="t" href="#lib.pdf.checks.coherence.shape">shape</a><span class="c"></span>
+
+<span class="k">def </span><span class="n" id="lib.pdf.checks.coherence.merged_share">merged_share</span>(rows):<a class="ln" href="../../src/tomd/lib/pdf/checks/coherence.py#L67">coherence.py:67</a>
+<span class="d">    &quot;&quot;&quot;Items per cell: the worst column&#x27;s share of body cells holding several</span>
+<span class="d">    items of the column&#x27;s own single-item kind (identifiers, numbers, marks),</span>
+<span class="d">    or several sentences. High means rows were merged.</span>
+<span class="d">    &quot;&quot;&quot;</span>
+    <span class="c u"># untyped: rows, return</span>
+    <span class="c"># calls: </span><a class="t" href="#lib.pdf.checks.coherence.shape">shape</a><span class="c"></span>
+
+<span class="k">def </span><span class="n" id="lib.pdf.checks.coherence.run">run</span>(ctx) -&gt; dict:<a class="ln" href="../../src/tomd/lib/pdf/checks/coherence.py#L154">coherence.py:154</a>
+    <span class="c u"># untyped: ctx</span>
+    <span class="c"># calls: </span><a class="t" href="#lib.pdf.checks.coherence.content_features">content_features</a>, _best_reading<span class="c"></span>
+    ...
+
+<span class="k">def </span><span class="n" id="lib.pdf.checks.coherence.shape">shape</span>(cell: str) -&gt; str:<a class="ln" href="../../src/tomd/lib/pdf/checks/coherence.py#L22">coherence.py:22</a>
+    <span class="c"># called by: </span><a class="t" href="#lib.pdf.checks.coherence.column_coherence">column_coherence</a>, <a class="t" href="#lib.pdf.checks.coherence.content_features">content_features</a>, <a class="t" href="#lib.pdf.checks.coherence.fragment_share">fragment_share</a>, <a class="t" href="#lib.pdf.checks.coherence.header_contrast">header_contrast</a>, <a class="t" href="#lib.pdf.checks.coherence.merged_share">merged_share</a><span class="c"></span>
+    ...
+
+<span class="k">def </span><span class="n" id="lib.pdf.checks.coherence.table_coherence">table_coherence</span>(rows):<a class="ln" href="../../src/tomd/lib/pdf/checks/coherence.py#L57">coherence.py:57</a>
+    <span class="c u"># untyped: rows, return</span>
+    <span class="c"># calls: </span><a class="t" href="#lib.pdf.checks.coherence.column_coherence">column_coherence</a><span class="c"></span>
+    ...
+
+<span class="n" id="lib.pdf.checks.coherence.CHECK">CHECK</span> = ...<a class="ln" href="../../src/tomd/lib/pdf/checks/coherence.py#L158">coherence.py:158</a>
+
+<span class="c"># + 1 private module-level name</span></pre><h2 id="lib-pdf-checks-data-or-format-py">lib/pdf/checks/data_or_format.py<a class="src" href="../../src/tomd/lib/pdf/checks/data_or_format.py">source</a></h2><p class="sum">Typed: 0 of 3 functions and methods (0%).</p><pre><span class="d">&quot;&quot;&quot;Meaning: tabular data or formatting? In data a cell&#x27;s meaning depends on its</span>
+<span class="d">row and its column (look a value up by row key and column header); in</span>
+<span class="d">formatting the grid only places content (front matter, label: value</span>
+<span class="d">entries, callouts, slide layouts). Features follow the web-table literature</span>
+<span class="d">(cell length and type consistency down columns, rows x columns, single</span>
+<span class="d">record, label: value pattern, large prose cells, borders), measured on the</span>
+<span class="d">existing keys before use (train_dvf.py: cross-validated AUC 0.99).</span>
+<span class="d">&quot;&quot;&quot;</span>
+
+<span class="k">def </span><span class="n" id="lib.pdf.checks.data_or_format.features">features</span>(rows, f) -&gt; dict | None:<a class="ln" href="../../src/tomd/lib/pdf/checks/data_or_format.py#L25">data_or_format.py:25</a>
+    <span class="c u"># untyped: rows, f</span>
+    <span class="c"># called by: </span><a class="t" href="#lib.pdf.checks.data_or_format.likelihood_data">likelihood_data</a><span class="c"></span>
+    ...
+
+<span class="k">def </span><span class="n" id="lib.pdf.checks.data_or_format.likelihood_data">likelihood_data</span>(rows, f) -&gt; float | None:<a class="ln" href="../../src/tomd/lib/pdf/checks/data_or_format.py#L46">data_or_format.py:46</a>
+<span class="d">    &quot;&quot;&quot;P(tabular data) for a reading, or None without one.&quot;&quot;&quot;</span>
+    <span class="c u"># untyped: rows, f</span>
+    <span class="c"># calls: </span><a class="t" href="#lib.pdf.checks.data_or_format.features">features</a>, <a class="t" href="#lib.pdf.scan_model.likelihood">scan_model.likelihood</a><span class="c"></span>
+    <span class="c"># called by: </span><a class="t" href="#lib.pdf.scan.run_scan">scan.run_scan</a><span class="c"></span>
+
+<span class="k">def </span><span class="n" id="lib.pdf.checks.data_or_format.run">run</span>(ctx) -&gt; dict:<a class="ln" href="../../src/tomd/lib/pdf/checks/data_or_format.py#L52">data_or_format.py:52</a>
+    <span class="c u"># untyped: ctx</span>
+    ...
+
+<span class="n" id="lib.pdf.checks.data_or_format.CHECK">CHECK</span> = ...<a class="ln" href="../../src/tomd/lib/pdf/checks/data_or_format.py#L56">data_or_format.py:56</a></pre><h2 id="lib-pdf-checks-drawn-lines-py">lib/pdf/checks/drawn_lines.py<a class="src" href="../../src/tomd/lib/pdf/checks/drawn_lines.py">source</a></h2><p class="sum">Typed: 0 of 1 functions and methods (0%).</p><pre><span class="d">&quot;&quot;&quot;Drawing: rules, vertical lines, row shading and enclosing boxes in the area.&quot;&quot;&quot;</span>
+
+<span class="k">def </span><span class="n" id="lib.pdf.checks.drawn_lines.run">run</span>(ctx) -&gt; dict:<a class="ln" href="../../src/tomd/lib/pdf/checks/drawn_lines.py#L13">drawn_lines.py:13</a>
+    <span class="c u"># untyped: ctx</span>
+    <span class="c"># calls: </span><a class="t" href="#lib.pdf.checks._layout.layout_features">_layout.layout_features</a><span class="c"></span>
+    ...
+
+<span class="n" id="lib.pdf.checks.drawn_lines.CHECK">CHECK</span> = <a class="t" href="#lib.pdf.checks.base.Check">Check</a>(&#x27;drawn_lines&#x27;, (&#x27;region&#x27;,), &#x27;paths&#x27;, 1, False, run)<a class="ln" href="../../src/tomd/lib/pdf/checks/drawn_lines.py#L18">drawn_lines.py:18</a></pre><h2 id="lib-pdf-checks-footprint-py">lib/pdf/checks/footprint.py<a class="src" href="../../src/tomd/lib/pdf/checks/footprint.py">source</a></h2><p class="sum">Typed: 0 of 1 functions and methods (0%).</p><pre><span class="d">&quot;&quot;&quot;Words: the area&#x27;s text footprint against the prose measure: left and</span>
+<span class="d">right inset (cell padding), and how many lines end on the right measure</span>
+<span class="d">(justified prose does; cell text ends raggedly).</span>
+<span class="d">&quot;&quot;&quot;</span>
+
+<span class="k">def </span><span class="n" id="lib.pdf.checks.footprint.run">run</span>(ctx) -&gt; dict:<a class="ln" href="../../src/tomd/lib/pdf/checks/footprint.py#L15">footprint.py:15</a>
+    <span class="c u"># untyped: ctx</span>
+    <span class="c"># calls: </span><a class="t" href="#lib.pdf.checks.wordgap.run">wordgap.run</a><span class="c"></span>
+    ...
+
+<span class="n" id="lib.pdf.checks.footprint.CHECK">CHECK</span> = ...<a class="ln" href="../../src/tomd/lib/pdf/checks/footprint.py#L20">footprint.py:20</a></pre><h2 id="lib-pdf-checks-nominations-py">lib/pdf/checks/nominations.py<a class="src" href="../../src/tomd/lib/pdf/checks/nominations.py">source</a></h2><p class="sum">Typed: 0 of 1 functions and methods (0%).</p><pre><span class="d">&quot;&quot;&quot;Which scans nominated the area and which rules excluded it (the evidence</span>
+<span class="d">record), with the number of independent information types among them.</span>
+<span class="d">&quot;&quot;&quot;</span>
+
+<span class="k">def </span><span class="n" id="lib.pdf.checks.nominations.run">run</span>(ctx) -&gt; dict:<a class="ln" href="../../src/tomd/lib/pdf/checks/nominations.py#L16">nominations.py:16</a>
+    <span class="c u"># untyped: ctx</span>
+    ...
+
+<span class="n" id="lib.pdf.checks.nominations.CHECK">CHECK</span> = <a class="t" href="#lib.pdf.checks.base.Check">Check</a>(&#x27;nominations&#x27;, (&#x27;region&#x27;,), &#x27;record&#x27;, 0, False, run)<a class="ln" href="../../src/tomd/lib/pdf/checks/nominations.py#L27">nominations.py:27</a>
+
+<span class="n" id="lib.pdf.checks.nominations.SOURCE_INFO">SOURCE_INFO</span> = ...<a class="ln" href="../../src/tomd/lib/pdf/checks/nominations.py#L12">nominations.py:12</a></pre><h2 id="lib-pdf-checks-plausible-py">lib/pdf/checks/plausible.py<a class="src" href="../../src/tomd/lib/pdf/checks/plausible.py">source</a></h2><p class="sum">Typed: 0 of 6 functions and methods (0%).</p><pre><span class="d">&quot;&quot;&quot;Content plausibility: does the reading make sense as data? A meaning-based</span>
 <span class="d">witness, independent of geometry: it reads only the cells&#x27; text.</span>
 <span class="d"></span>
 <span class="d">  sequence order   a key column that is mostly ordered (dates &quot;2022.3&quot;,</span>
@@ -1363,7 +1576,54 @@ a.t{color:inherit;text-decoration:underline dotted}a.ln{color:var(--mut);font-si
     <span class="c"># called by: </span><a class="t" href="#lib.pdf.checks.plausible.plausibility">plausibility</a><span class="c"></span>
     ...
 
-<span class="c"># + 1 private module-level name</span></pre><h2 id="lib-pdf-classify-py">lib/pdf/classify.py<a class="src" href="../../src/tomd/lib/pdf/classify.py">source</a></h2><p class="sum">Typed: 0 of 5 functions and methods (0%).</p><pre><span class="d">&quot;&quot;&quot;Stage-2 gate: is a selected table really a table, and how is it built?</span>
+<span class="c"># + 1 private module-level name</span></pre><h2 id="lib-pdf-checks-registry-py">lib/pdf/checks/registry.py<a class="src" href="../../src/tomd/lib/pdf/checks/registry.py">source</a></h2><p class="sum">Typed: 2 of 2 functions and methods (100%).</p><pre><span class="d">&quot;&quot;&quot;The scan&#x27;s region checks, in a fixed order (cheapest and most decisive first).&quot;&quot;&quot;</span>
+
+<span class="k">def </span><span class="n" id="lib.pdf.checks.registry.run_region_checks">run_region_checks</span>(ctx: <a class="t" href="#lib.pdf.checks.base.AreaContext">AreaContext</a>, decided: Callable[[dict], bool] | None = None) -&gt; dict:<a class="ln" href="../../src/tomd/lib/pdf/checks/registry.py#L38">registry.py:38</a>
+<span class="d">    &quot;&quot;&quot;Tier 1 first; the last-resort tier only while decided(features) is False</span>
+<span class="d">    . Tiers per generator family where the family&#x27;s ledger says so.</span>
+<span class="d">    Returns the features; &quot;_skipped&quot; lists the checks not run.</span>
+<span class="d">    &quot;&quot;&quot;</span>
+    <span class="c"># calls: </span>_tier<span class="c"></span>
+    <span class="c"># called by: </span><a class="t" href="#lib.pdf.scan.area_features">scan.area_features</a><span class="c"></span>
+
+<span class="c"># Per-generator tiers (the ledger computed within each generator family on the development</span>
+<span class="c"># sets, work/ledger_gen_*.txt): a last-resort check is effective for a family - unique AUC</span>
+<span class="c"># &gt;= 0.005 and more decisions fixed than harmed, in a family of 200+ areas - and runs in</span>
+<span class="c"># tier 1 there. Families not listed use the global tiers.</span>
+<span class="n" id="lib.pdf.checks.registry.GENERATOR_TIER">GENERATOR_TIER</span> = ...<a class="ln" href="../../src/tomd/lib/pdf/checks/registry.py#L24">registry.py:24</a>
+
+<span class="c"># The ledger&#x27;s order; every check is on (the ledger&#x27;s off-switch is not ported).</span>
+<span class="n" id="lib.pdf.checks.registry.REGISTRY">REGISTRY</span> = ...<a class="ln" href="../../src/tomd/lib/pdf/checks/registry.py#L16">registry.py:16</a>
+
+<span class="c"># + 1 private module-level name</span></pre><h2 id="lib-pdf-checks-same-code-py">lib/pdf/checks/same_code.py<a class="src" href="../../src/tomd/lib/pdf/checks/same_code.py">source</a></h2><p class="sum">Typed: 0 of 1 functions and methods (0%).</p><pre><span class="d">&quot;&quot;&quot;Meaning: the largest code-pair similarity recorded in the area (weighted</span>
+<span class="d">by size where it was computed; one-line blocks abstain upstream).</span>
+<span class="d">&quot;&quot;&quot;</span>
+
+<span class="k">def </span><span class="n" id="lib.pdf.checks.same_code.run">run</span>(ctx) -&gt; dict:<a class="ln" href="../../src/tomd/lib/pdf/checks/same_code.py#L13">same_code.py:13</a>
+    <span class="c u"># untyped: ctx</span>
+    ...
+
+<span class="n" id="lib.pdf.checks.same_code.CHECK">CHECK</span> = ...<a class="ln" href="../../src/tomd/lib/pdf/checks/same_code.py#L17">same_code.py:17</a></pre><h2 id="lib-pdf-checks-text-alignment-py">lib/pdf/checks/text_alignment.py<a class="src" href="../../src/tomd/lib/pdf/checks/text_alignment.py">source</a></h2><p class="sum">Typed: 0 of 1 functions and methods (0%).</p><pre><span class="d">&quot;&quot;&quot;Alignment and shape of the text: rows, pieces per row, aligned starts,</span>
+<span class="d">monospace and digit shares, size and position (the classifier&#x27;s features).</span>
+<span class="d">&quot;&quot;&quot;</span>
+
+<span class="k">def </span><span class="n" id="lib.pdf.checks.text_alignment.run">run</span>(ctx) -&gt; dict:<a class="ln" href="../../src/tomd/lib/pdf/checks/text_alignment.py#L14">text_alignment.py:14</a>
+    <span class="c u"># untyped: ctx</span>
+    <span class="c"># calls: </span><a class="t" href="#lib.pdf.checks._layout.layout_features">_layout.layout_features</a><span class="c"></span>
+    ...
+
+<span class="n" id="lib.pdf.checks.text_alignment.CHECK">CHECK</span> = <a class="t" href="#lib.pdf.checks.base.Check">Check</a>(&#x27;text_alignment&#x27;, (&#x27;region&#x27;,), &#x27;words&#x27;, 1, False, run)<a class="ln" href="../../src/tomd/lib/pdf/checks/text_alignment.py#L19">text_alignment.py:19</a></pre><h2 id="lib-pdf-checks-wordgap-py">lib/pdf/checks/wordgap.py<a class="src" href="../../src/tomd/lib/pdf/checks/wordgap.py">source</a></h2><p class="sum">Typed: 0 of 1 functions and methods (0%).</p><pre><span class="d">&quot;&quot;&quot;Words: gaps between neighbouring words in units of the document&#x27;s normal</span>
+<span class="d">space. Prose has uniform gaps (one space, or uniformly stretched when</span>
+<span class="d">justified); table lines have bimodal gaps that recur at the same x.</span>
+<span class="d">&quot;&quot;&quot;</span>
+
+<span class="k">def </span><span class="n" id="lib.pdf.checks.wordgap.run">run</span>(ctx) -&gt; dict:<a class="ln" href="../../src/tomd/lib/pdf/checks/wordgap.py#L17">wordgap.py:17</a>
+    <span class="c u"># untyped: ctx</span>
+    <span class="c"># calls: </span><a class="t" href="#lib.pdf.docmeasure.area_word_features">docmeasure.area_word_features</a><span class="c"></span>
+    <span class="c"># called by: </span><a class="t" href="#lib.pdf.checks.footprint.run">footprint.run</a><span class="c"></span>
+    ...
+
+<span class="n" id="lib.pdf.checks.wordgap.CHECK">CHECK</span> = ...<a class="ln" href="../../src/tomd/lib/pdf/checks/wordgap.py#L24">wordgap.py:24</a></pre><h2 id="lib-pdf-classify-py">lib/pdf/classify.py<a class="src" href="../../src/tomd/lib/pdf/classify.py">source</a></h2><p class="sum">Typed: 0 of 5 functions and methods (0%).</p><pre><span class="d">&quot;&quot;&quot;Stage-2 gate: is a selected table really a table, and how is it built?</span>
 <span class="d"></span>
 <span class="d">Every selected table is described by cheap geometric and font features of</span>
 <span class="d">its area (rules drawn, shaded bands, column-split text rows, monospace and</span>
@@ -1398,7 +1658,7 @@ a.t{color:inherit;text-decoration:underline dotted}a.ln{color:var(--mut);font-si
 <span class="d">    &quot;&quot;&quot;</span>
     <span class="c u"># untyped: doc, pages</span>
     <span class="c"># calls: </span><a class="t" href="#lib.pdf.summary.generator">summary.generator</a>, <a class="t" href="#lib.pdf.classify.region_features">region_features</a>, <a class="t" href="#lib.pdf.pagecache.words_in">pagecache.words_in</a>, <a class="t" href="#lib.pdf.validate.verify_layout">validate.verify_layout</a>, <a class="t" href="#lib.pdf.validate.verify_pieces">validate.verify_pieces</a>, <a class="t" href="#lib.pdf.fullwidth.apply">fullwidth.apply</a>, <a class="t" href="#lib.pdf.runctx.current">runctx.current</a>, <a class="t" href="#lib.pdf.fit.fit">fit.fit</a>, <a class="t" href="#lib.pdf.fit.fit_rows">fit.fit_rows</a>, <a class="t" href="#lib.pdf.ruled.page_hrules">ruled.page_hrules</a>, <a class="t" href="#lib.pdf.relations.record_for">relations.record_for</a>, <a class="t" href="#lib.pdf.checks.plausible.plausibility">plausible.plausibility</a><span class="c">, +4 more</span>
-    <span class="c"># called by: </span><a class="t" href="#lib.pdf.pipeline.run_pipeline">pipeline.run_pipeline</a><span class="c"></span>
+    <span class="c"># called by: </span>pipeline._build_scan_tables, <a class="t" href="#lib.pdf.pipeline.run_pipeline">pipeline.run_pipeline</a><span class="c"></span>
 
 <span class="k">def </span><span class="n" id="lib.pdf.classify.image_share">image_share</span>(page, bbox) -&gt; float:<a class="ln" href="../../src/tomd/lib/pdf/classify.py#L198">classify.py:198</a>
 <span class="d">    &quot;&quot;&quot;The share of bbox covered by images drawn on the page (union approximated by the sum,</span>
@@ -1416,7 +1676,7 @@ a.t{color:inherit;text-decoration:underline dotted}a.ln{color:var(--mut);font-si
 <span class="d">    &quot;&quot;&quot;(features, text lines) of one table area. Shared with the PoC&#x27;s training.&quot;&quot;&quot;</span>
     <span class="c u"># untyped: page, bbox, sources, flags, return</span>
     <span class="c"># calls: </span><a class="t" href="#lib.pdf.classify.text_rows">text_rows</a><span class="c"></span>
-    <span class="c"># called by: </span><a class="t" href="#lib.pdf.classify.gate_tables">gate_tables</a><span class="c"></span>
+    <span class="c"># called by: </span><a class="t" href="#lib.pdf.checks._layout.layout_features">_layout.layout_features</a>, <a class="t" href="#lib.pdf.classify.gate_tables">gate_tables</a><span class="c"></span>
 
 <span class="k">def </span><span class="n" id="lib.pdf.classify.text_rows">text_rows</span>(page, rect):<a class="ln" href="../../src/tomd/lib/pdf/classify.py#L78">classify.py:78</a>
 <span class="d">    &quot;&quot;&quot;Text rows in rect: [(top, bottom, [(x0, x1, text, mono)])], pieces split at wide gaps.&quot;&quot;&quot;</span>
@@ -1848,6 +2108,7 @@ a.t{color:inherit;text-decoration:underline dotted}a.ln{color:var(--mut);font-si
 <span class="d">    &quot;&quot;&quot;</span>
     <span class="c u"># untyped: pages, regions, specialists, rules_by_page</span>
     <span class="c"># calls: </span><a class="t" href="#lib.pdf.content.page_text">page_text</a>, <a class="t" href="#lib.pdf.content.page_hrules">page_hrules</a>, <a class="t" href="#lib.pdf.content.build">build</a>, _region_rules, _rotated_header, _cell_lines, <a class="t" href="#lib.pdf.types.TableCandidate">types.TableCandidate</a><span class="c"></span>
+    <span class="c"># called by: </span>pipeline._build_scan_tables, pipeline._content_readings<span class="c"></span>
 
 <span class="k">def </span><span class="n" id="lib.pdf.content.gutters">gutters</span>(lines_pieces, x_lo, x_hi):<a class="ln" href="../../src/tomd/lib/pdf/content.py#L81">content.py:81</a>
 <span class="d">    &quot;&quot;&quot;x intervals crossed by at most _SPAN_LINES lines&#x27; pieces.&quot;&quot;&quot;</span>
@@ -1866,7 +2127,7 @@ a.t{color:inherit;text-decoration:underline dotted}a.ln{color:var(--mut);font-si
 <span class="d">    &quot;&quot;&quot;</span>
     <span class="c u"># untyped: page</span>
     <span class="c"># calls: </span>pagecache._dedup_words<span class="c"></span>
-    <span class="c"># called by: </span><a class="t" href="#lib.pdf.content.content_candidates">content_candidates</a>, <a class="t" href="#lib.pdf.content.page_words">page_words</a><span class="c"></span>
+    <span class="c"># called by: </span><a class="t" href="#lib.pdf.content.content_candidates">content_candidates</a>, <a class="t" href="#lib.pdf.content.page_words">page_words</a>, _Page.__init__<span class="c"></span>
 
 <span class="k">def </span><span class="n" id="lib.pdf.content.page_words">page_words</span>(page) -&gt; list[tuple]:<a class="ln" href="../../src/tomd/lib/pdf/content.py#L308">content.py:308</a>
 <span class="d">    &quot;&quot;&quot;(x0, y0, x1, y1, text, monospace) for every horizontal word on the page.&quot;&quot;&quot;</span>
@@ -1881,7 +2142,7 @@ a.t{color:inherit;text-decoration:underline dotted}a.ln{color:var(--mut);font-si
 <span class="k">def </span><span class="n" id="lib.pdf.content.visual_lines">visual_lines</span>(words):<a class="ln" href="../../src/tomd/lib/pdf/content.py#L54">content.py:54</a>
 <span class="d">    &quot;&quot;&quot;words: (x0, y0, x1, y1, text) -&gt; lines of words sorted left to right.&quot;&quot;&quot;</span>
     <span class="c u"># untyped: words, return</span>
-    <span class="c"># called by: </span>_rotated_header, <a class="t" href="#lib.pdf.content.build">build</a><span class="c"></span>
+    <span class="c"># called by: </span>_rotated_header, <a class="t" href="#lib.pdf.content.build">build</a>, extent._row_from<span class="c"></span>
 
 <span class="n" id="lib.pdf.content.SPECIALISTS">SPECIALISTS</span> = {&#x27;code_rows&#x27;: True, &#x27;separators&#x27;: True}<a class="ln" href="../../src/tomd/lib/pdf/content.py#L107">content.py:107</a>
 
@@ -2012,7 +2273,62 @@ a.t{color:inherit;text-decoration:underline dotted}a.ln{color:var(--mut);font-si
     <span class="c"># calls: </span><a class="t" href="#lib.pdf.docling_backend.docling_available">docling_available</a>, _normalize_table_bbox<span class="c"></span>
     <span class="c"># called by: </span><a class="t" href="#lib.pdf.pipeline.run_pipeline">pipeline.run_pipeline</a><span class="c"></span>
 
-<span class="c"># + 8 private module-level names</span></pre><h2 id="lib-pdf-emit-py">lib/pdf/emit.py<a class="src" href="../../src/tomd/lib/pdf/emit.py">source</a></h2><p class="sum">Typed: 43 of 47 functions and methods (91%).</p><pre><span class="d">&quot;&quot;&quot;Markdown and companion prompts file generation.&quot;&quot;&quot;</span>
+<span class="c"># + 8 private module-level names</span></pre><h2 id="lib-pdf-docmeasure-py">lib/pdf/docmeasure.py<a class="src" href="../../src/tomd/lib/pdf/docmeasure.py">source</a></h2><p class="sum">Typed: 3 of 6 functions and methods (50%).</p><pre><span class="d">&quot;&quot;&quot;Level 0: what ordinary prose looks like in this document.</span>
+<span class="d"></span>
+<span class="d">Measured once per paper from the body text (lines of multi-line blocks with</span>
+<span class="d">several words): the prose measure (left and right text edges, robust</span>
+<span class="d">percentiles), whether the prose is justified (right edges pile up on the</span>
+<span class="d">measure), and the normal space between words per text height. Everything</span>
+<span class="d">below compares against it: a table&#x27;s text is inset from the measure (cell</span>
+<span class="d">padding) and ends raggedly per column; its lines have bimodal word gaps</span>
+<span class="d">(one space inside cells, several between cells, recurring at the same x),</span>
+<span class="d">where prose has uniform gaps (one space, or uniformly stretched when</span>
+<span class="d">justified).</span>
+<span class="d">&quot;&quot;&quot;</span>
+
+<span class="k">@dataclass</span>
+<span class="k">class </span><span class="n" id="lib.pdf.docmeasure.DocMeasure">DocMeasure</span>:<a class="ln" href="../../src/tomd/lib/pdf/docmeasure.py#L27">docmeasure.py:27</a>
+    <span class="n" id="lib.pdf.docmeasure.DocMeasure.left">left</span>: float = 0.0<a class="ln" href="../../src/tomd/lib/pdf/docmeasure.py#L28">docmeasure.py:28</a>
+    <span class="n" id="lib.pdf.docmeasure.DocMeasure.right">right</span>: float = 0.0<a class="ln" href="../../src/tomd/lib/pdf/docmeasure.py#L29">docmeasure.py:29</a>
+    <span class="n" id="lib.pdf.docmeasure.DocMeasure.justified">justified</span>: float = 0.0  <span class="c"># share of prose lines ending on the right measure</span><a class="ln" href="../../src/tomd/lib/pdf/docmeasure.py#L30">docmeasure.py:30</a>
+    <span class="n" id="lib.pdf.docmeasure.DocMeasure.space">space</span>: dict = field(default_factory=dict)  <span class="c"># text height (pt, rounded) -&gt; normal word space</span><a class="ln" href="../../src/tomd/lib/pdf/docmeasure.py#L31">docmeasure.py:31</a>
+    <span class="n" id="lib.pdf.docmeasure.DocMeasure.known">known</span>: bool = False<a class="ln" href="../../src/tomd/lib/pdf/docmeasure.py#L32">docmeasure.py:32</a>
+    <span class="k">def </span><span class="n" id="lib.pdf.docmeasure.DocMeasure.word_space">word_space</span>(self, height: float) -&gt; float: ...<a class="ln" href="../../src/tomd/lib/pdf/docmeasure.py#L34">docmeasure.py:34</a>
+
+<span class="k">def </span><span class="n" id="lib.pdf.docmeasure.area_word_features">area_word_features</span>(words, m: <a class="t" href="#lib.pdf.docmeasure.DocMeasure">DocMeasure</a>) -&gt; dict:<a class="ln" href="../../src/tomd/lib/pdf/docmeasure.py#L111">docmeasure.py:111</a>
+<span class="d">    &quot;&quot;&quot;Word-gap and footprint features of the words in one area.&quot;&quot;&quot;</span>
+    <span class="c u"># untyped: words</span>
+    <span class="c"># calls: </span><a class="t" href="#lib.pdf.docmeasure.visual_lines">visual_lines</a>, <a class="t" href="#lib.pdf.docmeasure.gap_stats">gap_stats</a><span class="c"></span>
+    <span class="c"># called by: </span><a class="t" href="#lib.pdf.checks.wordgap.run">wordgap.run</a><span class="c"></span>
+
+<span class="k">def </span><span class="n" id="lib.pdf.docmeasure.gap_stats">gap_stats</span>(line, m: <a class="t" href="#lib.pdf.docmeasure.DocMeasure">DocMeasure</a>) -&gt; dict | None:<a class="ln" href="../../src/tomd/lib/pdf/docmeasure.py#L98">docmeasure.py:98</a>
+<span class="d">    &quot;&quot;&quot;One visual line&#x27;s word gaps in units of the document&#x27;s normal space.&quot;&quot;&quot;</span>
+    <span class="c u"># untyped: line</span>
+    <span class="c"># called by: </span><a class="t" href="#lib.pdf.docmeasure.area_word_features">area_word_features</a><span class="c"></span>
+
+<span class="k">def </span><span class="n" id="lib.pdf.docmeasure.hyphenates">hyphenates</span>(page_words: list[list]) -&gt; bool:<a class="ln" href="../../src/tomd/lib/pdf/docmeasure.py#L134">docmeasure.py:134</a>
+<span class="d">    &quot;&quot;&quot;Does the document break words with a hyphen at line ends? Evidence: a</span>
+<span class="d">    line ending in &quot;word-&quot; whose join with the next line&#x27;s first word appears</span>
+<span class="d">    elsewhere in the document unhyphenated (&quot;compari-&quot; + &quot;son&quot;, &quot;comparison&quot;</span>
+<span class="d">    seen elsewhere). Two or more such breaks: it hyphenates. None: a line-end</span>
+<span class="d">    hyphen is the word&#x27;s own (&quot;Use-&quot; + &quot;cases&quot;). One: undecided, treated as</span>
+<span class="d">    hyphenating (the earlier behaviour). Measured on the keys: 4 to 223 such</span>
+<span class="d">    breaks in hyphenating papers (LaTeX, and Word with hyphenation on), 0 in</span>
+<span class="d">    papers that never hyphenate. The maker alone does not tell (Word can do</span>
+<span class="d">    either).</span>
+<span class="d">    &quot;&quot;&quot;</span>
+
+<span class="k">def </span><span class="n" id="lib.pdf.docmeasure.measure">measure</span>(page_words: list[list]) -&gt; <a class="t" href="#lib.pdf.docmeasure.DocMeasure">DocMeasure</a>:<a class="ln" href="../../src/tomd/lib/pdf/docmeasure.py#L59">docmeasure.py:59</a>
+<span class="d">    &quot;&quot;&quot;page_words: per page, fitz &quot;words&quot; tuples (x0, y0, x1, y1, text, block, line, n).&quot;&quot;&quot;</span>
+    <span class="c"># calls: </span><a class="t" href="#lib.pdf.docmeasure.visual_lines">visual_lines</a>, <a class="t" href="#lib.pdf.docmeasure.DocMeasure">DocMeasure</a><span class="c"></span>
+    <span class="c"># called by: </span><a class="t" href="#lib.pdf.pipeline.run_pipeline">pipeline.run_pipeline</a><span class="c"></span>
+
+<span class="k">def </span><span class="n" id="lib.pdf.docmeasure.visual_lines">visual_lines</span>(words):<a class="ln" href="../../src/tomd/lib/pdf/docmeasure.py#L44">docmeasure.py:44</a>
+<span class="d">    &quot;&quot;&quot;Words (x0, y0, x1, y1, text, ...) sharing a baseline, left to right.&quot;&quot;&quot;</span>
+    <span class="c u"># untyped: words, return</span>
+    <span class="c"># called by: </span><a class="t" href="#lib.pdf.docmeasure.area_word_features">area_word_features</a>, <a class="t" href="#lib.pdf.docmeasure.measure">measure</a><span class="c"></span></pre><h2 id="lib-pdf-dvf-model-py">lib/pdf/dvf_model.py<a class="src" href="../../src/tomd/lib/pdf/dvf_model.py">source</a></h2><pre><span class="d">&quot;&quot;&quot;Data-vs-formatting model, fitted by train_dvf.py on the existing keys.&quot;&quot;&quot;</span>
+
+<span class="n" id="lib.pdf.dvf_model.MODEL">MODEL</span> = ...<a class="ln" href="../../src/tomd/lib/pdf/dvf_model.py#L10">dvf_model.py:10</a></pre><h2 id="lib-pdf-emit-py">lib/pdf/emit.py<a class="src" href="../../src/tomd/lib/pdf/emit.py">source</a></h2><p class="sum">Typed: 43 of 48 functions and methods (89%).</p><pre><span class="d">&quot;&quot;&quot;Markdown and companion prompts file generation.&quot;&quot;&quot;</span>
 
 <span class="k">def </span><span class="n" id="lib.pdf.emit.emit_markdown">emit_markdown</span>(metadata: dict, sections: list[<a class="t" href="#lib.pdf.types.Section">Section</a>], *, annotate: bool = False, images_truncated: bool = False, source_image_count: int = 0, vector_uncertainty: <a class="t" href="#lib.pdf.images.VectorUncertaintyStats">VectorUncertaintyStats</a> | None = None, glyph_stats: <a class="t" href="#lib.pdf.glyphs.GlyphPassStats">GlyphPassStats</a> | None = None) -&gt; str:<a class="ln" href="../../src/tomd/lib/pdf/emit.py#L1251">emit.py:1251</a>
 <span class="d">    &quot;&quot;&quot;Generate the output Markdown from structured sections.</span>
@@ -2079,6 +2395,16 @@ a.t{color:inherit;text-decoration:underline dotted}a.ln{color:var(--mut);font-si
 <span class="d">    &quot;&quot;&quot;</span>
     <span class="c"># called by: </span><a class="t" href="#api.convert_paper_full">api.convert_paper_full</a>, <a class="t" href="#lib.pdf.emit.emit_markdown">emit_markdown</a>, pipeline._insert_after_front_matter<span class="c"></span>
 
+<span class="k">def </span><span class="n" id="lib.pdf.emit.table_use">table_use</span>(rows) -&gt; str:<a class="ln" href="../../src/tomd/lib/pdf/emit.py#L1592">emit.py:1592</a>
+<span class="d">    &quot;&quot;&quot;What a grid is used for (conventions decided by a person, 2026-10-19):</span>
+<span class="d">    &quot;label-value&quot; - repeated per-item &quot;label: value&quot; entries (not a table);</span>
+<span class="d">    &quot;contents&quot; - a contents page or reference list laid out in a grid (not a table);</span>
+<span class="d">    &quot;heading&quot; - a numbered heading of the standard&#x27;s wording and its stable name;</span>
+<span class="d">    &quot;table&quot; - everything else.</span>
+<span class="d">    &quot;&quot;&quot;</span>
+    <span class="c u"># untyped: rows</span>
+    <span class="c"># called by: </span>pipeline._build_scan_tables<span class="c"></span>
+
 <span class="c"># The single Markdown unordered-list marker this converter emits, at every</span>
 <span class="c"># nesting depth. &quot;-&quot; over &quot;*&quot; because the HTML renderer already emits &quot;-&quot;, the</span>
 <span class="c"># blessed ideals standardize on it, and it cannot be read as emphasis if a</span>
@@ -2113,39 +2439,76 @@ a.t{color:inherit;text-decoration:underline dotted}a.ln{color:var(--mut);font-si
 <span class="d">&quot;&quot;&quot;</span>
 
 <span class="k">@dataclass</span>
-<span class="k">class </span><span class="n" id="lib.pdf.evidence.Entry">Entry</span>:<a class="ln" href="../../src/tomd/lib/pdf/evidence.py#L31">evidence.py:31</a>
-    <span class="n" id="lib.pdf.evidence.Entry.kind">kind</span>: str  <span class="c"># &quot;nominated&quot; | &quot;excluded&quot; | &quot;feature&quot;</span><a class="ln" href="../../src/tomd/lib/pdf/evidence.py#L32">evidence.py:32</a>
-    <span class="n" id="lib.pdf.evidence.Entry.scan">scan</span>: str  <span class="c"># which reader or check wrote it</span><a class="ln" href="../../src/tomd/lib/pdf/evidence.py#L33">evidence.py:33</a>
-    <span class="n" id="lib.pdf.evidence.Entry.page">page</span>: int<a class="ln" href="../../src/tomd/lib/pdf/evidence.py#L34">evidence.py:34</a>
-    <span class="n" id="lib.pdf.evidence.Entry.bbox">bbox</span>: Box<a class="ln" href="../../src/tomd/lib/pdf/evidence.py#L35">evidence.py:35</a>
-    <span class="n" id="lib.pdf.evidence.Entry.rule">rule</span>: str  <span class="c"># the rule that decided (or the feature&#x27;s name)</span><a class="ln" href="../../src/tomd/lib/pdf/evidence.py#L36">evidence.py:36</a>
-    <span class="n" id="lib.pdf.evidence.Entry.info">info</span>: str  <span class="c"># information type the rule used</span><a class="ln" href="../../src/tomd/lib/pdf/evidence.py#L37">evidence.py:37</a>
-    <span class="n" id="lib.pdf.evidence.Entry.value">value</span>: object = None  <span class="c"># a feature&#x27;s value, or extra detail</span><a class="ln" href="../../src/tomd/lib/pdf/evidence.py#L38">evidence.py:38</a>
-    <span class="n" id="lib.pdf.evidence.Entry.observed">observed</span>: bool = True  <span class="c"># observed on the page, or inferred</span><a class="ln" href="../../src/tomd/lib/pdf/evidence.py#L39">evidence.py:39</a>
+<span class="k">class </span><span class="n" id="lib.pdf.evidence.Entry">Entry</span>:<a class="ln" href="../../src/tomd/lib/pdf/evidence.py#L33">evidence.py:33</a>
+    <span class="n" id="lib.pdf.evidence.Entry.kind">kind</span>: str  <span class="c"># &quot;nominated&quot; | &quot;excluded&quot; | &quot;feature&quot;</span><a class="ln" href="../../src/tomd/lib/pdf/evidence.py#L34">evidence.py:34</a>
+    <span class="n" id="lib.pdf.evidence.Entry.scan">scan</span>: str  <span class="c"># which reader or check wrote it</span><a class="ln" href="../../src/tomd/lib/pdf/evidence.py#L35">evidence.py:35</a>
+    <span class="n" id="lib.pdf.evidence.Entry.page">page</span>: int<a class="ln" href="../../src/tomd/lib/pdf/evidence.py#L36">evidence.py:36</a>
+    <span class="n" id="lib.pdf.evidence.Entry.bbox">bbox</span>: Box<a class="ln" href="../../src/tomd/lib/pdf/evidence.py#L37">evidence.py:37</a>
+    <span class="n" id="lib.pdf.evidence.Entry.rule">rule</span>: str  <span class="c"># the rule that decided (or the feature&#x27;s name)</span><a class="ln" href="../../src/tomd/lib/pdf/evidence.py#L38">evidence.py:38</a>
+    <span class="n" id="lib.pdf.evidence.Entry.info">info</span>: str  <span class="c"># information type the rule used</span><a class="ln" href="../../src/tomd/lib/pdf/evidence.py#L39">evidence.py:39</a>
+    <span class="n" id="lib.pdf.evidence.Entry.value">value</span>: object = None  <span class="c"># a feature&#x27;s value, or extra detail</span><a class="ln" href="../../src/tomd/lib/pdf/evidence.py#L40">evidence.py:40</a>
+    <span class="n" id="lib.pdf.evidence.Entry.observed">observed</span>: bool = True  <span class="c"># observed on the page, or inferred</span><a class="ln" href="../../src/tomd/lib/pdf/evidence.py#L41">evidence.py:41</a>
 
 <span class="k">@dataclass</span>
-<span class="k">class </span><span class="n" id="lib.pdf.evidence.Record">Record</span>:<a class="ln" href="../../src/tomd/lib/pdf/evidence.py#L43">evidence.py:43</a>
-    <span class="n" id="lib.pdf.evidence.Record.entries">entries</span>: list[<a class="t" href="#lib.pdf.evidence.Entry">Entry</a>] = field(default_factory=list)<a class="ln" href="../../src/tomd/lib/pdf/evidence.py#L44">evidence.py:44</a>
+<span class="k">class </span><span class="n" id="lib.pdf.evidence.Record">Record</span>:<a class="ln" href="../../src/tomd/lib/pdf/evidence.py#L45">evidence.py:45</a>
+    <span class="n" id="lib.pdf.evidence.Record.entries">entries</span>: list[<a class="t" href="#lib.pdf.evidence.Entry">Entry</a>] = field(default_factory=list)<a class="ln" href="../../src/tomd/lib/pdf/evidence.py#L46">evidence.py:46</a>
     <span class="c"># every candidate reading: (source, page, bbox, rows of cell text)</span>
-    <span class="n" id="lib.pdf.evidence.Record.readings">readings</span>: list[tuple] = field(default_factory=list)<a class="ln" href="../../src/tomd/lib/pdf/evidence.py#L46">evidence.py:46</a>
+    <span class="n" id="lib.pdf.evidence.Record.readings">readings</span>: list[tuple] = field(default_factory=list)<a class="ln" href="../../src/tomd/lib/pdf/evidence.py#L48">evidence.py:48</a>
     <span class="c"># readers, checks and specialists that raised: never swallowed silently</span>
-    <span class="n" id="lib.pdf.evidence.Record.errors">errors</span>: list[dict] = field(default_factory=list)<a class="ln" href="../../src/tomd/lib/pdf/evidence.py#L48">evidence.py:48</a>
-    <span class="k">def </span><span class="n" id="lib.pdf.evidence.Record.exclude">exclude</span>(self, scan: str, page: int, bbox: Box, rule: str, info: str, value=None) -&gt; None:<a class="ln" href="../../src/tomd/lib/pdf/evidence.py#L53">evidence.py:53</a>
+    <span class="n" id="lib.pdf.evidence.Record.errors">errors</span>: list[dict] = field(default_factory=list)<a class="ln" href="../../src/tomd/lib/pdf/evidence.py#L50">evidence.py:50</a>
+    <span class="c"># what ordinary prose looks like in this document (docmeasure.measure), for the region scan</span>
+    <span class="n" id="lib.pdf.evidence.Record.doc_measure">doc_measure</span>: <a class="t" href="#lib.pdf.docmeasure.DocMeasure">DocMeasure</a> | None = None<a class="ln" href="../../src/tomd/lib/pdf/evidence.py#L52">evidence.py:52</a>
+    <span class="k">def </span><span class="n" id="lib.pdf.evidence.Record.exclude">exclude</span>(self, scan: str, page: int, bbox: Box, rule: str, info: str, value=None) -&gt; None:<a class="ln" href="../../src/tomd/lib/pdf/evidence.py#L57">evidence.py:57</a>
         <span class="c u"># untyped: value</span>
         <span class="c"># calls: </span><a class="t" href="#lib.pdf.evidence.Entry">Entry</a><span class="c"></span>
         ...
-    <span class="k">def </span><span class="n" id="lib.pdf.evidence.Record.feature">feature</span>(self, scan: str, page: int, bbox: Box, name: str, info: str, value, observed: bool = True) -&gt; None:<a class="ln" href="../../src/tomd/lib/pdf/evidence.py#L56">evidence.py:56</a>
+    <span class="k">def </span><span class="n" id="lib.pdf.evidence.Record.feature">feature</span>(self, scan: str, page: int, bbox: Box, name: str, info: str, value, observed: bool = True) -&gt; None:<a class="ln" href="../../src/tomd/lib/pdf/evidence.py#L60">evidence.py:60</a>
         <span class="c u"># untyped: value</span>
         <span class="c"># calls: </span><a class="t" href="#lib.pdf.evidence.Entry">Entry</a><span class="c"></span>
         ...
-    <span class="k">def </span><span class="n" id="lib.pdf.evidence.Record.nominate">nominate</span>(self, scan: str, page: int, bbox: Box, cue: str, info: str, value=None) -&gt; None:<a class="ln" href="../../src/tomd/lib/pdf/evidence.py#L50">evidence.py:50</a>
+    <span class="k">def </span><span class="n" id="lib.pdf.evidence.Record.nominate">nominate</span>(self, scan: str, page: int, bbox: Box, cue: str, info: str, value=None) -&gt; None:<a class="ln" href="../../src/tomd/lib/pdf/evidence.py#L54">evidence.py:54</a>
         <span class="c u"># untyped: value</span>
         <span class="c"># calls: </span><a class="t" href="#lib.pdf.evidence.Entry">Entry</a><span class="c"></span>
         ...
-    <span class="k">def </span><span class="n" id="lib.pdf.evidence.Record.on_page">on_page</span>(self, page: int, kind: str | None = None) -&gt; list[<a class="t" href="#lib.pdf.evidence.Entry">Entry</a>]: ...<a class="ln" href="../../src/tomd/lib/pdf/evidence.py#L60">evidence.py:60</a>
+    <span class="k">def </span><span class="n" id="lib.pdf.evidence.Record.on_page">on_page</span>(self, page: int, kind: str | None = None) -&gt; list[<a class="t" href="#lib.pdf.evidence.Entry">Entry</a>]: ...<a class="ln" href="../../src/tomd/lib/pdf/evidence.py#L64">evidence.py:64</a>
 
 <span class="c"># Exceptions that mean the code is wrong, not the PDF: the release gate fails on any of them.</span>
-<span class="n" id="lib.pdf.evidence.CODE_ERRORS">CODE_ERRORS</span> = ...<a class="ln" href="../../src/tomd/lib/pdf/evidence.py#L27">evidence.py:27</a></pre><h2 id="lib-pdf-extract-py">lib/pdf/extract.py<a class="src" href="../../src/tomd/lib/pdf/extract.py">source</a></h2><p class="sum">Typed: 1 of 4 functions and methods (25%).</p><pre><span class="d">&quot;&quot;&quot;Dual-path PDF text extraction: MuPDF grouping and spatial rules.&quot;&quot;&quot;</span>
+<span class="n" id="lib.pdf.evidence.CODE_ERRORS">CODE_ERRORS</span> = ...<a class="ln" href="../../src/tomd/lib/pdf/evidence.py#L29">evidence.py:29</a></pre><h2 id="lib-pdf-extent-py">lib/pdf/extent.py<a class="src" href="../../src/tomd/lib/pdf/extent.py">source</a></h2><p class="sum">Typed: 1 of 20 functions and methods (5%).</p><pre><span class="d">&quot;&quot;&quot;The extent step: where each reader&#x27;s table stops, and the rows just outside it.</span>
+<span class="d"></span>
+<span class="d">Runs after every reader, before selection, with the pages at hand.</span>
+<span class="d"></span>
+<span class="d">Stop reason (evidence): for every candidate, at its top and bottom, the</span>
+<span class="d">reader&#x27;s own extent rule and what lies just beyond (page edge, a drawn rule,</span>
+<span class="d">the gap to the next text, that text). Readers do not record why they stop;</span>
+<span class="d">this is the one place that does.</span>
+<span class="d"></span>
+<span class="d">Rows just outside a reading (user, from the cut-short diagnosis: &quot;Alignment</span>
+<span class="d">of text over the columns is a common reason&quot;; background colour; rules that</span>
+<span class="d">keep separating the columns; a header placed under its columns):</span>
+<span class="d">  alignment   a short label row directly above (or below) the body whose</span>
+<span class="d">              pieces each start at, or are centred over, a body column, and</span>
+<span class="d">              that covers at least two columns</span>
+<span class="d">  dividers    the body&#x27;s vertical column dividers continue through the row</span>
+<span class="d">              (the row is inside the drawn table even above its first</span>
+<span class="d">              horizontal rule)</span>
+<span class="d">  shading     a filled band spanning the table&#x27;s width directly above or</span>
+<span class="d">              below the body holds the row (a header or title band)</span>
+<span class="d">Dividers and shading are drawn paths - the same information type as rules -</span>
+<span class="d">so they set extent; they are not an independent witness. A row above becomes</span>
+<span class="d">the first row; a label row below the body (short labels, unlike the body&#x27;s</span>
+<span class="d">cells) is the table&#x27;s header, placed first and marked as found under the</span>
+<span class="d">columns. Tagged and poll readings are left alone (the tag tree and the poll</span>
+<span class="d">vocabulary state their own extent).</span>
+<span class="d">&quot;&quot;&quot;</span>
+
+<span class="k">def </span><span class="n" id="lib.pdf.extent.extend">extend</span>(cands: list[<a class="t" href="#lib.pdf.types.TableCandidate">TableCandidate</a>], pages: dict) -&gt; None:<a class="ln" href="../../src/tomd/lib/pdf/extent.py#L403">extent.py:403</a>
+    <span class="c"># calls: </span><a class="t" href="#lib.pdf.runctx.current">runctx.current</a>, _Page, _beyond, _row_height, _overlaps, _block, _kind, _pieces, _row_from<span class="c"></span>
+    <span class="c"># called by: </span><a class="t" href="#lib.pdf.pipeline.run_pipeline">pipeline.run_pipeline</a><span class="c"></span>
+    ...
+
+<span class="n" id="lib.pdf.extent.EXTENT_RULE">EXTENT_RULE</span> = ...<a class="ln" href="../../src/tomd/lib/pdf/extent.py#L72">extent.py:72</a>
+
+<span class="c"># + 19 private module-level names</span></pre><h2 id="lib-pdf-extract-py">lib/pdf/extract.py<a class="src" href="../../src/tomd/lib/pdf/extract.py">source</a></h2><p class="sum">Typed: 1 of 4 functions and methods (25%).</p><pre><span class="d">&quot;&quot;&quot;Dual-path PDF text extraction: MuPDF grouping and spatial rules.&quot;&quot;&quot;</span>
 
 <span class="k">def </span><span class="n" id="lib.pdf.extract.attach_links">attach_links</span>(blocks: list[<a class="t" href="#lib.golden_compare.Block">Block</a>], links: list[dict]) -&gt; None:<a class="ln" href="../../src/tomd/lib/pdf/extract.py#L236">extract.py:236</a>
 <span class="d">    &quot;&quot;&quot;Match link annotations to text spans by bounding rect overlap.</span>
@@ -2265,7 +2628,82 @@ a.t{color:inherit;text-decoration:underline dotted}a.ln{color:var(--mut);font-si
     <span class="c"># calls: </span>_segments, _clusters, _covers<span class="c"></span>
     <span class="c"># called by: </span><a class="t" href="#lib.pdf.fit.fit">fit</a><span class="c"></span>
 
-<span class="c"># + 6 private module-level names</span></pre><h2 id="lib-pdf-fullwidth-py">lib/pdf/fullwidth.py<a class="src" href="../../src/tomd/lib/pdf/fullwidth.py">source</a></h2><p class="sum">Typed: 0 of 4 functions and methods (0%).</p><pre><span class="d">&quot;&quot;&quot;Full-width rows in drawn tables: titles and spanning rows read as spans.</span>
+<span class="c"># + 6 private module-level names</span></pre><h2 id="lib-pdf-flag-py">lib/pdf/flag.py<a class="src" href="../../src/tomd/lib/pdf/flag.py">source</a></h2><p class="sum">Typed: 9 of 17 functions and methods (52%).</p><pre><span class="d">&quot;&quot;&quot;Mark text that is probably a table but was not extracted as one.</span>
+<span class="d"></span>
+<span class="d">The table sources only emit what passes their checks, so a real table can</span>
+<span class="d">reach the output as plain paragraphs or code with no warning. This module</span>
+<span class="d">looks at what is left after table selection and marks the sections in</span>
+<span class="d">table-like areas uncertain (their text is kept as it is), so a reader or an</span>
+<span class="d">LLM pass knows to rebuild them. Two kinds of evidence:</span>
+<span class="d"></span>
+<span class="d">  - a drawing or tag source found a table there, but the rule checks</span>
+<span class="d">    rejected its reading (select_tables&#x27; `rejected` list);</span>
+<span class="d">  - the text itself is laid out like a table: a run of rows split into</span>
+<span class="d">    columns by wide gaps, with the columns starting at the same x positions</span>
+<span class="d">    from row to row, or a vote line (&quot;SF F N A SA&quot;, &quot;Favor: 8 ...&quot;).</span>
+<span class="d"></span>
+<span class="d">Nothing here decides cell boundaries; it only says &quot;look here&quot;.</span>
+<span class="d">&quot;&quot;&quot;</span>
+
+<span class="k">def </span><span class="n" id="lib.pdf.flag.aligned_regions">aligned_regions</span>(blocks: list[<a class="t" href="#lib.golden_compare.Block">Block</a>]) -&gt; list[Region]:<a class="ln" href="../../src/tomd/lib/pdf/flag.py#L263">flag.py:263</a>
+<span class="d">    &quot;&quot;&quot;Tables without rules found by their columns, as the vision readers find</span>
+<span class="d">    them: text in three or more columns whose starts line up down consecutive</span>
+<span class="d">    rows (left-aligned cells), with no line running across a column start.</span>
+<span class="d">    A header row just above (centred labels) joins the region. Code listings,</span>
+<span class="d">    contents pages and front matter are left out; what remains is read by the</span>
+<span class="d">    content reader and checked like any other reading.</span>
+<span class="d">    &quot;&quot;&quot;</span>
+    <span class="c"># calls: </span>_rows, _is_not_table<span class="c"></span>
+    <span class="c"># called by: </span>pipeline._content_readings<span class="c"></span>
+
+<span class="k">def </span><span class="n" id="lib.pdf.flag.dropped_uncovered">dropped_uncovered</span>(rejected: list[<a class="t" href="#lib.pdf.types.TableCandidate">TableCandidate</a>], tables: list[<a class="t" href="#lib.pdf.types.Section">Section</a>]) -&gt; list[str]:<a class="ln" href="../../src/tomd/lib/pdf/flag.py#L366">flag.py:366</a>
+<span class="d">    &quot;&quot;&quot;Every dropped candidate (any source, any reason) that no kept table</span>
+<span class="d">    covers, for the prompts file: nothing a reader found is erased, but only</span>
+<span class="d">    misread-looking ones are marked in the Markdown (rejected_regions).</span>
+<span class="d">    &quot;&quot;&quot;</span>
+    <span class="c"># called by: </span><a class="t" href="#lib.pdf.pipeline.run_pipeline">pipeline.run_pipeline</a><span class="c"></span>
+
+<span class="k">def </span><span class="n" id="lib.pdf.flag.flag_possible_tables">flag_possible_tables</span>(sections: list[<a class="t" href="#lib.pdf.types.Section">Section</a>], regions: list[Region]) -&gt; int:<a class="ln" href="../../src/tomd/lib/pdf/flag.py#L411">flag.py:411</a>
+<span class="d">    &quot;&quot;&quot;Mark sections inside a region; returns how many. Locality: a section is cut at page</span>
+<span class="d">    breaks, so its lines on other pages never inherit a mark.</span>
+<span class="d">    &quot;&quot;&quot;</span>
+    <span class="c"># calls: </span>_line_in, <a class="t" href="#lib.pdf.runctx.current">runctx.current</a>, _split_at_region<span class="c"></span>
+    <span class="c"># called by: </span><a class="t" href="#lib.pdf.pipeline.run_pipeline">pipeline.run_pipeline</a><span class="c"></span>
+
+<span class="k">def </span><span class="n" id="lib.pdf.flag.gutter_regions">gutter_regions</span>(blocks: list[<a class="t" href="#lib.golden_compare.Block">Block</a>]) -&gt; list[Region]:<a class="ln" href="../../src/tomd/lib/pdf/flag.py#L188">flag.py:188</a>
+<span class="d">    &quot;&quot;&quot;Tables found by their negative space: a vertical whitespace gutter.</span>
+<span class="d"></span>
+<span class="d">    A table without rules still leaves an empty vertical strip between its</span>
+<span class="d">    columns that runs down consecutive lines, with text on both sides.</span>
+<span class="d">    Running text has none (it fills the measure and wraps), and neither do</span>
+<span class="d">    lists or headings. Each run of at least _GUTTER_ROWS lines with text on</span>
+<span class="d">    both sides of one gutter is a region, unless it is two-column prose</span>
+<span class="d">    (sentences on both sides), code with aligned comments, a contents page</span>
+<span class="d">    or title-page metadata.</span>
+<span class="d">    &quot;&quot;&quot;</span>
+    <span class="c"># calls: </span>_rows, _prose, _is_not_table<span class="c"></span>
+    <span class="c"># called by: </span><a class="t" href="#lib.pdf.pipeline.run_pipeline">pipeline.run_pipeline</a><span class="c"></span>
+
+<span class="k">def </span><span class="n" id="lib.pdf.flag.outside_view_regions">outside_view_regions</span>(sections: list[<a class="t" href="#lib.pdf.types.Section">Section</a>]) -&gt; list[Region]:<a class="ln" href="../../src/tomd/lib/pdf/flag.py#L472">flag.py:472</a>
+<span class="d">    &quot;&quot;&quot;Tables seen from the outside, against the paper&#x27;s own prose: a block</span>
+<span class="d">    that is set apart (its rows fill much less than the prose measure) AND</span>
+<span class="d">    two-dimensional (most rows hold 2+ pieces whose positions recur on other</span>
+<span class="d">    rows). A block that is set apart but one-dimensional is a quote or a</span>
+<span class="d">    list; prose fills the measure. Measured on the tuning sets before use.</span>
+<span class="d">    &quot;&quot;&quot;</span>
+    <span class="c"># calls: </span>_visual_rows, _pieces<span class="c"></span>
+    <span class="c"># called by: </span><a class="t" href="#lib.pdf.pipeline.run_pipeline">pipeline.run_pipeline</a><span class="c"></span>
+
+<span class="k">def </span><span class="n" id="lib.pdf.flag.rejected_regions">rejected_regions</span>(rejected: list[<a class="t" href="#lib.pdf.types.TableCandidate">TableCandidate</a>], tables: list[<a class="t" href="#lib.pdf.types.Section">Section</a>]) -&gt; list[Region]:<a class="ln" href="../../src/tomd/lib/pdf/flag.py#L341">flag.py:341</a>
+<span class="d">    &quot;&quot;&quot;Areas of rejected drawing/tag tables that no selected table covers.&quot;&quot;&quot;</span>
+    <span class="c"># called by: </span><a class="t" href="#lib.pdf.pipeline.run_pipeline">pipeline.run_pipeline</a><span class="c"></span>
+
+<span class="k">def </span><span class="n" id="lib.pdf.flag.text_regions">text_regions</span>(blocks: list[<a class="t" href="#lib.golden_compare.Block">Block</a>]) -&gt; list[Region]:<a class="ln" href="../../src/tomd/lib/pdf/flag.py#L130">flag.py:130</a>
+<span class="d">    &quot;&quot;&quot;Table-like areas in the remaining text.&quot;&quot;&quot;</span>
+    <span class="c"># calls: </span>_rows, _is_not_table, _is_table_row, _shared_starts<span class="c"></span>
+    <span class="c"># called by: </span><a class="t" href="#lib.pdf.pipeline.run_pipeline">pipeline.run_pipeline</a><span class="c"></span>
+
+<span class="c"># + 10 private module-level names</span></pre><h2 id="lib-pdf-fullwidth-py">lib/pdf/fullwidth.py<a class="src" href="../../src/tomd/lib/pdf/fullwidth.py">source</a></h2><p class="sum">Typed: 0 of 4 functions and methods (0%).</p><pre><span class="d">&quot;&quot;&quot;Full-width rows in drawn tables: titles and spanning rows read as spans.</span>
 <span class="d"></span>
 <span class="d">A boxed table often has rows that run across every column: a title over the</span>
 <span class="d">table (&quot;[comma.value-category]&quot;, set right-aligned), a link or an</span>
@@ -2792,10 +3230,10 @@ a.t{color:inherit;text-decoration:underline dotted}a.ln{color:var(--mut);font-si
     <span class="c"># calls: </span>_dedup_words, <a class="t" href="#lib.pdf.pagecache.rawdict">rawdict</a><span class="c"></span>
     <span class="c"># called by: </span><a class="t" href="#lib.pdf.classify.gate_tables">classify.gate_tables</a><span class="c"></span>
 
-<span class="c"># + 2 private module-level names</span></pre><h2 id="lib-pdf-pipeline-py">lib/pdf/pipeline.py<a class="src" href="../../src/tomd/lib/pdf/pipeline.py">source</a></h2><p class="sum">Typed: 29 of 40 functions and methods (72%).</p><pre><span class="d">&quot;&quot;&quot;PDF to Markdown converter - pipeline entry point.&quot;&quot;&quot;</span>
+<span class="c"># + 2 private module-level names</span></pre><h2 id="lib-pdf-pipeline-py">lib/pdf/pipeline.py<a class="src" href="../../src/tomd/lib/pdf/pipeline.py">source</a></h2><p class="sum">Typed: 29 of 45 functions and methods (64%).</p><pre><span class="d">&quot;&quot;&quot;PDF to Markdown converter - pipeline entry point.&quot;&quot;&quot;</span>
 
 <span class="k">@dataclass</span>
-<span class="k">class </span><span class="n" id="lib.pdf.pipeline.PipelineResult">PipelineResult</span>:<a class="ln" href="../../src/tomd/lib/pdf/pipeline.py#L1805">pipeline.py:1805</a>
+<span class="k">class </span><span class="n" id="lib.pdf.pipeline.PipelineResult">PipelineResult</span>:<a class="ln" href="../../src/tomd/lib/pdf/pipeline.py#L1953">pipeline.py:1953</a>
 <span class="d">    &quot;&quot;&quot;Full output of the PDF conversion pipeline, used for QA scoring.</span>
 <span class="d"></span>
 <span class="d">    Image fields:</span>
@@ -2811,29 +3249,29 @@ a.t{color:inherit;text-decoration:underline dotted}a.ln{color:var(--mut);font-si
 <span class="d">    - ``images_truncated``: True iff ``source_image_count`` exceeded</span>
 <span class="d">      the cap and the emit step appended the truncation HTML comment.</span>
 <span class="d">    &quot;&quot;&quot;</span>
-    <span class="n" id="lib.pdf.pipeline.PipelineResult.md">md</span>: str = &#x27;&#x27;<a class="ln" href="../../src/tomd/lib/pdf/pipeline.py#L1822">pipeline.py:1822</a>
-    <span class="n" id="lib.pdf.pipeline.PipelineResult.prompts">prompts</span>: list[str] | None = None<a class="ln" href="../../src/tomd/lib/pdf/pipeline.py#L1823">pipeline.py:1823</a>
-    <span class="n" id="lib.pdf.pipeline.PipelineResult.sections">sections</span>: list[<a class="t" href="#lib.pdf.types.Section">Section</a>] = field(default_factory=list)<a class="ln" href="../../src/tomd/lib/pdf/pipeline.py#L1824">pipeline.py:1824</a>
-    <span class="n" id="lib.pdf.pipeline.PipelineResult.metadata">metadata</span>: dict = field(default_factory=dict)<a class="ln" href="../../src/tomd/lib/pdf/pipeline.py#L1825">pipeline.py:1825</a>
-    <span class="n" id="lib.pdf.pipeline.PipelineResult.page_count">page_count</span>: int = 0<a class="ln" href="../../src/tomd/lib/pdf/pipeline.py#L1826">pipeline.py:1826</a>
-    <span class="n" id="lib.pdf.pipeline.PipelineResult.nesting_corrections">nesting_corrections</span>: int = 0<a class="ln" href="../../src/tomd/lib/pdf/pipeline.py#L1827">pipeline.py:1827</a>
-    <span class="n" id="lib.pdf.pipeline.PipelineResult.readable">readable</span>: bool = True<a class="ln" href="../../src/tomd/lib/pdf/pipeline.py#L1828">pipeline.py:1828</a>
-    <span class="n" id="lib.pdf.pipeline.PipelineResult.skipped">skipped</span>: bool = False<a class="ln" href="../../src/tomd/lib/pdf/pipeline.py#L1829">pipeline.py:1829</a>
-    <span class="n" id="lib.pdf.pipeline.PipelineResult.skip_reason">skip_reason</span>: <a class="t" href="#domain.document.SkipReason">SkipReason</a> | None = None<a class="ln" href="../../src/tomd/lib/pdf/pipeline.py#L1830">pipeline.py:1830</a>
-    <span class="n" id="lib.pdf.pipeline.PipelineResult.images">images</span>: list[<a class="t" href="#domain.image.ExtractedImage">ExtractedImage</a>] = field(default_factory=list)<a class="ln" href="../../src/tomd/lib/pdf/pipeline.py#L1831">pipeline.py:1831</a>
-    <span class="n" id="lib.pdf.pipeline.PipelineResult.source_image_count">source_image_count</span>: int = 0<a class="ln" href="../../src/tomd/lib/pdf/pipeline.py#L1832">pipeline.py:1832</a>
-    <span class="n" id="lib.pdf.pipeline.PipelineResult.images_truncated">images_truncated</span>: bool = False<a class="ln" href="../../src/tomd/lib/pdf/pipeline.py#L1833">pipeline.py:1833</a>
-    <span class="n" id="lib.pdf.pipeline.PipelineResult.vector_uncertainty">vector_uncertainty</span>: <a class="t" href="#lib.pdf.images.VectorUncertaintyStats">VectorUncertaintyStats</a> | None = None<a class="ln" href="../../src/tomd/lib/pdf/pipeline.py#L1834">pipeline.py:1834</a>
-    <span class="n" id="lib.pdf.pipeline.PipelineResult.glyph_stats">glyph_stats</span>: <a class="t" href="#lib.pdf.glyphs.GlyphPassStats">GlyphPassStats</a> | None = None<a class="ln" href="../../src/tomd/lib/pdf/pipeline.py#L1835">pipeline.py:1835</a>
+    <span class="n" id="lib.pdf.pipeline.PipelineResult.md">md</span>: str = &#x27;&#x27;<a class="ln" href="../../src/tomd/lib/pdf/pipeline.py#L1970">pipeline.py:1970</a>
+    <span class="n" id="lib.pdf.pipeline.PipelineResult.prompts">prompts</span>: list[str] | None = None<a class="ln" href="../../src/tomd/lib/pdf/pipeline.py#L1971">pipeline.py:1971</a>
+    <span class="n" id="lib.pdf.pipeline.PipelineResult.sections">sections</span>: list[<a class="t" href="#lib.pdf.types.Section">Section</a>] = field(default_factory=list)<a class="ln" href="../../src/tomd/lib/pdf/pipeline.py#L1972">pipeline.py:1972</a>
+    <span class="n" id="lib.pdf.pipeline.PipelineResult.metadata">metadata</span>: dict = field(default_factory=dict)<a class="ln" href="../../src/tomd/lib/pdf/pipeline.py#L1973">pipeline.py:1973</a>
+    <span class="n" id="lib.pdf.pipeline.PipelineResult.page_count">page_count</span>: int = 0<a class="ln" href="../../src/tomd/lib/pdf/pipeline.py#L1974">pipeline.py:1974</a>
+    <span class="n" id="lib.pdf.pipeline.PipelineResult.nesting_corrections">nesting_corrections</span>: int = 0<a class="ln" href="../../src/tomd/lib/pdf/pipeline.py#L1975">pipeline.py:1975</a>
+    <span class="n" id="lib.pdf.pipeline.PipelineResult.readable">readable</span>: bool = True<a class="ln" href="../../src/tomd/lib/pdf/pipeline.py#L1976">pipeline.py:1976</a>
+    <span class="n" id="lib.pdf.pipeline.PipelineResult.skipped">skipped</span>: bool = False<a class="ln" href="../../src/tomd/lib/pdf/pipeline.py#L1977">pipeline.py:1977</a>
+    <span class="n" id="lib.pdf.pipeline.PipelineResult.skip_reason">skip_reason</span>: <a class="t" href="#domain.document.SkipReason">SkipReason</a> | None = None<a class="ln" href="../../src/tomd/lib/pdf/pipeline.py#L1978">pipeline.py:1978</a>
+    <span class="n" id="lib.pdf.pipeline.PipelineResult.images">images</span>: list[<a class="t" href="#domain.image.ExtractedImage">ExtractedImage</a>] = field(default_factory=list)<a class="ln" href="../../src/tomd/lib/pdf/pipeline.py#L1979">pipeline.py:1979</a>
+    <span class="n" id="lib.pdf.pipeline.PipelineResult.source_image_count">source_image_count</span>: int = 0<a class="ln" href="../../src/tomd/lib/pdf/pipeline.py#L1980">pipeline.py:1980</a>
+    <span class="n" id="lib.pdf.pipeline.PipelineResult.images_truncated">images_truncated</span>: bool = False<a class="ln" href="../../src/tomd/lib/pdf/pipeline.py#L1981">pipeline.py:1981</a>
+    <span class="n" id="lib.pdf.pipeline.PipelineResult.vector_uncertainty">vector_uncertainty</span>: <a class="t" href="#lib.pdf.images.VectorUncertaintyStats">VectorUncertaintyStats</a> | None = None<a class="ln" href="../../src/tomd/lib/pdf/pipeline.py#L1982">pipeline.py:1982</a>
+    <span class="n" id="lib.pdf.pipeline.PipelineResult.glyph_stats">glyph_stats</span>: <a class="t" href="#lib.pdf.glyphs.GlyphPassStats">GlyphPassStats</a> | None = None<a class="ln" href="../../src/tomd/lib/pdf/pipeline.py#L1983">pipeline.py:1983</a>
     <span class="c"># Table readers and checks that raised during the run (runctx.RunContext.reader_error):</span>
     <span class="c"># recorded instead of failing the paper, never swallowed silently.</span>
-    <span class="n" id="lib.pdf.pipeline.PipelineResult.reader_errors">reader_errors</span>: list[dict] = field(default_factory=list)<a class="ln" href="../../src/tomd/lib/pdf/pipeline.py#L1838">pipeline.py:1838</a>
+    <span class="n" id="lib.pdf.pipeline.PipelineResult.reader_errors">reader_errors</span>: list[dict] = field(default_factory=list)<a class="ln" href="../../src/tomd/lib/pdf/pipeline.py#L1986">pipeline.py:1986</a>
     <span class="c"># Content removed on purpose: (what, why, an example). Never silent.</span>
-    <span class="n" id="lib.pdf.pipeline.PipelineResult.discards">discards</span>: list[tuple[str, str, str]] = field(default_factory=list)<a class="ln" href="../../src/tomd/lib/pdf/pipeline.py#L1840">pipeline.py:1840</a>
+    <span class="n" id="lib.pdf.pipeline.PipelineResult.discards">discards</span>: list[tuple[str, str, str]] = field(default_factory=list)<a class="ln" href="../../src/tomd/lib/pdf/pipeline.py#L1988">pipeline.py:1988</a>
     <span class="c"># The paper summary (summary.build); None for a skipped paper.</span>
-    <span class="n" id="lib.pdf.pipeline.PipelineResult.summary">summary</span>: dict | None = None<a class="ln" href="../../src/tomd/lib/pdf/pipeline.py#L1842">pipeline.py:1842</a>
+    <span class="n" id="lib.pdf.pipeline.PipelineResult.summary">summary</span>: dict | None = None<a class="ln" href="../../src/tomd/lib/pdf/pipeline.py#L1990">pipeline.py:1990</a>
     <span class="k">@classmethod</span>
-    <span class="k">def </span><span class="n" id="lib.pdf.pipeline.PipelineResult.for_skip">for_skip</span>(cls, reason: <a class="t" href="#domain.document.SkipReason">SkipReason</a>, *, page_count: int = 0, prompts: list[str] | None = None, readable: bool = True) -&gt; &#x27;<a class="t" href="#lib.pdf.pipeline.PipelineResult">PipelineResult</a>&#x27;:<a class="ln" href="../../src/tomd/lib/pdf/pipeline.py#L1845">pipeline.py:1845</a>
+    <span class="k">def </span><span class="n" id="lib.pdf.pipeline.PipelineResult.for_skip">for_skip</span>(cls, reason: <a class="t" href="#domain.document.SkipReason">SkipReason</a>, *, page_count: int = 0, prompts: list[str] | None = None, readable: bool = True) -&gt; &#x27;<a class="t" href="#lib.pdf.pipeline.PipelineResult">PipelineResult</a>&#x27;:<a class="ln" href="../../src/tomd/lib/pdf/pipeline.py#L1993">pipeline.py:1993</a>
 <span class="d">        &quot;&quot;&quot;Construct a complete skip result.</span>
 <span class="d"></span>
 <span class="d">        Single source of truth for exit-condition fields on early-exit</span>
@@ -2842,7 +3280,17 @@ a.t{color:inherit;text-decoration:underline dotted}a.ln{color:var(--mut);font-si
 <span class="d">        &quot;&quot;&quot;</span>
         <span class="c"># called by: </span><a class="t" href="#lib.pdf.pipeline.run_pipeline">run_pipeline</a><span class="c"></span>
 
-<span class="k">def </span><span class="n" id="lib.pdf.pipeline.run_pipeline">run_pipeline</span>(path: Path, *, ml_tables: bool = False, visualize: bool = False, extract_vector: bool = False, whiteout_text: bool = False) -&gt; <a class="t" href="#lib.pdf.pipeline.PipelineResult">PipelineResult</a>:<a class="ln" href="../../src/tomd/lib/pdf/pipeline.py#L1955">pipeline.py:1955</a>
+<span class="k">def </span><span class="n" id="lib.pdf.pipeline.dropped_nomination_regions">dropped_nomination_regions</span>(record, tables) -&gt; list:<a class="ln" href="../../src/tomd/lib/pdf/pipeline.py#L1119">pipeline.py:1119</a>
+<span class="d">    &quot;&quot;&quot;Every area a reader or scan nominated and a rule then excluded, where no</span>
+<span class="d">    kept table covers it, as a possible-table region: a drop never leaves the</span>
+<span class="d">    text silent, except for the rules that say it is not a table at all.</span>
+<span class="d">    (page, bbox, reason, rows) like every mark region.</span>
+<span class="d">    &quot;&quot;&quot;</span>
+    <span class="c u"># untyped: record, tables</span>
+    <span class="c"># calls: </span>_overlap<span class="c"></span>
+    <span class="c"># called by: </span><a class="t" href="#lib.pdf.pipeline.run_pipeline">run_pipeline</a><span class="c"></span>
+
+<span class="k">def </span><span class="n" id="lib.pdf.pipeline.run_pipeline">run_pipeline</span>(path: Path, *, ml_tables: bool = False, visualize: bool = False, extract_vector: bool = False, whiteout_text: bool = False) -&gt; <a class="t" href="#lib.pdf.pipeline.PipelineResult">PipelineResult</a>:<a class="ln" href="../../src/tomd/lib/pdf/pipeline.py#L2103">pipeline.py:2103</a>
 <span class="d">    &quot;&quot;&quot;Run the full PDF conversion pipeline, returning all intermediate data.</span>
 <span class="d"></span>
 <span class="d">    ``extract_vector`` opts in to vector-figure extraction (v2.0 default</span>
@@ -2856,9 +3304,9 @@ a.t{color:inherit;text-decoration:underline dotted}a.ln{color:var(--mut);font-si
 <span class="d">    effect when ``extract_vector`` is False.</span>
 <span class="d">    labels inside vector figures render as pixels alongside body text.</span>
 <span class="d">    &quot;&quot;&quot;</span>
-    <span class="c"># calls: </span><a class="t" href="#lib.pdf.pipeline.PipelineResult">PipelineResult</a>, images._VectorExtractionStats, _enforce_skip_contract, <a class="t" href="#lib.pdf.pipeline.PipelineResult.for_skip">PipelineResult.for_skip</a>, _is_slide_deck, _is_standards_draft, <a class="t" href="#lib.pdf.extract.extract_mupdf">extract.extract_mupdf</a>, <a class="t" href="#lib.pdf.extract.extract_spatial">extract.extract_spatial</a>, <a class="t" href="#lib.pdf.cleanup.get_edge_items">cleanup.get_edge_items</a>, <a class="t" href="#lib.pdf.extract.collect_links">extract.collect_links</a>, <a class="t" href="#lib.pdf.extract.attach_links">extract.attach_links</a>, <a class="t" href="#lib.pdf.images.extract_page_images">images.extract_page_images</a><span class="c">, +79 more</span>
+    <span class="c"># calls: </span><a class="t" href="#lib.pdf.pipeline.PipelineResult">PipelineResult</a>, images._VectorExtractionStats, _enforce_skip_contract, <a class="t" href="#lib.pdf.pipeline.PipelineResult.for_skip">PipelineResult.for_skip</a>, _is_slide_deck, _is_standards_draft, <a class="t" href="#lib.pdf.extract.extract_mupdf">extract.extract_mupdf</a>, <a class="t" href="#lib.pdf.extract.extract_spatial">extract.extract_spatial</a>, <a class="t" href="#lib.pdf.cleanup.get_edge_items">cleanup.get_edge_items</a>, <a class="t" href="#lib.pdf.extract.collect_links">extract.collect_links</a>, <a class="t" href="#lib.pdf.extract.attach_links">extract.attach_links</a>, <a class="t" href="#lib.pdf.images.extract_page_images">images.extract_page_images</a><span class="c">, +91 more</span>
 
-<span class="c"># + 38 private module-level names</span></pre><h2 id="lib-pdf-poll-py">lib/pdf/poll.py<a class="src" href="../../src/tomd/lib/pdf/poll.py">source</a></h2><p class="sum">Typed: 2 of 8 functions and methods (25%).</p><pre><span class="d">&quot;&quot;&quot;WG21 poll result tables.</span>
+<span class="c"># + 42 private module-level names</span></pre><h2 id="lib-pdf-poll-py">lib/pdf/poll.py<a class="src" href="../../src/tomd/lib/pdf/poll.py">source</a></h2><p class="sum">Typed: 2 of 8 functions and methods (25%).</p><pre><span class="d">&quot;&quot;&quot;WG21 poll result tables.</span>
 <span class="d"></span>
 <span class="d">WG21 papers and minutes record straw polls in a fixed shape: a header line</span>
 <span class="d">&quot;SF F N A SA&quot; (Strongly For, For, Neutral, Against, Strongly Against) with</span>
@@ -2962,7 +3410,51 @@ a.t{color:inherit;text-decoration:underline dotted}a.ln{color:var(--mut);font-si
 <span class="k">def </span><span class="n" id="lib.pdf.qa.write_qa_json_atomic">write_qa_json_atomic</span>(path: Path, results: Sequence[<a class="t" href="#lib.pdf.qa.QAMetrics">QAMetrics</a>]) -&gt; None:<a class="ln" href="../../src/tomd/lib/pdf/qa.py#L606">qa.py:606</a>
 <span class="d">    &quot;&quot;&quot;Atomically write per-paper QA metrics as JSON.&quot;&quot;&quot;</span>
 
-<span class="c"># + 12 private module-level names</span></pre><h2 id="lib-pdf-relations-py">lib/pdf/relations.py<a class="src" href="../../src/tomd/lib/pdf/relations.py">source</a></h2><p class="sum">Typed: 1 of 5 functions and methods (20%).</p><pre><span class="d">&quot;&quot;&quot;Stage 1: the relationship record and the relational checker.</span>
+<span class="c"># + 12 private module-level names</span></pre><h2 id="lib-pdf-records-py">lib/pdf/records.py<a class="src" href="../../src/tomd/lib/pdf/records.py">source</a></h2><p class="sum">Typed: 4 of 7 functions and methods (57%).</p><pre><span class="d">&quot;&quot;&quot;Content record-pattern reader: a table seen as runs of records that share a</span>
+<span class="d">schema of kinds, with no geometry.</span>
+<span class="d"></span>
+<span class="d">The text layer gives a region&#x27;s lines in reading order. Each line has a kind</span>
+<span class="d">(an identifier such as P1234R0 or [expr.add], a date, a number, a check mark,</span>
+<span class="d">code, words). In most PDFs a table&#x27;s cells come out one per line, so a table</span>
+<span class="d">reads as a sequence whose kinds repeat with a period: name, number, number,</span>
+<span class="d">name, number, number, ... A run of at least three periods with at least two</span>
+<span class="d">kinds in a period is a run of records; the period is the column count and</span>
+<span class="d">each period a row. The k lines just before the run become the header when</span>
+<span class="d">they are short labels.</span>
+<span class="d"></span>
+<span class="d">Rows and columns come from the text&#x27;s own pattern (meaning), not from</span>
+<span class="d">positions, so this is a different way to see a table from every other</span>
+<span class="d">reader. Measured on the answer keys first: alone it is noisy (code listings</span>
+<span class="d">repeat too), so it reads only regions other cues nominated, never votes for</span>
+<span class="d">HIGH, and is an alternative that escalation may switch to when the emitted</span>
+<span class="d">reading fails verification and this one passes.</span>
+<span class="d">&quot;&quot;&quot;</span>
+
+<span class="k">def </span><span class="n" id="lib.pdf.records.line_kind">line_kind</span>(text: str) -&gt; str:<a class="ln" href="../../src/tomd/lib/pdf/records.py#L49">records.py:49</a>
+<span class="d">    &quot;&quot;&quot;One kind for a line: its tokens&#x27; kind when they all share one, else &#x27;mixed&#x27;.&quot;&quot;&quot;</span>
+    <span class="c"># calls: </span>_token_kind<span class="c"></span>
+    <span class="c"># called by: </span><a class="t" href="#lib.pdf.records.read_region">read_region</a><span class="c"></span>
+
+<span class="k">def </span><span class="n" id="lib.pdf.records.periodic_runs">periodic_runs</span>(kinds: list[str]) -&gt; list[tuple[int, int, int]]:<a class="ln" href="../../src/tomd/lib/pdf/records.py#L55">records.py:55</a>
+<span class="d">    &quot;&quot;&quot;(start, period, records) for runs whose kinds repeat with a period, longest first.&quot;&quot;&quot;</span>
+    <span class="c"># called by: </span><a class="t" href="#lib.pdf.records.read_region">read_region</a><span class="c"></span>
+
+<span class="k">def </span><span class="n" id="lib.pdf.records.read_region">read_region</span>(page, page_num: int, bbox) -&gt; list[<a class="t" href="#lib.pdf.types.TableCandidate">TableCandidate</a>]:<a class="ln" href="../../src/tomd/lib/pdf/records.py#L93">records.py:93</a>
+<span class="d">    &quot;&quot;&quot;Every run of records in the region (longest first, not overlapping), each</span>
+<span class="d">    with its header and its own box; none unless together they cover most of</span>
+<span class="d">    the region&#x27;s lines (a region holding two stacked tables reads as two).</span>
+<span class="d">    &quot;&quot;&quot;</span>
+    <span class="c u"># untyped: page, bbox</span>
+    <span class="c"># calls: </span>_lines_in, <a class="t" href="#lib.pdf.records.line_kind">line_kind</a>, _text, <a class="t" href="#lib.pdf.records.periodic_runs">periodic_runs</a>, <a class="t" href="#lib.pdf.types.TableCandidate">types.TableCandidate</a><span class="c"></span>
+    <span class="c"># called by: </span><a class="t" href="#lib.pdf.records.records_candidates">records_candidates</a><span class="c"></span>
+
+<span class="k">def </span><span class="n" id="lib.pdf.records.records_candidates">records_candidates</span>(pages, regions) -&gt; list[<a class="t" href="#lib.pdf.types.TableCandidate">TableCandidate</a>]:<a class="ln" href="../../src/tomd/lib/pdf/records.py#L133">records.py:133</a>
+<span class="d">    &quot;&quot;&quot;The record-pattern reading of every located region (page, bbox).&quot;&quot;&quot;</span>
+    <span class="c u"># untyped: pages, regions</span>
+    <span class="c"># calls: </span><a class="t" href="#lib.pdf.records.read_region">read_region</a><span class="c"></span>
+    <span class="c"># called by: </span>pipeline._content_readings<span class="c"></span>
+
+<span class="c"># + 3 private module-level names</span></pre><h2 id="lib-pdf-relations-py">lib/pdf/relations.py<a class="src" href="../../src/tomd/lib/pdf/relations.py">source</a></h2><p class="sum">Typed: 1 of 5 functions and methods (20%).</p><pre><span class="d">&quot;&quot;&quot;Stage 1: the relationship record and the relational checker.</span>
 <span class="d"></span>
 <span class="d">A table asserts relationships between the words of its region: two words</span>
 <span class="d">share a row, share a column, share a cell. The page shows others, observed</span>
@@ -3127,7 +3619,7 @@ a.t{color:inherit;text-decoration:underline dotted}a.ln{color:var(--mut);font-si
 <span class="d">    as in unit tests) a detached context is returned, so recording never fails.</span>
 <span class="d">    &quot;&quot;&quot;</span>
     <span class="c"># calls: </span><a class="t" href="#lib.pdf.runctx.RunContext">RunContext</a><span class="c"></span>
-    <span class="c"># called by: </span><a class="t" href="#lib.pdf.classify.gate_tables">classify.gate_tables</a>, <a class="t" href="#lib.pdf.codepair.find_code_pairs">codepair.find_code_pairs</a>, pipeline._filter_sections_inside_vector_images, <a class="t" href="#lib.pdf.pipeline.run_pipeline">pipeline.run_pipeline</a>, ruled._bands_to_table, ruled._column_ruled_tables, ruled._mark_icon_cells, <a class="t" href="#lib.pdf.ruled.extract_ruled_tables">ruled.extract_ruled_tables</a>, select._continuation_votes, <a class="t" href="#lib.pdf.select.cross_reader_continuation">select.cross_reader_continuation</a>, <a class="t" href="#lib.pdf.select.select_tables">select.select_tables</a>, <a class="t" href="#lib.pdf.select.stitch_pages">select.stitch_pages</a><span class="c">, +1 more</span>
+    <span class="c"># called by: </span><a class="t" href="#lib.pdf.classify.gate_tables">classify.gate_tables</a>, <a class="t" href="#lib.pdf.codepair.find_code_pairs">codepair.find_code_pairs</a>, <a class="t" href="#lib.pdf.extent.extend">extent.extend</a>, <a class="t" href="#lib.pdf.flag.flag_possible_tables">flag.flag_possible_tables</a>, pipeline._content_readings, pipeline._filter_sections_inside_vector_images, <a class="t" href="#lib.pdf.pipeline.run_pipeline">pipeline.run_pipeline</a>, ruled._bands_to_table, ruled._column_ruled_tables, ruled._mark_icon_cells, <a class="t" href="#lib.pdf.ruled.extract_ruled_tables">ruled.extract_ruled_tables</a>, select._continuation_votes<span class="c">, +4 more</span>
 
 <span class="k">@contextlib.contextmanager</span>
 <span class="k">def </span><span class="n" id="lib.pdf.runctx.run_scope">run_scope</span>():<a class="ln" href="../../src/tomd/lib/pdf/runctx.py#L62">runctx.py:62</a>
@@ -3137,7 +3629,76 @@ a.t{color:inherit;text-decoration:underline dotted}a.ln{color:var(--mut);font-si
     <span class="c"># called by: </span>pipeline._in_run_scope<span class="c"></span>
 
 <span class="c"># Longest exception message kept in a reader-error entry.</span>
-<span class="n" id="lib.pdf.runctx.ERROR_MESSAGE_LIMIT">ERROR_MESSAGE_LIMIT</span> = 300<a class="ln" href="../../src/tomd/lib/pdf/runctx.py#L27">runctx.py:27</a></pre><h2 id="lib-pdf-select-py">lib/pdf/select.py<a class="src" href="../../src/tomd/lib/pdf/select.py">source</a></h2><p class="sum">Typed: 40 of 48 functions and methods (83%).</p><pre><span class="d">&quot;&quot;&quot;Table selection: one reading per region, trusted only when another kind of evidence agrees.</span>
+<span class="n" id="lib.pdf.runctx.ERROR_MESSAGE_LIMIT">ERROR_MESSAGE_LIMIT</span> = 300<a class="ln" href="../../src/tomd/lib/pdf/runctx.py#L27">runctx.py:27</a></pre><h2 id="lib-pdf-scan-py">lib/pdf/scan.py<a class="src" href="../../src/tomd/lib/pdf/scan.py">source</a></h2><p class="sum">Typed: 3 of 9 functions and methods (33%).</p><pre><span class="d">&quot;&quot;&quot;The region scan: check every piece that makes a table, then decide.</span>
+<span class="d"></span>
+<span class="d">1. Areas: every place any scan nominated or excluded (the evidence record),</span>
+<span class="d">   merged per page. Nominating is not deciding; nothing nominated is lost.</span>
+<span class="d">2. Features per area, each with its information type (words, paths, tree,</span>
+<span class="d">   meaning, document): the classifier&#x27;s layout features, which scans saw it</span>
+<span class="d">   and which rules excluded it, content checks on the best reading in the</span>
+<span class="d">   area (items per cell, fragments, header vs body, column shapes, first</span>
+<span class="d">   column as keys, shared code), and document cues (a caption nearby).</span>
+<span class="d">3. Likelihood that the area is a table: a logistic model fitted on the</span>
+<span class="d">   existing truth (scan_model.py), so it is fast and explainable; the top</span>
+<span class="d">   supporting and opposing features are recorded with the decision.</span>
+<span class="d">4. Bands: high (and two independent information types) -&gt; may be trusted;</span>
+<span class="d">   middle -&gt; build, UNCERTAIN; low -&gt; possible-table mark; none -&gt; recorded.</span>
+<span class="d">&quot;&quot;&quot;</span>
+
+<span class="k">def </span><span class="n" id="lib.pdf.scan.area_features">area_features</span>(page, a, generator: str, doc_tagged: bool, measure=None, decided=None) -&gt; dict:<a class="ln" href="../../src/tomd/lib/pdf/scan.py#L104">scan.py:104</a>
+<span class="d">    &quot;&quot;&quot;Every enabled region-level check&#x27;s evidence for one area (checks/); the</span>
+<span class="d">    last-resort tier only while decided(features) is False.</span>
+<span class="d">    &quot;&quot;&quot;</span>
+    <span class="c u"># untyped: page, a, measure, decided</span>
+    <span class="c"># calls: </span><a class="t" href="#lib.pdf.checks.registry.run_region_checks">registry.run_region_checks</a><span class="c"></span>
+    <span class="c"># called by: </span><a class="t" href="#lib.pdf.scan.run_scan">run_scan</a><span class="c"></span>
+
+<span class="k">def </span><span class="n" id="lib.pdf.scan.areas">areas</span>(record) -&gt; list[dict]:<a class="ln" href="../../src/tomd/lib/pdf/scan.py#L76">scan.py:76</a>
+<span class="d">    &quot;&quot;&quot;Nominated and excluded places, merged per page (half the smaller one overlapping).&quot;&quot;&quot;</span>
+    <span class="c u"># untyped: record</span>
+    <span class="c"># calls: </span>_inter, _area<span class="c"></span>
+    <span class="c"># called by: </span><a class="t" href="#lib.pdf.scan.run_scan">run_scan</a><span class="c"></span>
+
+<span class="k">def </span><span class="n" id="lib.pdf.scan.band">band</span>(p: float, info_types: int) -&gt; str:<a class="ln" href="../../src/tomd/lib/pdf/scan.py#L128">scan.py:128</a>
+    <span class="c"># called by: </span><a class="t" href="#lib.pdf.scan.run_scan">run_scan</a><span class="c"></span>
+    ...
+
+<span class="k">def </span><span class="n" id="lib.pdf.scan.info_of">info_of</span>(name: str) -&gt; str:<a class="ln" href="../../src/tomd/lib/pdf/scan.py#L44">scan.py:44</a>
+    <span class="c"># called by: </span><a class="t" href="#lib.pdf.scan.run_scan">run_scan</a><span class="c"></span>
+    ...
+
+<span class="k">def </span><span class="n" id="lib.pdf.scan.run_scan">run_scan</span>(path, record, tables, builds: list | None = None) -&gt; list:<a class="ln" href="../../src/tomd/lib/pdf/scan.py#L147">scan.py:147</a>
+<span class="d">    &quot;&quot;&quot;Score every area in the evidence record and decide by band.</span>
+<span class="d"></span>
+<span class="d">    Emitted tables get their likelihood and top features in metadata; a HIGH</span>
+<span class="d">    table the scan rates below LOW is downgraded (reason recorded). Areas</span>
+<span class="d">    without a table come back as possible-table regions (page, bbox, reason,</span>
+<span class="d">    rows) for the build and mark bands; the rest are only recorded.</span>
+<span class="d">    &quot;&quot;&quot;</span>
+    <span class="c u"># untyped: path, record, tables</span>
+    <span class="c"># calls: </span><a class="t" href="#lib.pdf.summary.generator">summary.generator</a>, <a class="t" href="#lib.pdf.scan.areas">areas</a>, _inter, _area, _table_boxes, <a class="t" href="#lib.pdf.scan_model.likelihood">scan_model.likelihood</a>, _at_mean, <a class="t" href="#lib.pdf.scan.area_features">area_features</a>, <a class="t" href="#lib.pdf.scan.info_of">info_of</a>, <a class="t" href="#lib.pdf.scan.band">band</a>, <a class="t" href="#lib.pdf.checks.data_or_format.likelihood_data">data_or_format.likelihood_data</a><span class="c"></span>
+    <span class="c"># called by: </span><a class="t" href="#lib.pdf.pipeline.run_pipeline">pipeline.run_pipeline</a><span class="c"></span>
+
+<span class="c"># information type of each feature family (stage 0: same-type features do not</span>
+<span class="c"># stack like independent witnesses)</span>
+<span class="c"># document priors: what the whole document is (tagged at all, which generator made it, how its</span>
+<span class="c"># prose is set) describes the document, not this area; they shape the likelihood but never</span>
+<span class="c"># count as an independent witness for an area</span>
+<span class="n" id="lib.pdf.scan.DOC_PRIOR">DOC_PRIOR</span> = &#x27;document prior&#x27;<a class="ln" href="../../src/tomd/lib/pdf/scan.py#L41">scan.py:41</a>
+
+<span class="c"># early stop (ledger ordering): an area whose likelihood without the last-resort</span>
+<span class="c"># tier is below this is not a table whatever that tier says. Measured on the</span>
+<span class="c"># 4991 tuning areas: below 0.02 (24% of areas) the full likelihood never</span>
+<span class="c"># exceeded 0.043 (LOW is 0.3); at 0.05 one area reached 0.26, too close.</span>
+<span class="n" id="lib.pdf.scan.EARLY_NONE">EARLY_NONE</span> = 0.02<a class="ln" href="../../src/tomd/lib/pdf/scan.py#L114">scan.py:114</a>
+
+<span class="c"># + 4 private module-level names</span></pre><h2 id="lib-pdf-scan-model-py">lib/pdf/scan_model.py<a class="src" href="../../src/tomd/lib/pdf/scan_model.py">source</a></h2><p class="sum">Typed: 1 of 1 functions and methods (100%).</p><pre><span class="d">&quot;&quot;&quot;Region scan model, fitted by train_scan.py on the existing truth sets, and how it is applied.&quot;&quot;&quot;</span>
+
+<span class="k">def </span><span class="n" id="lib.pdf.scan_model.likelihood">likelihood</span>(x: dict, model: dict) -&gt; tuple[float, list[tuple[str, float]]]:<a class="ln" href="../../src/tomd/lib/pdf/scan_model.py#L494">scan_model.py:494</a>
+<span class="d">    &quot;&quot;&quot;P(table) and the features that pushed it most (signed contributions).&quot;&quot;&quot;</span>
+    <span class="c"># called by: </span><a class="t" href="#lib.pdf.checks.data_or_format.likelihood_data">data_or_format.likelihood_data</a>, <a class="t" href="#lib.pdf.scan.run_scan">scan.run_scan</a><span class="c"></span>
+
+<span class="n" id="lib.pdf.scan_model.MODEL">MODEL</span> = ...<a class="ln" href="../../src/tomd/lib/pdf/scan_model.py#L12">scan_model.py:12</a></pre><h2 id="lib-pdf-select-py">lib/pdf/select.py<a class="src" href="../../src/tomd/lib/pdf/select.py">source</a></h2><p class="sum">Typed: 40 of 48 functions and methods (83%).</p><pre><span class="d">&quot;&quot;&quot;Table selection: one reading per region, trusted only when another kind of evidence agrees.</span>
 <span class="d"></span>
 <span class="d">Independent readers propose tables (``TableCandidate``): the text-position</span>
 <span class="d">detector (``table.detect_tables``, source &quot;tomd&quot;), the PDF&#x27;s accessibility</span>
@@ -3159,17 +3720,17 @@ a.t{color:inherit;text-decoration:underline dotted}a.ln{color:var(--mut);font-si
 <span class="d">section&#x27;s table kind and rendering strategy.</span>
 <span class="d">&quot;&quot;&quot;</span>
 
-<span class="k">def </span><span class="n" id="lib.pdf.select.candidate_from_section">candidate_from_section</span>(sec: <a class="t" href="#lib.pdf.types.Section">Section</a>) -&gt; <a class="t" href="#lib.pdf.types.TableCandidate">TableCandidate</a>:<a class="ln" href="../../src/tomd/lib/pdf/select.py#L502">select.py:502</a>
+<span class="k">def </span><span class="n" id="lib.pdf.select.candidate_from_section">candidate_from_section</span>(sec: <a class="t" href="#lib.pdf.types.Section">Section</a>) -&gt; <a class="t" href="#lib.pdf.types.TableCandidate">TableCandidate</a>:<a class="ln" href="../../src/tomd/lib/pdf/select.py#L494">select.py:494</a>
 <span class="d">    &quot;&quot;&quot;Wrap a detect_tables() section (cells are span lists) as a candidate.&quot;&quot;&quot;</span>
     <span class="c"># calls: </span><a class="t" href="#lib.pdf.types.Line">types.Line</a>, <a class="t" href="#lib.pdf.types.TableCandidate">types.TableCandidate</a><span class="c"></span>
     <span class="c"># called by: </span><a class="t" href="#lib.pdf.select.select_tables">select_tables</a><span class="c"></span>
 
-<span class="k">def </span><span class="n" id="lib.pdf.select.candidates_agree">candidates_agree</span>(a: <a class="t" href="#lib.pdf.types.TableCandidate">TableCandidate</a>, b: <a class="t" href="#lib.pdf.types.TableCandidate">TableCandidate</a>) -&gt; bool:<a class="ln" href="../../src/tomd/lib/pdf/select.py#L114">select.py:114</a>
+<span class="k">def </span><span class="n" id="lib.pdf.select.candidates_agree">candidates_agree</span>(a: <a class="t" href="#lib.pdf.types.TableCandidate">TableCandidate</a>, b: <a class="t" href="#lib.pdf.types.TableCandidate">TableCandidate</a>) -&gt; bool:<a class="ln" href="../../src/tomd/lib/pdf/select.py#L106">select.py:106</a>
 <span class="d">    &quot;&quot;&quot;Same grid shape and every cell matching.&quot;&quot;&quot;</span>
     <span class="c"># calls: </span>_cells_agree<span class="c"></span>
     <span class="c"># called by: </span><a class="t" href="#lib.pdf.select.select_tables">select_tables</a><span class="c"></span>
 
-<span class="k">def </span><span class="n" id="lib.pdf.select.class_check">class_check</span>(cand: <a class="t" href="#lib.pdf.types.TableCandidate">TableCandidate</a>) -&gt; str:<a class="ln" href="../../src/tomd/lib/pdf/select.py#L1339">select.py:1339</a>
+<span class="k">def </span><span class="n" id="lib.pdf.select.class_check">class_check</span>(cand: <a class="t" href="#lib.pdf.types.TableCandidate">TableCandidate</a>) -&gt; str:<a class="ln" href="../../src/tomd/lib/pdf/select.py#L1320">select.py:1320</a>
 <span class="d">    &quot;&quot;&quot;Why this table can be trusted from one source, or &quot;&quot;.</span>
 <span class="d"></span>
 <span class="d">    Each check is specific to how the table was built, and only used when</span>
@@ -3184,14 +3745,14 @@ a.t{color:inherit;text-decoration:underline dotted}a.ln{color:var(--mut);font-si
     <span class="c"># calls: </span>_is_bad, <a class="t" href="#lib.pdf.select.vote_header">vote_header</a><span class="c"></span>
     <span class="c"># called by: </span><a class="t" href="#lib.pdf.select.select_tables">select_tables</a><span class="c"></span>
 
-<span class="k">def </span><span class="n" id="lib.pdf.select.closed_exempt">closed_exempt</span>(t) -&gt; bool:<a class="ln" href="../../src/tomd/lib/pdf/select.py#L440">select.py:440</a>
+<span class="k">def </span><span class="n" id="lib.pdf.select.closed_exempt">closed_exempt</span>(t) -&gt; bool:<a class="ln" href="../../src/tomd/lib/pdf/select.py#L432">select.py:432</a>
 <span class="d">    &quot;&quot;&quot;a closed grid&#x27;s own layout explains its empty cells, unless a whole column is</span>
 <span class="d">    empty (a doubled rule read as a column of its own)</span>
 <span class="d">    &quot;&quot;&quot;</span>
     <span class="c u"># untyped: t</span>
     <span class="c"># called by: </span>ruled._bad_flags, _is_bad, <a class="t" href="#lib.pdf.select.sparse_mapping">sparse_mapping</a><span class="c"></span>
 
-<span class="k">def </span><span class="n" id="lib.pdf.select.conservation_error">conservation_error</span>(cand: <a class="t" href="#lib.pdf.types.TableCandidate">TableCandidate</a>, blocks: list[<a class="t" href="#lib.golden_compare.Block">Block</a>]) -&gt; str:<a class="ln" href="../../src/tomd/lib/pdf/select.py#L131">select.py:131</a>
+<span class="k">def </span><span class="n" id="lib.pdf.select.conservation_error">conservation_error</span>(cand: <a class="t" href="#lib.pdf.types.TableCandidate">TableCandidate</a>, blocks: list[<a class="t" href="#lib.golden_compare.Block">Block</a>]) -&gt; str:<a class="ln" href="../../src/tomd/lib/pdf/select.py#L123">select.py:123</a>
 <span class="d">    &quot;&quot;&quot;Check that the text in the table&#x27;s area went into its cells exactly once.</span>
 <span class="d"></span>
 <span class="d">    The area is where the cells&#x27; own lines sit on each page. Every letter and</span>
@@ -3204,7 +3765,7 @@ a.t{color:inherit;text-decoration:underline dotted}a.ln{color:var(--mut);font-si
     <span class="c"># calls: </span>_aligned_neighbour_row<span class="c"></span>
     <span class="c"># called by: </span><a class="t" href="#lib.pdf.select.select_tables">select_tables</a><span class="c"></span>
 
-<span class="k">def </span><span class="n" id="lib.pdf.select.cross_reader_continuation">cross_reader_continuation</span>(cands: list[<a class="t" href="#lib.pdf.types.TableCandidate">TableCandidate</a>], blocks: list[<a class="t" href="#lib.golden_compare.Block">Block</a>], furniture: frozenset = frozenset()) -&gt; list[<a class="t" href="#lib.pdf.types.TableCandidate">TableCandidate</a>]:<a class="ln" href="../../src/tomd/lib/pdf/select.py#L665">select.py:665</a>
+<span class="k">def </span><span class="n" id="lib.pdf.select.cross_reader_continuation">cross_reader_continuation</span>(cands: list[<a class="t" href="#lib.pdf.types.TableCandidate">TableCandidate</a>], blocks: list[<a class="t" href="#lib.golden_compare.Block">Block</a>], furniture: frozenset = frozenset()) -&gt; list[<a class="t" href="#lib.pdf.types.TableCandidate">TableCandidate</a>]:<a class="ln" href="../../src/tomd/lib/pdf/select.py#L657">select.py:657</a>
 <span class="d">    &quot;&quot;&quot;A table continuing across a page is the same table whichever reader read</span>
 <span class="d">    each piece (user: preserve meaningful spatial relationships regardless of</span>
 <span class="d">    mechanism). After every reader&#x27;s own stitching, a piece ending low on page N</span>
@@ -3217,7 +3778,7 @@ a.t{color:inherit;text-decoration:underline dotted}a.ln{color:var(--mut);font-si
     <span class="c"># calls: </span>_page_span, _new_header, _same_columns, _text_outside, _overlap, _same_header, _carry, <a class="t" href="#lib.pdf.types.TableCandidate">types.TableCandidate</a>, <a class="t" href="#lib.pdf.runctx.current">runctx.current</a><span class="c"></span>
     <span class="c"># called by: </span><a class="t" href="#lib.pdf.select.select_tables">select_tables</a><span class="c"></span>
 
-<span class="k">def </span><span class="n" id="lib.pdf.select.join_split_words">join_split_words</span>(cands: list[<a class="t" href="#lib.pdf.types.TableCandidate">TableCandidate</a>], blocks: list[<a class="t" href="#lib.golden_compare.Block">Block</a>]) -&gt; None:<a class="ln" href="../../src/tomd/lib/pdf/select.py#L869">select.py:869</a>
+<span class="k">def </span><span class="n" id="lib.pdf.select.join_split_words">join_split_words</span>(cands: list[<a class="t" href="#lib.pdf.types.TableCandidate">TableCandidate</a>], blocks: list[<a class="t" href="#lib.golden_compare.Block">Block</a>]) -&gt; None:<a class="ln" href="../../src/tomd/lib/pdf/select.py#L861">select.py:861</a>
 <span class="d">    &quot;&quot;&quot;A word split by a narrow cell is still one word (user, 2026-10-21): a cell line</span>
 <span class="d">    that runs to the cell&#x27;s right edge ending mid-token, followed by a line that</span>
 <span class="d">    continues the token, is joined without a space - when the joined token occurs</span>
@@ -3232,22 +3793,22 @@ a.t{color:inherit;text-decoration:underline dotted}a.ln{color:var(--mut);font-si
 <span class="d">    &quot;&quot;&quot;</span>
     <span class="c"># called by: </span><a class="t" href="#lib.pdf.select.select_tables">select_tables</a><span class="c"></span>
 
-<span class="k">def </span><span class="n" id="lib.pdf.select.mark_matrix">mark_matrix</span>(cand: <a class="t" href="#lib.pdf.types.TableCandidate">TableCandidate</a>) -&gt; bool:<a class="ln" href="../../src/tomd/lib/pdf/select.py#L403">select.py:403</a>
+<span class="k">def </span><span class="n" id="lib.pdf.select.mark_matrix">mark_matrix</span>(cand: <a class="t" href="#lib.pdf.types.TableCandidate">TableCandidate</a>) -&gt; bool:<a class="ln" href="../../src/tomd/lib/pdf/select.py#L395">select.py:395</a>
 <span class="d">    &quot;&quot;&quot;A check-mark matrix (status, feature or compliance tables): row keys in</span>
 <span class="d">    the first column, and the filled cells beside them are marks. Sparse by</span>
 <span class="d">    design, so empty cells and sparse or ragged columns are not misreadings.</span>
 <span class="d">    &quot;&quot;&quot;</span>
     <span class="c"># called by: </span>_is_bad, <a class="t" href="#lib.pdf.select.select_tables">select_tables</a><span class="c"></span>
 
-<span class="k">def </span><span class="n" id="lib.pdf.select.page_furniture">page_furniture</span>(blocks: list[<a class="t" href="#lib.golden_compare.Block">Block</a>], min_pages: int = 3) -&gt; frozenset:<a class="ln" href="../../src/tomd/lib/pdf/select.py#L573">select.py:573</a>
+<span class="k">def </span><span class="n" id="lib.pdf.select.page_furniture">page_furniture</span>(blocks: list[<a class="t" href="#lib.golden_compare.Block">Block</a>], min_pages: int = 3) -&gt; frozenset:<a class="ln" href="../../src/tomd/lib/pdf/select.py#L565">select.py:565</a>
 <span class="d">    &quot;&quot;&quot;Lines repeated at the same height on several pages once digits are</span>
 <span class="d">    normalised: running headers and footers with page numbers that header</span>
 <span class="d">    stripping missed (a header block holding the page number).</span>
 <span class="d">    &quot;&quot;&quot;</span>
     <span class="c"># calls: </span>_furniture_key<span class="c"></span>
-    <span class="c"># called by: </span><a class="t" href="#lib.pdf.select.select_tables">select_tables</a><span class="c"></span>
+    <span class="c"># called by: </span>pipeline._build_scan_tables, <a class="t" href="#lib.pdf.select.select_tables">select_tables</a><span class="c"></span>
 
-<span class="k">def </span><span class="n" id="lib.pdf.select.partial_reading">partial_reading</span>(primary: <a class="t" href="#lib.pdf.types.TableCandidate">TableCandidate</a>, other: <a class="t" href="#lib.pdf.types.TableCandidate">TableCandidate</a>) -&gt; bool:<a class="ln" href="../../src/tomd/lib/pdf/select.py#L266">select.py:266</a>
+<span class="k">def </span><span class="n" id="lib.pdf.select.partial_reading">partial_reading</span>(primary: <a class="t" href="#lib.pdf.types.TableCandidate">TableCandidate</a>, other: <a class="t" href="#lib.pdf.types.TableCandidate">TableCandidate</a>) -&gt; bool:<a class="ln" href="../../src/tomd/lib/pdf/select.py#L258">select.py:258</a>
 <span class="d">    &quot;&quot;&quot;True when `other` is tomd&#x27;s text-position reading of part of a fully</span>
 <span class="d">    ruled table: same columns, and every one of its rows matches, cell for</span>
 <span class="d">    cell, a row of the ruled table in the same order. The text-position</span>
@@ -3257,7 +3818,7 @@ a.t{color:inherit;text-decoration:underline dotted}a.ln{color:var(--mut);font-si
     <span class="c"># calls: </span>_cells_agree, _all_bold<span class="c"></span>
     <span class="c"># called by: </span><a class="t" href="#lib.pdf.select.select_tables">select_tables</a><span class="c"></span>
 
-<span class="k">def </span><span class="n" id="lib.pdf.select.remove_table_regions">remove_table_regions</span>(blocks: list[<a class="t" href="#lib.golden_compare.Block">Block</a>], tables: list[<a class="t" href="#lib.pdf.types.Section">Section</a>]) -&gt; list[<a class="t" href="#lib.golden_compare.Block">Block</a>]:<a class="ln" href="../../src/tomd/lib/pdf/select.py#L1374">select.py:1374</a>
+<span class="k">def </span><span class="n" id="lib.pdf.select.remove_table_regions">remove_table_regions</span>(blocks: list[<a class="t" href="#lib.golden_compare.Block">Block</a>], tables: list[<a class="t" href="#lib.pdf.types.Section">Section</a>]) -&gt; list[<a class="t" href="#lib.golden_compare.Block">Block</a>]:<a class="ln" href="../../src/tomd/lib/pdf/select.py#L1355">select.py:1355</a>
 <span class="d">    &quot;&quot;&quot;Drop the lines that fall inside any chosen table&#x27;s region.</span>
 <span class="d"></span>
 <span class="d">    A line inside the region whose text is not in the table is kept, so it</span>
@@ -3267,7 +3828,7 @@ a.t{color:inherit;text-decoration:underline dotted}a.ln{color:var(--mut);font-si
     <span class="c"># calls: </span><a class="t" href="#lib.pdf.types.Block">types.Block</a><span class="c"></span>
     <span class="c"># called by: </span><a class="t" href="#lib.pdf.pipeline.run_pipeline">pipeline.run_pipeline</a><span class="c"></span>
 
-<span class="k">def </span><span class="n" id="lib.pdf.select.select_tables">select_tables</span>(tomd_sections: list[<a class="t" href="#lib.pdf.types.Section">Section</a>], ruled: list[<a class="t" href="#lib.pdf.types.TableCandidate">TableCandidate</a>], tagged: list[<a class="t" href="#lib.pdf.types.TableCandidate">TableCandidate</a>], blocks: list[<a class="t" href="#lib.golden_compare.Block">Block</a>], polls: list[<a class="t" href="#lib.pdf.types.TableCandidate">TableCandidate</a>] = (), rejected: list[<a class="t" href="#lib.pdf.types.TableCandidate">TableCandidate</a>] | None = None, codepairs: list[<a class="t" href="#lib.pdf.types.TableCandidate">TableCandidate</a>] = (), content: list[<a class="t" href="#lib.pdf.types.TableCandidate">TableCandidate</a>] = (), generator: str = &#x27;unknown&#x27;) -&gt; list[<a class="t" href="#lib.pdf.types.Section">Section</a>]:<a class="ln" href="../../src/tomd/lib/pdf/select.py#L964">select.py:964</a>
+<span class="k">def </span><span class="n" id="lib.pdf.select.select_tables">select_tables</span>(tomd_sections: list[<a class="t" href="#lib.pdf.types.Section">Section</a>], ruled: list[<a class="t" href="#lib.pdf.types.TableCandidate">TableCandidate</a>], tagged: list[<a class="t" href="#lib.pdf.types.TableCandidate">TableCandidate</a>], blocks: list[<a class="t" href="#lib.golden_compare.Block">Block</a>], polls: list[<a class="t" href="#lib.pdf.types.TableCandidate">TableCandidate</a>] = (), rejected: list[<a class="t" href="#lib.pdf.types.TableCandidate">TableCandidate</a>] | None = None, codepairs: list[<a class="t" href="#lib.pdf.types.TableCandidate">TableCandidate</a>] = (), content: list[<a class="t" href="#lib.pdf.types.TableCandidate">TableCandidate</a>] = (), generator: str = &#x27;unknown&#x27;) -&gt; list[<a class="t" href="#lib.pdf.types.Section">Section</a>]:<a class="ln" href="../../src/tomd/lib/pdf/select.py#L956">select.py:956</a>
 <span class="d">    &quot;&quot;&quot;Choose one table per region from the three extractors.</span>
 <span class="d"></span>
 <span class="d">    Primary version by source priority (tags, polls, ruling lines, text positions),</span>
@@ -3287,7 +3848,7 @@ a.t{color:inherit;text-decoration:underline dotted}a.ln{color:var(--mut);font-si
     <span class="c"># calls: </span><a class="t" href="#lib.pdf.select.candidate_from_section">candidate_from_section</a>, <a class="t" href="#lib.pdf.select.page_furniture">page_furniture</a>, <a class="t" href="#lib.pdf.select.stitch_pages">stitch_pages</a>, <a class="t" href="#lib.pdf.select.cross_reader_continuation">cross_reader_continuation</a>, <a class="t" href="#lib.pdf.select.split_at_headers">split_at_headers</a>, <a class="t" href="#lib.pdf.select.join_split_words">join_split_words</a>, <a class="t" href="#lib.pdf.stacked.split_stacked">stacked.split_stacked</a>, <a class="t" href="#lib.pdf.runctx.current">runctx.current</a>, <a class="t" href="#lib.pdf.select.table_flags">table_flags</a>, _is_bad, _row_top, _same_region<span class="c">, +13 more</span>
     <span class="c"># called by: </span><a class="t" href="#lib.pdf.pipeline.run_pipeline">pipeline.run_pipeline</a><span class="c"></span>
 
-<span class="k">def </span><span class="n" id="lib.pdf.select.sparse_mapping">sparse_mapping</span>(t) -&gt; bool:<a class="ln" href="../../src/tomd/lib/pdf/select.py#L463">select.py:463</a>
+<span class="k">def </span><span class="n" id="lib.pdf.select.sparse_mapping">sparse_mapping</span>(t) -&gt; bool:<a class="ln" href="../../src/tomd/lib/pdf/select.py#L455">select.py:455</a>
 <span class="d">    &quot;&quot;&quot;a closed grid of two or more drawn columns whose rows mostly fill only their first</span>
 <span class="d">    cell with a short label (a mapping where most entries have no counterpart): a table,</span>
 <span class="d">    not a framed paragraph under a lead-in line (whose single cells are prose)</span>
@@ -3296,7 +3857,7 @@ a.t{color:inherit;text-decoration:underline dotted}a.ln{color:var(--mut);font-si
     <span class="c"># calls: </span><a class="t" href="#lib.pdf.select.closed_exempt">closed_exempt</a><span class="c"></span>
     <span class="c"># called by: </span>ruled._bad_flags, _is_bad<span class="c"></span>
 
-<span class="k">def </span><span class="n" id="lib.pdf.select.split_at_headers">split_at_headers</span>(cand: <a class="t" href="#lib.pdf.types.TableCandidate">TableCandidate</a>) -&gt; list[<a class="t" href="#lib.pdf.types.TableCandidate">TableCandidate</a>]:<a class="ln" href="../../src/tomd/lib/pdf/select.py#L754">select.py:754</a>
+<span class="k">def </span><span class="n" id="lib.pdf.select.split_at_headers">split_at_headers</span>(cand: <a class="t" href="#lib.pdf.types.TableCandidate">TableCandidate</a>) -&gt; list[<a class="t" href="#lib.pdf.types.TableCandidate">TableCandidate</a>]:<a class="ln" href="../../src/tomd/lib/pdf/select.py#L746">select.py:746</a>
 <span class="d">    &quot;&quot;&quot;Two tables stacked in one reading: a different header row inside the body</span>
 <span class="d">    (short bold labels after a non-bold row) starts a new table (the user&#x27;s</span>
 <span class="d">    header rule; an identical header repeated is the same table and stays).</span>
@@ -3305,7 +3866,7 @@ a.t{color:inherit;text-decoration:underline dotted}a.ln{color:var(--mut);font-si
     <span class="c"># calls: </span>_is_header_row, <a class="t" href="#lib.pdf.types.TableCandidate">types.TableCandidate</a>, _bold_row, _same_header, _carry<span class="c"></span>
     <span class="c"># called by: </span><a class="t" href="#lib.pdf.select.select_tables">select_tables</a><span class="c"></span>
 
-<span class="k">def </span><span class="n" id="lib.pdf.select.stitch_pages">stitch_pages</span>(cands: list[<a class="t" href="#lib.pdf.types.TableCandidate">TableCandidate</a>], blocks: list[<a class="t" href="#lib.golden_compare.Block">Block</a>], furniture: frozenset = frozenset()) -&gt; list[<a class="t" href="#lib.pdf.types.TableCandidate">TableCandidate</a>]:<a class="ln" href="../../src/tomd/lib/pdf/select.py#L611">select.py:611</a>
+<span class="k">def </span><span class="n" id="lib.pdf.select.stitch_pages">stitch_pages</span>(cands: list[<a class="t" href="#lib.pdf.types.TableCandidate">TableCandidate</a>], blocks: list[<a class="t" href="#lib.golden_compare.Block">Block</a>], furniture: frozenset = frozenset()) -&gt; list[<a class="t" href="#lib.pdf.types.TableCandidate">TableCandidate</a>]:<a class="ln" href="../../src/tomd/lib/pdf/select.py#L603">select.py:603</a>
 <span class="d">    &quot;&quot;&quot;Join a table that ends one page with one that starts the next page.</span>
 <span class="d"></span>
 <span class="d">    Requires the same column count and x-extent, and no text after the first</span>
@@ -3314,42 +3875,34 @@ a.t{color:inherit;text-decoration:underline dotted}a.ln{color:var(--mut);font-si
 <span class="d">    that the PDF repeats on the continuation is dropped.</span>
 <span class="d">    &quot;&quot;&quot;</span>
     <span class="c"># calls: </span>_new_header, _same_columns, _continuation_votes, _text_outside, _same_header, _carry, <a class="t" href="#lib.pdf.types.TableCandidate">types.TableCandidate</a>, <a class="t" href="#lib.pdf.runctx.current">runctx.current</a><span class="c"></span>
-    <span class="c"># called by: </span><a class="t" href="#lib.pdf.select.select_tables">select_tables</a><span class="c"></span>
+    <span class="c"># called by: </span>pipeline._build_scan_tables, <a class="t" href="#lib.pdf.select.select_tables">select_tables</a><span class="c"></span>
 
-<span class="k">def </span><span class="n" id="lib.pdf.select.table_flags">table_flags</span>(cand: <a class="t" href="#lib.pdf.types.TableCandidate">TableCandidate</a>) -&gt; list[str]:<a class="ln" href="../../src/tomd/lib/pdf/select.py#L303">select.py:303</a>
+<span class="k">def </span><span class="n" id="lib.pdf.select.table_flags">table_flags</span>(cand: <a class="t" href="#lib.pdf.types.TableCandidate">TableCandidate</a>) -&gt; list[str]:<a class="ln" href="../../src/tomd/lib/pdf/select.py#L295">select.py:295</a>
 <span class="d">    &quot;&quot;&quot;Rule-based sanity checks. Flags in BAD_TABLE_FLAGS mean the grid is</span>
 <span class="d">    probably wrong; the others are informational.</span>
 <span class="d">    &quot;&quot;&quot;</span>
     <span class="c"># calls: </span>_split_code_cell<span class="c"></span>
     <span class="c"># called by: </span>ruled._bad_flags, <a class="t" href="#lib.pdf.ruled.extract_ruled_tables">ruled.extract_ruled_tables</a>, <a class="t" href="#lib.pdf.select.select_tables">select_tables</a><span class="c"></span>
 
-<span class="k">def </span><span class="n" id="lib.pdf.select.vote_header">vote_header</span>(labels: list[str]) -&gt; bool:<a class="ln" href="../../src/tomd/lib/pdf/select.py#L427">select.py:427</a>
+<span class="k">def </span><span class="n" id="lib.pdf.select.vote_header">vote_header</span>(labels: list[str]) -&gt; bool:<a class="ln" href="../../src/tomd/lib/pdf/select.py#L419">select.py:419</a>
 <span class="d">    &quot;&quot;&quot;These cell texts form a poll header (see VOTE_LABELS).&quot;&quot;&quot;</span>
     <span class="c"># called by: </span>poll._header_prefix, <a class="t" href="#lib.pdf.poll.extract_poll_tables">poll.extract_poll_tables</a>, <a class="t" href="#lib.pdf.select.class_check">class_check</a><span class="c"></span>
 
-<span class="k">def </span><span class="n" id="lib.pdf.select.witness">witness</span>(primary: <a class="t" href="#lib.pdf.types.TableCandidate">TableCandidate</a>, agreeing: list[<a class="t" href="#lib.pdf.types.TableCandidate">TableCandidate</a>], cands: list[<a class="t" href="#lib.pdf.types.TableCandidate">TableCandidate</a>], blocks: list[<a class="t" href="#lib.golden_compare.Block">Block</a>]) -&gt; dict:<a class="ln" href="../../src/tomd/lib/pdf/select.py#L1324">select.py:1324</a>
+<span class="k">def </span><span class="n" id="lib.pdf.select.witness">witness</span>(primary: <a class="t" href="#lib.pdf.types.TableCandidate">TableCandidate</a>, agreeing: list[<a class="t" href="#lib.pdf.types.TableCandidate">TableCandidate</a>], cands: list[<a class="t" href="#lib.pdf.types.TableCandidate">TableCandidate</a>], blocks: list[<a class="t" href="#lib.golden_compare.Block">Block</a>]) -&gt; dict:<a class="ln" href="../../src/tomd/lib/pdf/select.py#L1305">select.py:1305</a>
 <span class="d">    &quot;&quot;&quot;Per property, the distinct information sources behind the agreeing readings.&quot;&quot;&quot;</span>
     <span class="c"># calls: </span>_extent_open<span class="c"></span>
     <span class="c"># called by: </span><a class="t" href="#lib.pdf.select.select_tables">select_tables</a><span class="c"></span>
 
-<span class="n" id="lib.pdf.select.BAD_TABLE_FLAGS">BAD_TABLE_FLAGS</span> = ...<a class="ln" href="../../src/tomd/lib/pdf/select.py#L386">select.py:386</a>
+<span class="n" id="lib.pdf.select.BAD_TABLE_FLAGS">BAD_TABLE_FLAGS</span> = ...<a class="ln" href="../../src/tomd/lib/pdf/select.py#L378">select.py:378</a>
 
 <span class="c"># a closed drawn grid&#x27;s lines fix its cells: empty, merged and full-width cells are the</span>
 <span class="c"># author&#x27;s layout there, not a misread (the content checks still apply)</span>
-<span class="n" id="lib.pdf.select.CLOSED_GRID_EXEMPT">CLOSED_GRID_EXEMPT</span> = ...<a class="ln" href="../../src/tomd/lib/pdf/select.py#L437">select.py:437</a>
-
-<span class="c"># Readers whose readings are kept (flagged, reason &quot;rule-check&quot;) when they fail</span>
-<span class="c"># the rule checks and no other reading covers their region. During the port,</span>
-<span class="c"># the readers that read those layouts in tomd-tables (polls, drawn rules, the</span>
-<span class="c"># content reader) and the marks for dropped readings (flag.py) are not here</span>
-<span class="c"># yet; once they are, this set is emptied and such readings are dropped as</span>
-<span class="c"># there, their text kept as prose and marked.</span>
-<span class="n" id="lib.pdf.select.KEPT_WHEN_UNREPLACED">KEPT_WHEN_UNREPLACED</span> = frozenset({&#x27;tomd&#x27;})<a class="ln" href="../../src/tomd/lib/pdf/select.py#L47">select.py:47</a>
+<span class="n" id="lib.pdf.select.CLOSED_GRID_EXEMPT">CLOSED_GRID_EXEMPT</span> = ...<a class="ln" href="../../src/tomd/lib/pdf/select.py#L429">select.py:429</a>
 
 <span class="c"># Vote labels and their side: +1 for, 0 neutral, -1 against. A header is a</span>
 <span class="c"># line made only of these, in that order (for ... neutral ... against):</span>
 <span class="c"># &quot;SF F N A SA&quot;, &quot;SF WF N WA SA&quot;, &quot;F N A&quot;, &quot;Strongly Favor ... Strongly Against&quot;.</span>
-<span class="n" id="lib.pdf.select.VOTE_LABELS">VOTE_LABELS</span> = ...<a class="ln" href="../../src/tomd/lib/pdf/select.py#L419">select.py:419</a>
+<span class="n" id="lib.pdf.select.VOTE_LABELS">VOTE_LABELS</span> = ...<a class="ln" href="../../src/tomd/lib/pdf/select.py#L411">select.py:411</a>
 
 <span class="c"># + 30 private module-level names</span></pre><h2 id="lib-pdf-spans-py">lib/pdf/spans.py<a class="src" href="../../src/tomd/lib/pdf/spans.py">source</a></h2><p class="sum">Typed: 8 of 8 functions and methods (100%).</p><pre><span class="d">&quot;&quot;&quot;Span normalization - snap style boundaries to word edges.</span>
 <span class="d"></span>
@@ -3525,7 +4078,7 @@ a.t{color:inherit;text-decoration:underline dotted}a.ln{color:var(--mut);font-si
 
 <span class="k">def </span><span class="n" id="lib.pdf.summary.generator">generator</span>(meta: dict) -&gt; str:<a class="ln" href="../../src/tomd/lib/pdf/summary.py#L49">summary.py:49</a>
 <span class="d">    &quot;&quot;&quot;The PDF producer&#x27;s family, from the document metadata.&quot;&quot;&quot;</span>
-    <span class="c"># called by: </span><a class="t" href="#lib.pdf.classify.gate_tables">classify.gate_tables</a>, <a class="t" href="#lib.pdf.pipeline.run_pipeline">pipeline.run_pipeline</a><span class="c"></span>
+    <span class="c"># called by: </span><a class="t" href="#lib.pdf.classify.gate_tables">classify.gate_tables</a>, <a class="t" href="#lib.pdf.pipeline.run_pipeline">pipeline.run_pipeline</a>, <a class="t" href="#lib.pdf.scan.run_scan">scan.run_scan</a><span class="c"></span>
 
 <span class="k">def </span><span class="n" id="lib.pdf.summary.header_comment">header_comment</span>(s: dict) -&gt; str:<a class="ln" href="../../src/tomd/lib/pdf/summary.py#L116">summary.py:116</a>
 <span class="d">    &quot;&quot;&quot;The one-line ``tomd:summary`` comment written after the front matter.&quot;&quot;&quot;</span>

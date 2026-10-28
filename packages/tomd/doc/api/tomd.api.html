@@ -5062,7 +5062,7 @@ a.t{color:inherit;text-decoration:underline dotted}a.ln{color:var(--mut);font-si
 
 <span class="c"># + 9 private module-level names</span></pre><h2 id="lib-shared-py">lib/shared.py<a class="src" href="../../src/tomd/lib/shared.py">source</a></h2><p class="sum">Typed: 18 of 19 functions and methods (94%).</p><pre><span class="d">&quot;&quot;&quot;Shared text utilities and constants for PDF and HTML converters.&quot;&quot;&quot;</span>
 
-<span class="k">def </span><span class="n" id="lib.shared.apply_strip_leading_h1">apply_strip_leading_h1</span>(md: str, title: str, max_level: int = 1) -&gt; str:<a class="ln" href="../../src/tomd/lib/shared.py#L211">shared.py:211</a>
+<span class="k">def </span><span class="n" id="lib.shared.apply_strip_leading_h1">apply_strip_leading_h1</span>(md: str, title: str, max_level: int = 1) -&gt; str:<a class="ln" href="../../src/tomd/lib/shared.py#L214">shared.py:214</a>
 <span class="d">    &quot;&quot;&quot;Strip a leading title heading from the body after YAML front matter.&quot;&quot;&quot;</span>
     <span class="c"># calls: </span>_find_front_matter_end, <a class="t" href="#lib.shared.strip_leading_h1">strip_leading_h1</a><span class="c"></span>
     <span class="c"># called by: </span><a class="t" href="#writers.markdown.writer.MarkdownWriter.write">writer.MarkdownWriter.write</a><span class="c"></span>
@@ -5082,10 +5082,10 @@ a.t{color:inherit;text-decoration:underline dotted}a.ln{color:var(--mut);font-si
 <span class="d">    2. Any paragraph longer than 40 chars appearing more than 10 times</span>
 <span class="d">       total is capped at 10 occurrences (keeps the first 10).</span>
 <span class="d"></span>
-<span class="d">    Headings and code fences are never dropped.</span>
+<span class="d">    Headings, code fences and tomd&#x27;s structural markers are never dropped.</span>
 <span class="d">    &quot;&quot;&quot;</span>
 
-<span class="k">def </span><span class="n" id="lib.shared.deobfuscate_email">deobfuscate_email</span>(text: str) -&gt; tuple[str, tuple[int, int]] | None:<a class="ln" href="../../src/tomd/lib/shared.py#L738">shared.py:738</a>
+<span class="k">def </span><span class="n" id="lib.shared.deobfuscate_email">deobfuscate_email</span>(text: str) -&gt; tuple[str, tuple[int, int]] | None:<a class="ln" href="../../src/tomd/lib/shared.py#L741">shared.py:741</a>
 <span class="d">    &quot;&quot;&quot;Reverse common anti-spam email obfuscation patterns.</span>
 <span class="d"></span>
 <span class="d">    Handles three families (checked most-specific-first):</span>
@@ -5100,7 +5100,7 @@ a.t{color:inherit;text-decoration:underline dotted}a.ln{color:var(--mut);font-si
 <span class="d">    &quot;&quot;&quot;</span>
     <span class="c"># called by: </span><a class="t" href="#lib.shared.parse_author_lines">parse_author_lines</a><span class="c"></span>
 
-<span class="k">def </span><span class="n" id="lib.shared.enrich_reply_to_names">enrich_reply_to_names</span>(reply_to: list[str], author_names: list[str]) -&gt; list[str]:<a class="ln" href="../../src/tomd/lib/shared.py#L866">shared.py:866</a>
+<span class="k">def </span><span class="n" id="lib.shared.enrich_reply_to_names">enrich_reply_to_names</span>(reply_to: list[str], author_names: list[str]) -&gt; list[str]:<a class="ln" href="../../src/tomd/lib/shared.py#L869">shared.py:869</a>
 <span class="d">    &quot;&quot;&quot;Pair bare ``&lt;email&gt;`` reply-to entries with author names.</span>
 <span class="d"></span>
 <span class="d">    For each entry that has an email but no name (e.g. ``&lt;daveed@example.com&gt;``),</span>
@@ -5116,7 +5116,7 @@ a.t{color:inherit;text-decoration:underline dotted}a.ln{color:var(--mut);font-si
 <span class="d">    &quot;&quot;&quot;</span>
     <span class="c"># calls: </span>_looks_like_person_name<span class="c"></span>
 
-<span class="k">def </span><span class="n" id="lib.shared.normalize_date">normalize_date</span>(text: str) -&gt; str | None:<a class="ln" href="../../src/tomd/lib/shared.py#L970">shared.py:970</a>
+<span class="k">def </span><span class="n" id="lib.shared.normalize_date">normalize_date</span>(text: str) -&gt; str | None:<a class="ln" href="../../src/tomd/lib/shared.py#L973">shared.py:973</a>
 <span class="d">    &quot;&quot;&quot;Parse common date formats and return ISO YYYY-MM-DD, or None.</span>
 <span class="d"></span>
 <span class="d">    Tries in order:</span>
@@ -5128,14 +5128,14 @@ a.t{color:inherit;text-decoration:underline dotted}a.ln{color:var(--mut);font-si
 <span class="d">    Returns None when no recognized date format is found.</span>
 <span class="d">    &quot;&quot;&quot;</span>
 
-<span class="k">def </span><span class="n" id="lib.shared.override_revision_from_filename">override_revision_from_filename</span>(metadata: dict, path: Path) -&gt; None:<a class="ln" href="../../src/tomd/lib/shared.py#L1014">shared.py:1014</a>
+<span class="k">def </span><span class="n" id="lib.shared.override_revision_from_filename">override_revision_from_filename</span>(metadata: dict, path: Path) -&gt; None:<a class="ln" href="../../src/tomd/lib/shared.py#L1017">shared.py:1017</a>
 <span class="d">    &quot;&quot;&quot;Override document revision from filename when the base paper number</span>
 <span class="d">    matches but revisions differ. Skip when the extracted document has a</span>
 <span class="d">    D-prefix (draft), since D/P mismatches are expected WG21 workflow.</span>
 <span class="d">    &quot;&quot;&quot;</span>
     <span class="c"># called by: </span><a class="t" href="#lib.metadata_yaml.extract.apply_pdf_metadata_fallbacks">extract.apply_pdf_metadata_fallbacks</a>, <a class="t" href="#lib.pdf.pipeline.run_pipeline">pipeline.run_pipeline</a><span class="c"></span>
 
-<span class="k">def </span><span class="n" id="lib.shared.parse_author_lines">parse_author_lines</span>(lines, clean_line=None, skip_line=None):<a class="ln" href="../../src/tomd/lib/shared.py#L778">shared.py:778</a>
+<span class="k">def </span><span class="n" id="lib.shared.parse_author_lines">parse_author_lines</span>(lines, clean_line=None, skip_line=None):<a class="ln" href="../../src/tomd/lib/shared.py#L781">shared.py:781</a>
 <span class="d">    &quot;&quot;&quot;Parse author name + email pairs from an iterable of raw line strings.</span>
 <span class="d"></span>
 <span class="d">    Each entry in the returned list is either &#x27;Name &lt;email&gt;&#x27; when a name</span>
@@ -5150,7 +5150,7 @@ a.t{color:inherit;text-decoration:underline dotted}a.ln{color:var(--mut);font-si
 <span class="k">def </span><span class="n" id="lib.shared.strip_format_chars">strip_format_chars</span>(text: str) -&gt; str:<a class="ln" href="../../src/tomd/lib/shared.py#L65">shared.py:65</a>
 <span class="d">    &quot;&quot;&quot;Remove Unicode format characters (category Cf).&quot;&quot;&quot;</span>
 
-<span class="k">def </span><span class="n" id="lib.shared.strip_freeform_metadata_lines">strip_freeform_metadata_lines</span>(md: str, metadata: dict | None = None) -&gt; str:<a class="ln" href="../../src/tomd/lib/shared.py#L575">shared.py:575</a>
+<span class="k">def </span><span class="n" id="lib.shared.strip_freeform_metadata_lines">strip_freeform_metadata_lines</span>(md: str, metadata: dict | None = None) -&gt; str:<a class="ln" href="../../src/tomd/lib/shared.py#L578">shared.py:578</a>
 <span class="d">    &quot;&quot;&quot;Public entry point for free-form metadata stripping.</span>
 <span class="d"></span>
 <span class="d">    Called from ``api.convert_paper`` after ``_strip_body_metadata_text``,</span>
@@ -5164,7 +5164,7 @@ a.t{color:inherit;text-decoration:underline dotted}a.ln{color:var(--mut);font-si
     <span class="c"># calls: </span>_strip_freeform_metadata_lines<span class="c"></span>
     <span class="c"># called by: </span><a class="t" href="#writers.markdown.writer.MarkdownWriter.write">writer.MarkdownWriter.write</a><span class="c"></span>
 
-<span class="k">def </span><span class="n" id="lib.shared.strip_leading_h1">strip_leading_h1</span>(body: str, title: str = &#x27;&#x27;, max_level: int = 1) -&gt; str:<a class="ln" href="../../src/tomd/lib/shared.py#L148">shared.py:148</a>
+<span class="k">def </span><span class="n" id="lib.shared.strip_leading_h1">strip_leading_h1</span>(body: str, title: str = &#x27;&#x27;, max_level: int = 1) -&gt; str:<a class="ln" href="../../src/tomd/lib/shared.py#L151">shared.py:151</a>
 <span class="d">    &quot;&quot;&quot;Remove a leading heading from body text if it duplicates the title.</span>
 <span class="d"></span>
 <span class="d">    Strips the first non-blank line if it is an ATX heading no deeper than</span>
@@ -5178,7 +5178,7 @@ a.t{color:inherit;text-decoration:underline dotted}a.ln{color:var(--mut);font-si
     <span class="c"># calls: </span>_titles_match<span class="c"></span>
     <span class="c"># called by: </span><a class="t" href="#lib.shared.apply_strip_leading_h1">apply_strip_leading_h1</a><span class="c"></span>
 
-<span class="k">def </span><span class="n" id="lib.shared.strip_orphan_toc_list">strip_orphan_toc_list</span>(md: str) -&gt; str:<a class="ln" href="../../src/tomd/lib/shared.py#L478">shared.py:478</a>
+<span class="k">def </span><span class="n" id="lib.shared.strip_orphan_toc_list">strip_orphan_toc_list</span>(md: str) -&gt; str:<a class="ln" href="../../src/tomd/lib/shared.py#L481">shared.py:481</a>
 <span class="d">    &quot;&quot;&quot;Remove bullet-list TOCs orphaned before the first heading.</span>
 <span class="d"></span>
 <span class="d">    Some WG21 PDFs have a minimal Table of Contents as a bullet list of</span>
@@ -5189,7 +5189,7 @@ a.t{color:inherit;text-decoration:underline dotted}a.ln{color:var(--mut);font-si
 <span class="d">    &quot;&quot;&quot;</span>
     <span class="c"># calls: </span>_find_front_matter_end<span class="c"></span>
 
-<span class="k">def </span><span class="n" id="lib.shared.strip_redundant_body_meta">strip_redundant_body_meta</span>(md: str) -&gt; str:<a class="ln" href="../../src/tomd/lib/shared.py#L453">shared.py:453</a>
+<span class="k">def </span><span class="n" id="lib.shared.strip_redundant_body_meta">strip_redundant_body_meta</span>(md: str) -&gt; str:<a class="ln" href="../../src/tomd/lib/shared.py#L456">shared.py:456</a>
 <span class="d">    &quot;&quot;&quot;Remove body lines that duplicate YAML frontmatter metadata.</span>
 <span class="d"></span>
 <span class="d">    Strips:</span>
@@ -5200,7 +5200,7 @@ a.t{color:inherit;text-decoration:underline dotted}a.ln{color:var(--mut);font-si
 <span class="d">    &quot;&quot;&quot;</span>
     <span class="c"># calls: </span>_strip_metadata_table<span class="c"></span>
 
-<span class="n" id="lib.shared.ALLOWED_LINK_SCHEMES">ALLOWED_LINK_SCHEMES</span> = frozenset({&#x27;http&#x27;, &#x27;https&#x27;, &#x27;mailto&#x27;})<a class="ln" href="../../src/tomd/lib/shared.py#L697">shared.py:697</a>
+<span class="n" id="lib.shared.ALLOWED_LINK_SCHEMES">ALLOWED_LINK_SCHEMES</span> = frozenset({&#x27;http&#x27;, &#x27;https&#x27;, &#x27;mailto&#x27;})<a class="ln" href="../../src/tomd/lib/shared.py#L700">shared.py:700</a>
 
 <span class="c"># Canonical mapping from a language spelling (a CSS class token, a Pandoc</span>
 <span class="c"># ``sourceCode`` suffix, or a standalone label line) to the fence language</span>
@@ -5208,32 +5208,32 @@ a.t{color:inherit;text-decoration:underline dotted}a.ln{color:var(--mut);font-si
 <span class="c"># language-label detector (lib/pdf/structure.py) and the HTML class-based</span>
 <span class="c"># detector (lib/html/render.py) so the recognized-language set is not</span>
 <span class="c"># duplicated. Extend here, never in a consumer.</span>
-<span class="n" id="lib.shared.CODE_LANG_LABELS">CODE_LANG_LABELS</span> = ...<a class="ln" href="../../src/tomd/lib/shared.py#L123">shared.py:123</a>
+<span class="n" id="lib.shared.CODE_LANG_LABELS">CODE_LANG_LABELS</span> = ...<a class="ln" href="../../src/tomd/lib/shared.py#L126">shared.py:126</a>
 
-<span class="n" id="lib.shared.DATE_RE">DATE_RE</span> = re.compile(&#x27;\\b(\\d{4}-\\d{2}-\\d{2})\\b&#x27;)<a class="ln" href="../../src/tomd/lib/shared.py#L936">shared.py:936</a>
+<span class="n" id="lib.shared.DATE_RE">DATE_RE</span> = re.compile(&#x27;\\b(\\d{4}-\\d{2}-\\d{2})\\b&#x27;)<a class="ln" href="../../src/tomd/lib/shared.py#L939">shared.py:939</a>
 
-<span class="n" id="lib.shared.DEFAULT_FENCE_LANG">DEFAULT_FENCE_LANG</span> = &#x27;cpp&#x27;<a class="ln" href="../../src/tomd/lib/shared.py#L115">shared.py:115</a>
+<span class="n" id="lib.shared.DEFAULT_FENCE_LANG">DEFAULT_FENCE_LANG</span> = &#x27;cpp&#x27;<a class="ln" href="../../src/tomd/lib/shared.py#L118">shared.py:118</a>
 
 <span class="c"># Core pattern shapes (no anchors, no label context) reused across modules</span>
 <span class="c"># so every document- and section-number pattern has a single source of truth.</span>
 <span class="c"># `lib/pdf/types.py` builds the labeled PDF variants (DOC_FIELD_RE,</span>
 <span class="c"># SECTION_NUM_RE) on top of these.</span>
-<span class="n" id="lib.shared.DOC_NUM_PATTERN">DOC_NUM_PATTERN</span> = &#x27;[DPN]\\d{3,5}R\\d+|[DPN]\\d{3,5}|N\\d{3,5}|SD-\\d+&#x27;<a class="ln" href="../../src/tomd/lib/shared.py#L1044">shared.py:1044</a>
+<span class="n" id="lib.shared.DOC_NUM_PATTERN">DOC_NUM_PATTERN</span> = &#x27;[DPN]\\d{3,5}R\\d+|[DPN]\\d{3,5}|N\\d{3,5}|SD-\\d+&#x27;<a class="ln" href="../../src/tomd/lib/shared.py#L1047">shared.py:1047</a>
 
 <span class="c"># Broad document-number match used for header stripping and HTML metadata.</span>
 <span class="c"># For line-anchored field extraction in PDF blocks, see DOC_FIELD_RE in</span>
 <span class="c"># lib/pdf/types.py, which targets &quot;Document Number: PXXXXrN&quot; line prefixes.</span>
-<span class="n" id="lib.shared.DOC_NUM_RE">DOC_NUM_RE</span> = re.compile(f&#x27;\\b({DOC_NUM_PATTERN})\\b&#x27;, re.IGNORECASE)<a class="ln" href="../../src/tomd/lib/shared.py#L1057">shared.py:1057</a>
+<span class="n" id="lib.shared.DOC_NUM_RE">DOC_NUM_RE</span> = re.compile(f&#x27;\\b({DOC_NUM_PATTERN})\\b&#x27;, re.IGNORECASE)<a class="ln" href="../../src/tomd/lib/shared.py#L1060">shared.py:1060</a>
 
-<span class="n" id="lib.shared.EMAIL_RE">EMAIL_RE</span> = re.compile(&#x27;[\\w.+-]+@[\\w.-]+\\.\\w+&#x27;)<a class="ln" href="../../src/tomd/lib/shared.py#L699">shared.py:699</a>
+<span class="n" id="lib.shared.EMAIL_RE">EMAIL_RE</span> = re.compile(&#x27;[\\w.+-]+@[\\w.-]+\\.\\w+&#x27;)<a class="ln" href="../../src/tomd/lib/shared.py#L702">shared.py:702</a>
 
 <span class="n" id="lib.shared.FORMAT_CHARS">FORMAT_CHARS</span> = ...<a class="ln" href="../../src/tomd/lib/shared.py#L57">shared.py:57</a>
 
-<span class="n" id="lib.shared.SECTION_NUM_PATTERN">SECTION_NUM_PATTERN</span> = f&#x27;(?:\\d+(?:\\.\\d+)*|{_ROMAN})&#x27;<a class="ln" href="../../src/tomd/lib/shared.py#L1052">shared.py:1052</a>
+<span class="n" id="lib.shared.SECTION_NUM_PATTERN">SECTION_NUM_PATTERN</span> = f&#x27;(?:\\d+(?:\\.\\d+)*|{_ROMAN})&#x27;<a class="ln" href="../../src/tomd/lib/shared.py#L1055">shared.py:1055</a>
 
 <span class="c"># Leading section-number prefix used by the HTML renderer to strip a number</span>
 <span class="c"># (e.g. &quot;2.1.3 &quot; or &quot;1. &quot;) from heading text.</span>
-<span class="n" id="lib.shared.SECTION_NUM_PREFIX_RE">SECTION_NUM_PREFIX_RE</span> = re.compile(f&#x27;^{SECTION_NUM_PATTERN}\\.?\\s+&#x27;)<a class="ln" href="../../src/tomd/lib/shared.py#L1061">shared.py:1061</a>
+<span class="n" id="lib.shared.SECTION_NUM_PREFIX_RE">SECTION_NUM_PREFIX_RE</span> = re.compile(f&#x27;^{SECTION_NUM_PATTERN}\\.?\\s+&#x27;)<a class="ln" href="../../src/tomd/lib/shared.py#L1064">shared.py:1064</a>
 
 <span class="c"># + 6 private module-level names</span></pre><h2 id="lib-similarity-py">lib/similarity.py<a class="src" href="../../src/tomd/lib/similarity.py">source</a></h2><p class="sum">Typed: 6 of 6 functions and methods (100%).</p><pre><span class="d">&quot;&quot;&quot;String similarity algorithms for fuzzy matching.</span>
 <span class="d"></span>

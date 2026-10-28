@@ -82,7 +82,7 @@ def dedup_paragraphs(md: str) -> str:
     2. Any paragraph longer than 40 chars appearing more than 10 times
        total is capped at 10 occurrences (keeps the first 10).
 
-    Headings and code fences are never dropped.
+    Headings, code fences and tomd's structural markers are never dropped.
     """
     blocks = md.split("\n\n")
     if len(blocks) <= 1:
@@ -99,7 +99,10 @@ def dedup_paragraphs(md: str) -> str:
         stripped = block.strip()
         is_heading = stripped.startswith("#")
         is_code = stripped.startswith("```")
-        if is_heading or is_code or len(stripped) < _MIN_DEDUP_LENGTH:
+        # tomd's structural markers (a table's level, its kind, an uncertain
+        # region) repeat by design: one per table, however many tables
+        is_marker = stripped.startswith("<!-- tomd:")
+        if is_heading or is_code or is_marker or len(stripped) < _MIN_DEDUP_LENGTH:
             result.append(block)
             continue
         counts[stripped] += 1

@@ -37,3 +37,11 @@ def test_line_end_hyphen_decided_by_the_paper():
         ctx.lexicon.update({"character": 3})
         assert _render_table_cell([_s("char-"), _s("\n"), _s("acter encoding")]) == "character encoding"
         assert _render_table_cell([_s("non-"), _s("\n"), _s("enforced")]) == "non-enforced"
+
+
+def test_table_markers_survive_paragraph_dedup():
+    """More than ten tables: every table's marker stays (the dedup cap is for prose)."""
+    from tomd.lib.shared import dedup_paragraphs
+    marker = "<!-- tomd:table kind=code-comparison cols=2 -->"
+    md = "\n\n".join(f"{marker}\n\n```cpp\nint a{i};\n```" for i in range(15))
+    assert dedup_paragraphs(md).count(marker) == 15

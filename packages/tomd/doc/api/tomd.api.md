@@ -6132,7 +6132,7 @@ def dedup_paragraphs(md: str) -> str:
     2. Any paragraph longer than 40 chars appearing more than 10 times
        total is capped at 10 occurrences (keeps the first 10).
 
-    Headings and code fences are never dropped.
+    Headings, code fences and tomd's structural markers are never dropped.
     """
 
 def deobfuscate_email(text: str) -> tuple[str, tuple[int, int]] | None:

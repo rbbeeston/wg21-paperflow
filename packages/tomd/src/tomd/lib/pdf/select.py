@@ -426,6 +426,25 @@ def mark_matrix(cand: TableCandidate) -> bool:
     return len(keyed) >= 1 and len(body) >= need and sum(bool(_MARK.match(c)) for c in body) >= 0.8 * len(body)
 
 
+# Vote labels and their side: +1 for, 0 neutral, -1 against. A header is a
+# line made only of these, in that order (for ... neutral ... against):
+# "SF F N A SA", "SF WF N WA SA", "F N A", "Strongly Favor ... Strongly Against".
+VOTE_LABELS = {
+    "sf": 1, "wf": 1, "f": 1, "strongly favor": 1, "strongly for": 1, "weakly favor": 1,
+    "weakly for": 1, "favor": 1, "for": 1, "favour": 1, "strongly favour": 1,
+    "n": 0, "neutral": 0,
+    "wa": -1, "a": -1, "sa": -1, "against": -1, "weakly against": -1, "strongly against": -1,
+}
+
+
+def vote_header(labels: list[str]) -> bool:
+    """These cell texts form a poll header (see VOTE_LABELS)."""
+    sides = [VOTE_LABELS.get(" ".join(t.lower().split())) for t in labels]
+    if len(sides) < 3 or None in sides or 1 not in sides or -1 not in sides:
+        return False
+    return sides == sorted(sides, reverse=True)
+
+
 # a closed drawn grid's lines fix its cells: empty, merged and full-width cells are the
 # author's layout there, not a misread (the content checks still apply)
 CLOSED_GRID_EXEMPT = frozenset({"ragged-columns", "empty-cells", "sparse-columns"})
@@ -1359,6 +1378,14 @@ def class_check(cand: TableCandidate) -> str:
         return ""
     width = max(len(r) for r in rows)
     if any(len(r) != width for r in rows):
+        return ""
+    if cand.source == "poll":
+        if "blank-row-inferred" in cand.flags:
+            return ""                     # the blank row was added by convention, not read
+        if vote_header(rows[0]) and len(rows) >= 2 and all(
+                all(_VOTE.match(c.strip()) for c in r) or not any(c.strip() for c in r)
+                for r in rows[1:]):
+            return "poll"
         return ""
     empty_col = any(not any(r[c].strip() for r in rows) for c in range(width))
     empty_row = any(not any(c.strip() for c in r) for r in rows)

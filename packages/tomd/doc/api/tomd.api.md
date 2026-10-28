@@ -1,6 +1,6 @@
 # tomd API surface
 
-77 modules, 86 classes, 194 functions, 85 methods, 348 fields. Typed: 859 of 950 functions and methods (90%).
+78 modules, 86 classes, 196 functions, 85 methods, 348 fields. Typed: 862 of 959 functions and methods (89%).
 
 ## Contents
 
@@ -49,6 +49,7 @@
 - [`lib/pdf/mono.py`](#lib-pdf-mono-py): classify_monospace, propagate_monospace
 - [`lib/pdf/pagecache.py`](#lib-pdf-pagecache-py): rawdict
 - [`lib/pdf/pipeline.py`](#lib-pdf-pipeline-py): PipelineResult, run_pipeline
+- [`lib/pdf/poll.py`](#lib-pdf-poll-py): extract_poll_tables
 - [`lib/pdf/qa.py`](#lib-pdf-qa-py): QABatchResult, QAMetrics, compute_metrics, format_qa_report, run_qa_batch, write_qa_json_atomic
 - [`lib/pdf/rowbands.py`](#lib-pdf-rowbands-py): merge_rule_bands, MAX_FILL, MIN_RULES, MIN_SEGMENT
 - [`lib/pdf/ruled.py`](#lib-pdf-ruled-py): drawn_spans, extract_ruled_tables, page_hrules
@@ -2894,7 +2895,7 @@ shared between conversions.
 def rawdict(page):
     # untyped: page, return
     # calls: _dedup_raw
-    # called by: ruled._grid_tables_in, ruled.extract_ruled_tables
+    # called by: poll.extract_poll_tables, ruled._grid_tables_in, ruled.extract_ruled_tables
     ...
 
 # + 1 private module-level name
@@ -2971,9 +2972,44 @@ def run_pipeline(path: Path, *, ml_tables: bool = False, visualize: bool = False
     effect when ``extract_vector`` is False.
     labels inside vector figures render as pixels alongside body text.
     """
-    # calls: PipelineResult, images._VectorExtractionStats, _enforce_skip_contract, PipelineResult.for_skip, _is_slide_deck, _is_standards_draft, extract.extract_mupdf, extract.extract_spatial, cleanup.get_edge_items, extract.collect_links, extract.attach_links, images.extract_page_images, +76 more
+    # calls: PipelineResult, images._VectorExtractionStats, _enforce_skip_contract, PipelineResult.for_skip, _is_slide_deck, _is_standards_draft, extract.extract_mupdf, extract.extract_spatial, cleanup.get_edge_items, extract.collect_links, extract.attach_links, images.extract_page_images, +77 more
 
 # + 38 private module-level names
+```
+
+<a id="lib-pdf-poll-py"></a>
+
+## `lib/pdf/poll.py` ([source](../../src/tomd/lib/pdf/poll.py))
+
+Typed: 2 of 8 functions and methods (25%).
+
+```python
+"""WG21 poll result tables.
+
+WG21 papers and minutes record straw polls in a fixed shape: a header line
+"SF F N A SA" (Strongly For, For, Neutral, Against, Strongly Against) with
+the vote counts in the line below, one count under each header. Authors draw
+it in many ways - ruled, unruled, inside a coloured box, tab-aligned - and
+the other table sources miss most of them (too few rules, no tags), so this
+source looks for the shape itself.
+
+A poll is recognised when a text line consists of exactly the five header
+tokens in order. Rows of numbers directly below whose numbers sit under the
+header columns are its counts (up to _MAX_ROWS). A suggested poll with no
+counts yet is emitted with an empty vote row when one is drawn under the
+header, otherwise as a header-only table. A header followed by text on
+the same line ("SF F N A SA: 4 5 1 0 0") is inline prose and is left alone.
+"""
+
+def extract_poll_tables(page, page_num: int, words_hint=None) -> list[TableCandidate]:
+    """Poll result tables on one page. `words_hint` (the page's words, already
+    extracted) lets a page with no vote label skip the character extraction.
+    """
+    # untyped: page, words_hint
+    # calls: _clean, _split_pipes, pagecache.rawdict, ruled._page_words, _baseline_lines, select.vote_header, _label_cells, _header_prefix, _row_cells, _strip_zero_width, ruled._chars_to_lines, ruled._word_chars, +1 more
+    # called by: pipeline.run_pipeline
+
+# + 7 private module-level names
 ```
 
 <a id="lib-pdf-qa-py"></a>
@@ -3221,7 +3257,7 @@ ERROR_MESSAGE_LIMIT = 300
 
 ## `lib/pdf/select.py` ([source](../../src/tomd/lib/pdf/select.py))
 
-Typed: 39 of 47 functions and methods (82%).
+Typed: 40 of 48 functions and methods (83%).
 
 ```python
 """Table selection: one reading per region, trusted only when another kind of evidence agrees.
@@ -3268,7 +3304,7 @@ def class_check(cand: TableCandidate) -> str:
       - tags: from a well-formed structure tree, every row as wide as the
         table, no empty column.
     """
-    # calls: _is_bad
+    # calls: _is_bad, vote_header
     # called by: select_tables
 
 def closed_exempt(t) -> bool:
@@ -3410,6 +3446,10 @@ def table_flags(cand: TableCandidate) -> list[str]:
     # calls: _split_code_cell
     # called by: ruled._bad_flags, ruled.extract_ruled_tables, select_tables
 
+def vote_header(labels: list[str]) -> bool:
+    """These cell texts form a poll header (see VOTE_LABELS)."""
+    # called by: poll._header_prefix, poll.extract_poll_tables, class_check
+
 def witness(primary: TableCandidate, agreeing: list[TableCandidate], cands: list[TableCandidate], blocks: list[Block]) -> dict:
     """Per property, the distinct information sources behind the agreeing readings."""
     # calls: _extent_open
@@ -3428,6 +3468,11 @@ CLOSED_GRID_EXEMPT = ...
 # yet; once they are, this set is emptied and such readings are dropped as
 # there, their text kept as prose and marked.
 KEPT_WHEN_UNREPLACED = frozenset({'tomd'})
+
+# Vote labels and their side: +1 for, 0 neutral, -1 against. A header is a
+# line made only of these, in that order (for ... neutral ... against):
+# "SF F N A SA", "SF WF N WA SA", "F N A", "Strongly Favor ... Strongly Against".
+VOTE_LABELS = ...
 
 # No HIGH for a table whose cells hold multi-line code: such a table renders as a
 # pipe table with a whole code block in each cell, while a code comparison is read
@@ -5254,6 +5299,7 @@ class MarkdownWriter:
 - `extract_mupdf`: [`lib/pdf/extract.py`](#lib-pdf-extract-py)
 - `extract_page_images`: [`lib/pdf/images.py`](#lib-pdf-images-py)
 - `extract_page_vector_images`: [`lib/pdf/vector_images.py`](#lib-pdf-vector-images-py)
+- `extract_poll_tables`: [`lib/pdf/poll.py`](#lib-pdf-poll-py)
 - `extract_ruled_tables`: [`lib/pdf/ruled.py`](#lib-pdf-ruled-py)
 - `extract_spatial`: [`lib/pdf/extract.py`](#lib-pdf-extract-py)
 - `extract_tagged_tables`: [`lib/pdf/tagged.py`](#lib-pdf-tagged-py)
@@ -5480,6 +5526,8 @@ class MarkdownWriter:
 - `validate_facts_jsonl`: [`lib/golden_qa.py`](#lib-golden-qa-py)
 - `VECTOR_UNCERTAINTY_MARKER_TEMPLATE`: [`lib/pdf/vector_images.py`](#lib-pdf-vector-images-py)
 - `VectorUncertaintyStats`: [`lib/pdf/images.py`](#lib-pdf-images-py)
+- `vote_header`: [`lib/pdf/select.py`](#lib-pdf-select-py)
+- `VOTE_LABELS`: [`lib/pdf/select.py`](#lib-pdf-select-py)
 - `WITHHOLD_TRUST_FOR_CODE_CELLS`: [`lib/pdf/select.py`](#lib-pdf-select-py)
 - `WITHHOLD_TRUST_UNTIL_VERIFIED`: [`lib/pdf/select.py`](#lib-pdf-select-py)
 - `witness`: [`lib/pdf/select.py`](#lib-pdf-select-py)

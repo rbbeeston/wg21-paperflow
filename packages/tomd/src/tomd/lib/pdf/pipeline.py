@@ -100,6 +100,7 @@ from .runctx import current, run_scope
 from .select import remove_table_regions, select_tables
 from .tagged import extract_tagged_tables
 from .ruled import extract_ruled_tables, page_hrules
+from .poll import extract_poll_tables
 from .rowbands import merge_rule_bands
 from .levels import assign as assign_level
 from .summary import build as build_summary, generator as pdf_generator, header_comment, prompt_elements
@@ -2083,6 +2084,7 @@ def run_pipeline(
             page_drawings: dict[int, list] = {}
             page_mupdf_tables: dict[int, list[dict]] = {}
             ruled_tables: list = []
+            poll_tables: list = []
             page_rules: dict[int, list] = {}         # drawn horizontal rules per page
             all_figure_regions = []
             for pg_num in range(result.page_count):
@@ -2108,6 +2110,11 @@ def run_pipeline(
                         ruled_tables.extend(extract_ruled_tables(page, pg_num, raw_drawings))
                     except Exception as exc:  # a failing table reader must not fail the paper: recorded
                         current().reader_error("ruled", pg_num, exc)
+                    # Table reader: WG21 straw polls ("SF F N A SA" over the counts).
+                    try:
+                        poll_tables.extend(extract_poll_tables(page, pg_num, page.get_text("words")))
+                    except Exception as exc:  # a failing table reader must not fail the paper: recorded
+                        current().reader_error("poll", pg_num, exc)
 
                 # Intentional: runs unconditionally (independent of ml_tables).
                 # Three table-detection passes rely on the MuPDF signal:
@@ -2313,7 +2320,7 @@ def run_pipeline(
         current().reader_error("detect_tables", None, exc)
         tomd_sections = []
     table_sections = select_tables(tomd_sections, ruled_tables, tagged_tables, pre_detect_blocks,
-                                   generator=pdf_generator(doc_metadata))
+                                   poll_tables, generator=pdf_generator(doc_metadata))
     # Rows bounded by drawn rules: a record the reader cut into rows is joined.
     for ts in table_sections:
         pages = {ln.page_num for ln in ts.lines or []}

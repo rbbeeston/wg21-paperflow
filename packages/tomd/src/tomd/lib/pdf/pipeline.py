@@ -104,6 +104,8 @@ from .poll import extract_poll_tables
 from .codepair import find_code_pairs
 from .classify import gate_tables, withhold_trust
 from .content import content_candidates
+from .continuation import annotate as annotate_continuations
+from .figure_tables import label_figure_tables
 from .docmeasure import hyphenates as doc_hyphenates, measure as doc_measure
 from .extent import extend as extend_readings
 from .flag import (aligned_regions, dropped_uncovered, flag_possible_tables, gutter_regions,
@@ -2445,8 +2447,11 @@ def run_pipeline(
     if two_column_pages:
         _log.debug("Two-column pages: %s", sorted(two_column_pages))
 
-    all_mupdf_blocks = cleanup_text(all_mupdf_blocks)
-    all_spatial_blocks = cleanup_text(all_spatial_blocks)
+    # A line-end hyphen inside a region a table reader located is the cell's, decided
+    # when the cell is rendered: the document-wide pass leaves it.
+    reader_regions = [(pg, bb) for c in ruled_tables + tagged_tables + poll_tables for pg, bb in c.bboxes.items()]
+    all_mupdf_blocks = cleanup_text(all_mupdf_blocks, keep_hyphens=reader_regions)
+    all_spatial_blocks = cleanup_text(all_spatial_blocks, keep_hyphens=reader_regions)
 
     all_mupdf_blocks = normalize_spans(all_mupdf_blocks)
     all_spatial_blocks = normalize_spans(all_spatial_blocks)
@@ -2529,6 +2534,22 @@ def run_pipeline(
     all_spatial_blocks = remove_table_regions(all_spatial_blocks, table_sections)
     if table_sections:
         _log.info("Selected %d table(s)", len(table_sections))
+    if table_sections:
+        # A note on pieces that may continue the previous page's table (never a
+        # join), and the figure label of a table drawn inside a figure.
+        with _FITZ_LOCK:  # see _fitz_lock.py for why this lock is required
+            kdoc = fitz.open(str(path))
+            try:
+                try:
+                    annotate_continuations(kdoc, table_sections)
+                except Exception as exc:  # a note only; never fail on it, never silently
+                    current().reader_error("continuation notes", None, exc)
+                try:
+                    label_figure_tables(kdoc, table_sections)
+                except Exception as exc:  # a label only; never fail on it, never silently
+                    current().reader_error("figure labels", None, exc)
+            finally:
+                kdoc.close()
 
     # Nothing a reader found leaves the text silently: grids the rule reader
     # excluded and readings that failed the checks are listed for the paper,
@@ -2993,7 +3014,13 @@ def run_pipeline(
                 ],
             )
             toc_indices -= protected
+        # A selected table is never a contents entry: removing it would lose the
+        # table silently. What is removed is listed for the paper.
+        toc_indices = {i for i in toc_indices if sections[i].kind != SectionKind.TABLE}
         if toc_indices:
+            first = sections[min(toc_indices)].text.split("\n")[0][:80]
+            current().discards.append(("contents", f"{len(toc_indices)} section(s) taken for a table "
+                                       "of contents", first))
             sections[:] = [s for i, s in enumerate(sections) if i not in toc_indices]
 
     sections[:] = [

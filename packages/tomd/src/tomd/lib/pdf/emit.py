@@ -1335,6 +1335,13 @@ def emit_markdown(
         if sec.kind in (SectionKind.TITLE, SectionKind.HEADING):
             if not rendered.lstrip("#").strip():
                 continue
+        if sec.kind == SectionKind.TABLE:
+            note = _table_notes(sec)
+            if note:
+                # notes that go before a table: a possible continuation (never a
+                # join) and the figure the table is drawn in
+                parts.append(note)
+                line_num += note.count("\n") + 2
         if is_flagged_table(sec) or sec.metadata.get("possible_table"):
             # A table no second kind of evidence confirmed, or text that may be a
             # table no reader produced: marked like any uncertain region, its
@@ -1725,3 +1732,16 @@ def _render_table_cell(spans: list, suppress_bold: bool = False) -> str:
         else:
             out.append(r)
     return _escape_angle("<br>".join(out)).replace("|", "\\|").replace(_STAR, "\\*")
+
+
+def _table_notes(sec: Section) -> str:
+    """The comment and label lines written before a table (continuation.py, figure_tables.py)."""
+    out = []
+    cont = sec.metadata.get("continues_from")
+    if cont:
+        out.append(f"<!-- tomd:continues page={cont['page']} (may continue the table on page "
+                   f"{cont['page']}: {'; '.join(cont['reasons'])}; not merged) -->")
+    label = sec.metadata.get("figure_label") if sec.columns else None
+    if label:
+        out.append("*" + label.replace("*", "\\*") + "*")
+    return "\n\n".join(out)

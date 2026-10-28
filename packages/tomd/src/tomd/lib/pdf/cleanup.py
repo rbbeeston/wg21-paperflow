@@ -706,8 +706,20 @@ def dehyphenate_pair(last_line: Line, next_line: Line,
     return DehyphenatedPair(new_last, new_next, f"{prefix_raw}-", first_word, joined)
 
 
-def cleanup_text(blocks: list[Block]) -> list[Block]:
-    """Apply all text cleanup operations to extracted blocks."""
+def _in_regions(line: Line, regions: list | None) -> bool:
+    """The line's centre lies inside one of the (page, bbox) regions."""
+    if not regions:
+        return False
+    cx, cy = (line.bbox[0] + line.bbox[2]) / 2, (line.bbox[1] + line.bbox[3]) / 2
+    return any(pg == line.page_num and bb[0] <= cx <= bb[2] and bb[1] <= cy <= bb[3] for pg, bb in regions)
+
+
+def cleanup_text(blocks: list[Block], keep_hyphens: list | None = None) -> list[Block]:
+    """Apply all text cleanup operations to extracted blocks.
+
+    ``keep_hyphens`` lists (page, bbox) regions a table reader located: a
+    line-end hyphen there is a table cell's and is decided when the cell is
+    rendered (emit.py), not by the document-wide pass."""
     result = []
     for block in blocks:
         cleaned_lines = []
@@ -741,7 +753,7 @@ def cleanup_text(blocks: list[Block]) -> list[Block]:
         i = 0
         while i < len(lines):
             line = lines[i]
-            if i + 1 < len(lines):
+            if i + 1 < len(lines) and not _in_regions(line, keep_hyphens):
                 pair = dehyphenate_pair(line, lines[i + 1], evidence)
                 if pair is not None:
                     line = pair.last_line

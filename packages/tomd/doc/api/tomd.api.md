@@ -1,6 +1,6 @@
 # tomd API surface
 
-110 modules, 92 classes, 288 functions, 89 methods, 380 fields. Typed: 916 of 1153 functions and methods (79%).
+112 modules, 92 classes, 291 functions, 89 methods, 380 fields. Typed: 918 of 1166 functions and methods (78%).
 
 ## Contents
 
@@ -56,6 +56,7 @@
 - [`lib/pdf/code_grid.py`](#lib-pdf-code-grid-py): CodeGrid
 - [`lib/pdf/codepair.py`](#lib-pdf-codepair-py): find_code_pairs, same_code
 - [`lib/pdf/content.py`](#lib-pdf-content-py): build, build_text, content_candidates, gutters, page_hrules, page_text, page_words, pieces_of, visual_lines, SPECIALISTS
+- [`lib/pdf/continuation.py`](#lib-pdf-continuation-py): annotate, NEAR
 - [`lib/pdf/dimensions.py`](#lib-pdf-dimensions-py): dimensions, weak_note
 - [`lib/pdf/docling_backend.py`](#lib-pdf-docling-backend-py): absorb_cross_page_spec_rows, discover_tables_with_docling, docling_available, enrich_tables_with_docling, extract_docling_tables
 - [`lib/pdf/docmeasure.py`](#lib-pdf-docmeasure-py): DocMeasure, area_word_features, gap_stats, hyphenates, measure, visual_lines
@@ -65,6 +66,7 @@
 - [`lib/pdf/evidence.py`](#lib-pdf-evidence-py): Entry, Record, CODE_ERRORS
 - [`lib/pdf/extent.py`](#lib-pdf-extent-py): extend, EXTENT_RULE
 - [`lib/pdf/extract.py`](#lib-pdf-extract-py): attach_links, collect_links, extract_mupdf, extract_spatial
+- [`lib/pdf/figure_tables.py`](#lib-pdf-figure-tables-py): figure_label, label_figure_tables
 - [`lib/pdf/figures.py`](#lib-pdf-figures-py): detect_figure_regions
 - [`lib/pdf/fit.py`](#lib-pdf-fit-py): fit, fit_rows, grid_of
 - [`lib/pdf/flag.py`](#lib-pdf-flag-py): aligned_regions, dropped_uncovered, flag_possible_tables, gutter_regions, outside_view_regions, rejected_regions, text_regions
@@ -2254,7 +2256,7 @@ TABLE_TREE = ...
 
 ## `lib/pdf/cleanup.py` ([source](../../src/tomd/lib/pdf/cleanup.py))
 
-Typed: 15 of 16 functions and methods (93%).
+Typed: 16 of 17 functions and methods (94%).
 
 ```python
 """Header/footer detection and text cleanup for PDF extraction."""
@@ -2287,9 +2289,14 @@ class HyphenEvidence:
     compounds: frozenset[str]
     tails: frozenset[str]
 
-def cleanup_text(blocks: list[Block]) -> list[Block]:
-    """Apply all text cleanup operations to extracted blocks."""
-    # calls: _collapse_spaces, types.Line, types.Block, _join_cross_page, collect_hyphen_evidence, dehyphenate_pair
+def cleanup_text(blocks: list[Block], keep_hyphens: list | None = None) -> list[Block]:
+    """Apply all text cleanup operations to extracted blocks.
+
+    ``keep_hyphens`` lists (page, bbox) regions a table reader located: a
+    line-end hyphen there is a table cell's and is decided when the cell is
+    rendered (emit.py), not by the document-wide pass.
+    """
+    # calls: _collapse_spaces, types.Line, types.Block, _join_cross_page, collect_hyphen_evidence, _in_regions, dehyphenate_pair
     # called by: pipeline.run_pipeline
 
 def collect_hyphen_evidence(lines: list[Line]) -> HyphenEvidence:
@@ -2423,7 +2430,7 @@ def strip_repeating(blocks: list[Block], repeating: set[tuple[float, str]]) -> l
     # calls: _is_edge_block, _y_bucket
     # called by: pipeline.run_pipeline
 
-# + 6 private module-level names
+# + 7 private module-level names
 ```
 
 <a id="lib-pdf-code-format-py"></a>
@@ -2740,6 +2747,42 @@ SPECIALISTS = {'code_rows': True, 'separators': True}
 # + 4 private module-level names
 ```
 
+<a id="lib-pdf-continuation-py"></a>
+
+## `lib/pdf/continuation.py` ([source](../../src/tomd/lib/pdf/continuation.py))
+
+Typed: 0 of 8 functions and methods (0%).
+
+```python
+"""A note on table pieces that may continue the previous page's table (2026-10-24).
+
+When a table piece reaches the bottom of its page's content area and the next page's first table
+piece starts at the top of that page's content area, the next piece is noted as possibly
+continuing the previous one. The note names the evidence seen: reaches the bottom, starts at the
+top, and, when present, the same header row and the first column's numbering continuing.
+
+Since 2026-10-24 the note is written only when the first column's numbering also continues across
+the break (US 019 → US 020): with the page-edge signals alone it was right 55 of 150 times on the
+tuning sets. It never joins pieces, changes cells or changes
+levels, so the note says "may", and the pieces stay separate.
+
+The content area of a page excludes page furniture: lines whose text (digits ignored) repeats
+within 3 pt of the same position on an adjacent page.
+"""
+
+def annotate(doc, tables) -> int:
+    """Set metadata["continues_from"] = {"page": N, "reasons": [...]} (N 1-based, the previous
+    page) on table pieces that may continue the previous page's table. Returns the count.
+    """
+    # untyped: doc, tables
+    # calls: _extent, _Areas, _text, _number
+    # called by: pipeline.run_pipeline
+
+NEAR = 0.06  # within 6% of the page height of the content edge
+
+# + 5 private module-level names
+```
+
 <a id="lib-pdf-dimensions-py"></a>
 
 ## `lib/pdf/dimensions.py` ([source](../../src/tomd/lib/pdf/dimensions.py))
@@ -2965,7 +3008,7 @@ MODEL = ...
 
 ## `lib/pdf/emit.py` ([source](../../src/tomd/lib/pdf/emit.py))
 
-Typed: 47 of 52 functions and methods (90%).
+Typed: 48 of 53 functions and methods (90%).
 
 ```python
 """Markdown and companion prompts file generation."""
@@ -3000,7 +3043,7 @@ def emit_markdown(metadata: dict, sections: list[Section], *, annotate: bool = F
     ``placeholders`` count is taken from the finished body (after
     duplicate-paragraph collapse) so it matches a grep of the output.
     """
-    # calls: _assign_emdash_nesting, set_lexicon, _annotate_wrap, _render_section_md, is_flagged_table, levels.comment, vector_images.should_emit_marker, vector_images.format_uncertainty_marker, shared._find_front_matter_end, renumber_uncertain_markers
+    # calls: _assign_emdash_nesting, set_lexicon, _annotate_wrap, _render_section_md, _table_notes, is_flagged_table, levels.comment, vector_images.should_emit_marker, vector_images.format_uncertainty_marker, shared._find_front_matter_end, renumber_uncertain_markers
     # called by: pipeline.run_pipeline
 
 def emit_prompts(sections: list[Section]) -> list[str] | None:
@@ -3059,7 +3102,7 @@ COMPOUND_PREFIXES = ...
 # stray bullet glyph survives mid-text (#303).
 LIST_BULLET = '-'
 
-# + 45 private module-level names
+# + 46 private module-level names
 ```
 
 <a id="lib-pdf-emoji-data-py"></a>
@@ -3238,6 +3281,41 @@ def extract_spatial(page, page_num: int) -> list[Block]:
     # untyped: page
     # calls: types.Span, mono.classify_monospace, types.compute_bbox, types.Line, types.Block
     # called by: pipeline.run_pipeline
+```
+
+<a id="lib-pdf-figure-tables-py"></a>
+
+## `lib/pdf/figure_tables.py` ([source](../../src/tomd/lib/pdf/figure_tables.py))
+
+Typed: 0 of 3 functions and methods (0%).
+
+```python
+"""Tables inside figures: label them with the figure they belong to.
+
+Convention (decided by a person): small tables drawn inside a figure are converted
+as tables, labelled with the figure they belong to, e.g. "Figure 4(a)". The
+label line goes before the table and is taken from the sub-caption under the
+table ("(a) Table of actors.") and the figure caption below the figure
+("Figure 4: ...").
+
+A table belongs to a figure when a figure caption lies below it on the same
+page and nothing between them is ordinary prose (a wide text block that is
+not a sub-caption). A table with its own "Table N" caption close by is a
+table in its own right, never labelled.
+"""
+
+def figure_label(blocks, bbox, text_width: float) -> str | None:
+    """blocks: (bbox, text) of the page's text blocks; bbox: the table's box."""
+    # untyped: blocks, bbox
+    # called by: label_figure_tables
+
+def label_figure_tables(doc, table_sections) -> int:
+    """Set metadata["figure_label"] on single-page tables drawn inside a figure."""
+    # untyped: doc, table_sections
+    # calls: _blocks, figure_label
+    # called by: pipeline.run_pipeline
+
+# + 1 private module-level name
 ```
 
 <a id="lib-pdf-figures-py"></a>
@@ -4090,7 +4168,7 @@ def run_pipeline(path: Path, *, ml_tables: bool = False, visualize: bool = False
     effect when ``extract_vector`` is False.
     labels inside vector figures render as pixels alongside body text.
     """
-    # calls: PipelineResult, images._VectorExtractionStats, _enforce_skip_contract, PipelineResult.for_skip, _is_slide_deck, _is_standards_draft, extract.extract_mupdf, extract.extract_spatial, cleanup.get_edge_items, extract.collect_links, extract.attach_links, images.extract_page_images, +93 more
+    # calls: PipelineResult, images._VectorExtractionStats, _enforce_skip_contract, PipelineResult.for_skip, _is_slide_deck, _is_standards_draft, extract.extract_mupdf, extract.extract_spatial, cleanup.get_edge_items, extract.collect_links, extract.attach_links, images.extract_page_images, +95 more
 
 # + 42 private module-level names
 ```
@@ -6655,6 +6733,7 @@ class MarkdownWriter:
 - `ALLOWED_LINK_SCHEMES`: [`lib/shared.py`](#lib-shared-py)
 - `ALLOWED_REASON_KEYS`: [`lib/pdf/vector_images.py`](#lib-pdf-vector-images-py)
 - `anchors_path`: [`lib/golden_qa.py`](#lib-golden-qa-py)
+- `annotate`: [`lib/pdf/continuation.py`](#lib-pdf-continuation-py)
 - `apply`: [`lib/pdf/fullwidth.py`](#lib-pdf-fullwidth-py)
 - `apply_pdf_metadata_fallbacks`: [`lib/metadata_yaml/extract.py`](#lib-metadata-yaml-extract-py)
 - `apply_strip_leading_h1`: [`lib/shared.py`](#lib-shared-py)
@@ -6815,6 +6894,7 @@ class MarkdownWriter:
 - `features`: [`lib/pdf/checks/data_or_format.py`](#lib-pdf-checks-data-or-format-py)
 - `fidelity_verdict`: [`lib/golden_qa.py`](#lib-golden-qa-py)
 - `FidelityVerdict`: [`lib/golden_qa.py`](#lib-golden-qa-py)
+- `figure_label`: [`lib/pdf/figure_tables.py`](#lib-pdf-figure-tables-py)
 - `FigureEdge`: [`lib/pdf/types.py`](#lib-pdf-types-py)
 - `FigureGraph`: [`lib/pdf/types.py`](#lib-pdf-types-py)
 - `FigureNode`: [`lib/pdf/types.py`](#lib-pdf-types-py)
@@ -6892,6 +6972,7 @@ class MarkdownWriter:
 - `join_split_words`: [`lib/pdf/select.py`](#lib-pdf-select-py)
 - `KNOWN_GENERATORS`: [`lib/pdf/summary.py`](#lib-pdf-summary-py)
 - `KNOWN_SECTIONS`: [`lib/pdf/types.py`](#lib-pdf-types-py)
+- `label_figure_tables`: [`lib/pdf/figure_tables.py`](#lib-pdf-figure-tables-py)
 - `layout_features`: [`lib/pdf/checks/_layout.py`](#lib-pdf-checks-layout-py)
 - `LAYOUT_TREE`: [`lib/pdf/classify_trees.py`](#lib-pdf-classify-trees-py)
 - `LEGACY_FENCE_MARKER`: [`lib/wording_markup.py`](#lib-wording-markup-py)
@@ -6929,6 +7010,7 @@ class MarkdownWriter:
 - `MODEL`: [`lib/pdf/dvf_model.py`](#lib-pdf-dvf-model-py)
 - `MODEL`: [`lib/pdf/scan_model.py`](#lib-pdf-scan-model-py)
 - `NAMES`: [`lib/pdf/levels.py`](#lib-pdf-levels-py)
+- `NEAR`: [`lib/pdf/continuation.py`](#lib-pdf-continuation-py)
 - `normalize`: [`lib/golden_compare.py`](#lib-golden-compare-py)
 - `normalize_code_line`: [`lib/pdf/code_format.py`](#lib-pdf-code-format-py)
 - `normalize_date`: [`lib/shared.py`](#lib-shared-py)

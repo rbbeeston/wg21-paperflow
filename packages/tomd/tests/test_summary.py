@@ -66,7 +66,7 @@ def test_pipeline_returns_summary_comment_and_prompts():
     if not _WITH_TABLE.is_file():
         pytest.skip(f"missing PDF fixture: {_WITH_TABLE.name}")
     r = run_pipeline(_WITH_TABLE)
-    assert r.summary["tables"]["flagged"] >= 1
+    assert r.summary["tables"]["total"] >= 1
     body = r.md.split("\n---\n", 1)[1]
     assert body.lstrip("\n").startswith("<!-- tomd:summary ")
     assert any(p.startswith("Summary of the tables") for p in r.prompts)

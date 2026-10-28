@@ -12,6 +12,7 @@ import threading
 # calls so threads genuinely run MuPDF code in parallel. All code that opens or
 # drives a fitz.Document must acquire this lock for the full duration of the
 # open/close session.
-# Current fitz sites: pipeline.py (run_pipeline), docling_backend.py (_extract_docling_tables).
+# Current fitz sites: pipeline.py (run_pipeline: the main session and the table
+# checks' session), docling_backend.py (_extract_docling_tables).
 # Update this list when adding a new fitz caller.
 _FITZ_LOCK = threading.Lock()

@@ -8,18 +8,11 @@ import pytest
 
 from conftest import make_span
 from tomd.lib.pdf.types import Block, Line, Section, SectionKind, Confidence, TableCandidate
-from tomd.lib.pdf import select
 from tomd.lib.pdf.select import (
     table_flags, candidates_agree, select_tables, stitch_pages,
     remove_table_regions,
 )
 
-
-@pytest.fixture(autouse=True)
-def _agreement_trusts(monkeypatch):
-    """These tests check the agreement logic itself: trust is not withheld for the
-    checks still to be ported (select.WITHHOLD_TRUST_UNTIL_VERIFIED, port step 9)."""
-    monkeypatch.setattr(select, "WITHHOLD_TRUST_UNTIL_VERIFIED", False)
 
 
 def _line(text, x, y, page=0, mono=False):

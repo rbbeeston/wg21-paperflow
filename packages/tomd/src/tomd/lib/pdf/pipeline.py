@@ -102,6 +102,7 @@ from .tagged import extract_tagged_tables
 from .ruled import extract_ruled_tables, page_hrules
 from .poll import extract_poll_tables
 from .codepair import find_code_pairs
+from .classify import gate_tables
 from .rowbands import merge_rule_bands
 from .levels import assign as assign_level
 from .summary import build as build_summary, generator as pdf_generator, header_comment, prompt_elements
@@ -1074,6 +1075,10 @@ _STRUCTURAL_INSIDE_VECTOR_THRESHOLD = 0.8
 
 # Possible-table marks (L5): content a reader proposed as a table that is not
 # emitted as one. The reason travels in Section.metadata["possible_table"].
+# Reader-error stages that cannot change a table's content: listed for the
+# paper, they lower no table.
+_ERROR_NO_TABLE = frozenset({"generator", "region scan", "figure labels", "wording lines",
+                             "continuation notes", "visibility check", "paper summary"})
 # Recorded for a rotated page the drawn-rule readers skip.
 _ROTATED_NOT_READ = "rotated page: not read by the drawn-rule readers"
 _MARK_DOT_LEADER = "a table with dot leaders, demoted as contents"
@@ -2326,8 +2331,22 @@ def run_pipeline(
     except Exception as exc:  # a failing table reader must not fail the paper: recorded
         current().reader_error("codepair", None, exc)
         code_pairs = []
-    table_sections = select_tables(tomd_sections, ruled_tables, tagged_tables, pre_detect_blocks,
-                                   poll_tables, None, code_pairs, generator=pdf_generator(doc_metadata))
+    # The gate reopens the PDF (the readers' first session closed above) and
+    # checks every selected table against its page and classifies it. Rotated
+    # pages are not read upright yet.
+    with _FITZ_LOCK:  # see _fitz_lock.py for why this lock is required
+        tdoc = fitz.open(str(path))
+        try:
+            tpages = {pg: tdoc[pg] for pg in range(tdoc.page_count) if pg not in page_rotations}
+            table_sections = select_tables(tomd_sections, ruled_tables, tagged_tables, pre_detect_blocks,
+                                           poll_tables, None, code_pairs,
+                                           generator=pdf_generator(doc_metadata))
+            try:
+                gate_tables(tdoc, tpages, table_sections)
+            except Exception as exc:  # the gate only lowers trust; never fail on it, never silently
+                current().reader_error("table classification", None, exc)
+        finally:
+            tdoc.close()
     # Rows bounded by drawn rules: a record the reader cut into rows is joined.
     for ts in table_sections:
         pages = {ln.page_num for ln in ts.lines or []}
@@ -2788,6 +2807,21 @@ def run_pipeline(
     # duplicate headings and title-like paragraph/list entries, plus the
     # non-recurring stragglers (front-region only) that fragment the block.
     sections = drop_leaked_toc_entries(sections)
+
+    # A reader or check that raised: every table its stage could have touched
+    # is at most UNCERTAIN (a per-table check's failure touches only its table;
+    # stages that cannot change a table's content touch none).
+    touching = [e for e in current().record.errors if e["stage"] not in _ERROR_NO_TABLE]
+    error_pages = {e["page"] for e in touching if not e.get("table")}
+    for sec in sections:
+        if sec.kind != SectionKind.TABLE:
+            continue
+        on = {sec.page_num} | {ln.page_num for ln in (sec.lines or [])}
+        if None in error_pages or on & error_pages or sec.metadata.get("reader_errors"):
+            sec.confidence = Confidence.UNCERTAIN
+            reasons = sec.metadata.setdefault("uncertain_reasons", [])
+            if "reader error" not in reasons:
+                reasons.append("reader error")
 
     # Every table gets a graded level (L0-L5, levels.py): how a flagged table
     # may be wrong. A table classified as not a table (rendered as text) is a

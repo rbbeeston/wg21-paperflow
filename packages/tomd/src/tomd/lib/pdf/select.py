@@ -46,20 +46,6 @@ _log = logging.getLogger(__name__)
 # there, their text kept as prose and marked.
 KEPT_WHEN_UNREPLACED = frozenset({"tomd"})
 
-# No HIGH at all until the checks that follow agreement are ported: the extent
-# step (rows above or below a reading, a title row), layout verification and the
-# classifier gate. Two readers can agree on a reading that misses a row; in
-# tomd-tables those checks lower such tables. Removed by port step 9.
-WITHHOLD_TRUST_UNTIL_VERIFIED = True
-
-
-# No HIGH at all until the checks that follow agreement are ported: the extent
-# step (rows above or below a reading, a title row), layout verification and the
-# classifier gate. Two readers can agree on a reading that misses a row; in
-# tomd-tables those checks lower such tables. Removed by port step 9.
-WITHHOLD_TRUST_UNTIL_VERIFIED = True
-
-
 def _multiline_code_cells(cand: TableCandidate) -> bool:
     """Some cell holds two or more lines of monospace text."""
     for row in cand.rows:
@@ -1189,12 +1175,6 @@ def select_tables(tomd_sections: list[Section],
             reasons.append("single-source" if not voters else "disagree")
             notes.append("Only one table source produced this table." if not voters else
                          "The table sources disagree; every version is below.")
-        if WITHHOLD_TRUST_UNTIL_VERIFIED and conf == Confidence.HIGH:
-            # agreement is recorded; trust waits for the extent, layout and classifier checks
-            conf = Confidence.UNCERTAIN
-            reasons.append("unverified")
-            notes.append("Two kinds of evidence agree on this table; it is not yet checked "
-                         "for rows outside its extent or its layout.")
         if "cross-reader" in primary.flags:
             # joined from two readers' pieces: no single reading backs the whole table
             conf = Confidence.UNCERTAIN

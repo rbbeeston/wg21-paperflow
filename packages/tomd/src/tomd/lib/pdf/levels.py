@@ -43,8 +43,9 @@ _L4 = {"damaged": "damaged text", "glyph-order": "cells read out of order", "rea
 _L3 = {"disagree": "readers disagree", "cross-reader": "joined from two readers' pieces",
        "extent": "the table may continue on the adjacent page",
        "rule-check": "the reading fails the rule checks"}
-# Agreement found, checks not yet run: shown as minor (L2), not as a structure doubt.
-_L2 = {"unverified": "two kinds of evidence agree; not yet verified"}
+# Agreement found, but the page checks could not run: shown as minor (L2).
+_L2 = {"unverified": "not checked against its page (a rotated page)",
+       "cell-text": "readings agree and pass the page checks; cell text not yet verified"}
 
 
 def _rows(md: str) -> list[list[str]]:

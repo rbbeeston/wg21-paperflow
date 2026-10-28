@@ -9,7 +9,6 @@ from pathlib import Path
 import pytest
 
 from tomd.lib.pdf import run_pipeline
-from tomd.lib.pdf import select
 from tomd.lib.pdf.select import (
     candidate_from_section,
     candidates_agree,
@@ -18,12 +17,6 @@ from tomd.lib.pdf.select import (
     select_tables,
 )
 from tomd.lib.pdf.types import Block, Confidence, Line, Section, SectionKind, Span, TableCandidate
-
-@pytest.fixture(autouse=True)
-def _agreement_trusts(monkeypatch):
-    """These tests check the agreement logic itself: trust is not withheld for the
-    checks still to be ported (select.WITHHOLD_TRUST_UNTIL_VERIFIED, port step 9)."""
-    monkeypatch.setattr(select, "WITHHOLD_TRUST_UNTIL_VERIFIED", False)
 
 
 _GOLDEN = Path(__file__).resolve().parent / "fixtures" / "golden"

@@ -1,6 +1,6 @@
 # tomd API surface
 
-113 modules, 92 classes, 298 functions, 89 methods, 381 fields. Typed: 922 of 1181 functions and methods (78%).
+113 modules, 92 classes, 298 functions, 89 methods, 381 fields. Typed: 923 of 1182 functions and methods (78%).
 
 ## Contents
 
@@ -4092,7 +4092,7 @@ def words_in(page, bbox):
 
 ## `lib/pdf/pipeline.py` ([source](../../src/tomd/lib/pdf/pipeline.py))
 
-Typed: 29 of 45 functions and methods (64%).
+Typed: 30 of 46 functions and methods (65%).
 
 ```python
 """PDF to Markdown converter - pipeline entry point."""
@@ -4169,9 +4169,9 @@ def run_pipeline(path: Path, *, ml_tables: bool = False, visualize: bool = False
     effect when ``extract_vector`` is False.
     labels inside vector figures render as pixels alongside body text.
     """
-    # calls: PipelineResult, images._VectorExtractionStats, _enforce_skip_contract, PipelineResult.for_skip, _is_slide_deck, _is_standards_draft, visibility.remove_hidden_text, visibility.check_page, extract.extract_mupdf, extract.extract_spatial, cleanup.get_edge_items, extract.collect_links, +101 more
+    # calls: PipelineResult, images._VectorExtractionStats, _enforce_skip_contract, PipelineResult.for_skip, _is_slide_deck, _is_standards_draft, visibility.remove_hidden_text, visibility.check_page, extract.extract_mupdf, extract.extract_spatial, cleanup.get_edge_items, extract.collect_links, +102 more
 
-# + 42 private module-level names
+# + 43 private module-level names
 ```
 
 <a id="lib-pdf-poll-py"></a>

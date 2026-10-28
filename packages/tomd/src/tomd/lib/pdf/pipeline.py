@@ -1120,6 +1120,19 @@ def _overlap(a, b) -> bool:
     return w * h >= _SAME_AREA * max(small, 1e-6)
 
 
+_ONLY_DOTS = re.compile(r"^[\s.·…]*$")
+
+
+def _leader_text(sec: Section) -> str:
+    """A table's text for the dot-leader test: a cell holding only dots is data
+    (a table of punctuation: "...." | Ellipsis), not a leader between a title
+    and its page number."""
+    if not sec.columns:
+        return sec.text
+    rows = [[" ".join(sp.text for sp in cell if sp.text != "\n").strip() for cell in row] for row in sec.columns]
+    return "\n".join(" | ".join(c for c in row if not _ONLY_DOTS.match(c)) for row in rows)
+
+
 def dropped_nomination_regions(record, tables) -> list:
     """Every area a reader or scan nominated and a rule then excluded, where no
     kept table covers it, as a possible-table region: a drop never leaves the
@@ -2834,7 +2847,7 @@ def run_pipeline(
     # A table two kinds of evidence agree on is exempt; a demoted table
     # carries a possible-table mark, so the demotion is never silent.
     for sec in sections:
-        if (sec.kind == SectionKind.TABLE and has_dot_leader(sec.text)
+        if (sec.kind == SectionKind.TABLE and has_dot_leader(_leader_text(sec))
                 and sec.confidence != Confidence.HIGH):
             sec.metadata["possible_table"] = _MARK_DOT_LEADER
             sec.kind = SectionKind.PARAGRAPH

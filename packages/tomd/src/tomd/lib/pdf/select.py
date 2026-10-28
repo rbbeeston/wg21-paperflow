@@ -80,9 +80,30 @@ def _row_top(row) -> float | None:
     return min(ys) if ys else None
 
 
+# A row is packed (several rows read as one) when at least this share of its
+# filled cells hold the same number of lines, two or more.
+_PACKED_SHARE = 0.75
+
+
+def _packed_rows(cand: TableCandidate) -> int:
+    """How many extra rows the packed rows of a reading hold (0: none packed)."""
+    extra = 0
+    for row in cand.rows:
+        counts = [sum(1 for ln in cell for part in ln.text.split("\n") if part.strip()) for cell in row]
+        filled = [n for n in counts if n]
+        if len(filled) < 2:
+            continue
+        common = max(set(filled), key=filled.count)
+        if common >= 2 and filled.count(common) >= _PACKED_SHARE * len(filled):
+            extra += common - 1
+    return extra
+
+
 def _priority(c: TableCandidate) -> int:
     if c.source == "content" and "refines-rules" in c.flags:
         return _SOURCE_PRIORITY["rules"]
+    if c.source == "content" and "unpacks-tomd" in c.flags:
+        return _SOURCE_PRIORITY["tomd"]
     if c.source == "tags" and "tags-malformed" in c.flags:
         return _SOURCE_PRIORITY["tags-malformed"]
     return _SOURCE_PRIORITY[c.source]
@@ -1073,6 +1094,24 @@ def select_tables(tomd_sections: list[Section],
             if records and all(t is None or any(u is not None and abs(u - t) <= 3 for u in tops_k) for t in tops_r):
                 rec.feature("rules", pg, bb, "content rows refine the rule bands", "words", k.shape[0])
                 k.flags = k.flags + ["refines-rules"]
+                cands = [x for x in cands if x is not c]
+                break
+    # Paperflow's reader joins the lines of several rows into one row when nothing
+    # separates them ("1 2 3 4" in one cell, the next column's values beside it):
+    # a row whose cells mostly hold the same number of lines is several rows. When
+    # the content reading of that region keeps the columns and finds those rows,
+    # it takes the place of paperflow's reading.
+    for c in [c for c in cands if c.source == "tomd" and len(c.pages) == 1]:
+        pg, bb = c.pages[0], c.bboxes[c.pages[0]]
+        packed = _packed_rows(c)
+        if not packed:
+            continue
+        for k in [k for k in cands if k.source == "content" and k.pages == [pg]]:
+            kb = k.bboxes[pg]
+            if (_same_region(c, k) and k.shape[1] == c.shape[1] and not _is_bad(k)
+                    and k.shape[0] >= c.shape[0] + packed):
+                rec.feature("tomd", pg, bb, "content rows unpack paperflow's packed rows", "words", k.shape[0])
+                k.flags = k.flags + ["unpacks-tomd"]
                 cands = [x for x in cands if x is not c]
                 break
     # Two or more runs of records (records.py) inside one reading's region that

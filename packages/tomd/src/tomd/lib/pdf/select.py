@@ -80,16 +80,56 @@ def _row_top(row) -> float | None:
     return min(ys) if ys else None
 
 
+# A header row repeated partway down a reading starts a stacked table when it
+# has at least this many filled cells; a row just above it with at most
+# _HEADING_CELLS filled cells is the heading between the two (kept as text).
+_REPEAT_HEADER_CELLS = 3
+_HEADING_CELLS = 2
+
+
+def _rows_box(rows) -> tuple[float, float, float, float]:
+    boxes = [ln.bbox for row in rows for cell in row for ln in cell]
+    return (min(b[0] for b in boxes), min(b[1] for b in boxes), max(b[2] for b in boxes), max(b[3] for b in boxes))
+
+
+def _split_at_repeated_header(cand: TableCandidate) -> list[TableCandidate]:
+    """The reading as stacked tables, split where its header row repeats (one
+    part when it does not)."""
+    text = cand.text_rows()
+    head = text[0] if text else []
+    if sum(1 for c in head if c) < _REPEAT_HEADER_CELLS:
+        return [cand]
+    starts = [0] + [i for i in range(2, len(text)) if text[i] == head]
+    if len(starts) == 1:
+        return [cand]
+    parts = []
+    for a, b in zip(starts, starts[1:] + [len(text)]):
+        end = b
+        if b < len(text) and sum(1 for c in text[b - 1] if c) <= _HEADING_CELLS:
+            end = b - 1                    # the heading between two stacked tables
+        rows = cand.rows[a:end]
+        if len(rows) < 2 or not any(ln for row in rows for cell in row for ln in cell):
+            return [cand]
+        part = TableCandidate(cand.source, rows, {cand.pages[0]: _rows_box(rows)}, list(cand.flags) + ["stacked"])
+        parts.append(part)
+    return parts
+
+
 # A row is packed (several rows read as one) when at least this share of its
 # filled cells hold the same number of lines, two or more.
 _PACKED_SHARE = 0.75
+
+
+def _cell_line_count(cell) -> int:
+    """The text lines of a cell (a Line's text may hold several, joined with newlines)."""
+    return sum(1 for ln in cell for part in ln.text.split("\n") if part.strip())
 
 
 def _packed_rows(cand: TableCandidate) -> int:
     """How many extra rows the packed rows of a reading hold (0: none packed)."""
     extra = 0
     for row in cand.rows:
-        counts = [sum(1 for ln in cell for part in ln.text.split("\n") if part.strip()) for cell in row]
+        counts = [_cell_line_count(cell) for cell in row]
         filled = [n for n in counts if n]
         if len(filled) < 2:
             continue
@@ -1096,24 +1136,46 @@ def select_tables(tomd_sections: list[Section],
                 k.flags = k.flags + ["refines-rules"]
                 cands = [x for x in cands if x is not c]
                 break
+    # Stacked tables with the same columns, read as one region: a content
+    # reading that repeats its own header row partway down is two tables.
+    split: list[TableCandidate] = []
+    for k in [k for k in cands if k.source == "content" and len(k.pages) == 1]:
+        parts = _split_at_repeated_header(k)
+        if len(parts) > 1:
+            rec.feature("content", k.pages[0], k.bboxes[k.pages[0]], "header row repeats: stacked tables",
+                        "words", len(parts))
+            cands = [x for x in cands if x is not k]
+            split += parts
+    cands += split
     # Paperflow's reader joins the lines of several rows into one row when nothing
     # separates them ("1 2 3 4" in one cell, the next column's values beside it):
     # a row whose cells mostly hold the same number of lines is several rows. When
     # the content reading of that region keeps the columns and finds those rows,
     # it takes the place of paperflow's reading.
+    # A coarser reading is the same failure one level up: a cell holding a whole
+    # row of another reading's cells (more columns, more rows).
     for c in [c for c in cands if c.source == "tomd" and len(c.pages) == 1]:
         pg, bb = c.pages[0], c.bboxes[c.pages[0]]
         packed = _packed_rows(c)
-        if not packed:
-            continue
-        for k in [k for k in cands if k.source == "content" and k.pages == [pg]]:
-            kb = k.bboxes[pg]
-            if (_same_region(c, k) and k.shape[1] == c.shape[1] and not _is_bad(k)
-                    and k.shape[0] >= c.shape[0] + packed):
-                rec.feature("tomd", pg, bb, "content rows unpack paperflow's packed rows", "words", k.shape[0])
+        deepest = max((_cell_line_count(cell) for row in c.rows for cell in row), default=0)
+        # the content readings inside this region (stacked tables: several), top down, disjoint
+        inside = sorted((k for k in cands if k.source == "content" and k.pages == [pg] and _same_region(c, k)
+                         and k.shape[1] >= c.shape[1] and not _is_bad(k)), key=lambda k: k.bboxes[pg][1])
+        chosen: list[TableCandidate] = []
+        for k in inside:
+            if all(k.bboxes[pg][1] >= q.bboxes[pg][3] - _REGION_MARGIN
+                   or k.bboxes[pg][3] <= q.bboxes[pg][1] + _REGION_MARGIN for q in chosen):
+                chosen.append(k)
+        rows = sum(k.shape[0] for k in chosen)
+        same_cols = chosen and all(k.shape[1] == c.shape[1] for k in chosen)
+        coarse = (chosen and all(k.shape[1] > c.shape[1] for k in chosen) and rows > c.shape[0]
+                  and deepest >= min(k.shape[0] for k in chosen))
+        if (same_cols and packed and rows >= c.shape[0] + packed) or coarse:
+            rec.feature("tomd", pg, bb, "content rows unpack paperflow's packed rows", "words",
+                        sum(k.shape[0] for k in chosen))
+            for k in chosen:
                 k.flags = k.flags + ["unpacks-tomd"]
-                cands = [x for x in cands if x is not c]
-                break
+            cands = [x for x in cands if x is not c]
     # Two or more runs of records (records.py) inside one reading's region that
     # together hold its text: the region is several stacked tables read as one.
     # The records readings take its place (single source: flagged). Tags and

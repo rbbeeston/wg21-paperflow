@@ -1,6 +1,6 @@
 # tomd API surface
 
-113 modules, 92 classes, 298 functions, 89 methods, 381 fields. Typed: 923 of 1182 functions and methods (78%).
+113 modules, 92 classes, 298 functions, 89 methods, 381 fields. Typed: 924 of 1185 functions and methods (77%).
 
 ## Contents
 
@@ -4706,7 +4706,7 @@ MODEL = ...
 
 ## `lib/pdf/select.py` ([source](../../src/tomd/lib/pdf/select.py))
 
-Typed: 41 of 49 functions and methods (83%).
+Typed: 42 of 52 functions and methods (80%).
 
 ```python
 """Table selection: one reading per region, trusted only when another kind of evidence agrees.
@@ -4856,7 +4856,7 @@ def select_tables(tomd_sections: list[Section], ruled: list[TableCandidate], tag
     candidates from the drawing and tag sources are appended to `rejected`
     when given: their area probably is a table, so flag.py marks it.
     """
-    # calls: candidate_from_section, page_furniture, stitch_pages, cross_reader_continuation, split_at_headers, join_split_words, stacked.split_stacked, runctx.current, table_flags, _is_bad, _row_top, _packed_rows, +14 more
+    # calls: candidate_from_section, page_furniture, stitch_pages, cross_reader_continuation, split_at_headers, join_split_words, stacked.split_stacked, runctx.current, table_flags, _is_bad, _row_top, _split_at_repeated_header, +16 more
     # called by: pipeline.run_pipeline
 
 def sparse_mapping(t) -> bool:
@@ -4928,7 +4928,7 @@ TRUST_ONLY_PIPE_RENDERING = True
 # "SF F N A SA", "SF WF N WA SA", "F N A", "Strongly Favor ... Strongly Against".
 VOTE_LABELS = ...
 
-# + 31 private module-level names
+# + 34 private module-level names
 ```
 
 <a id="lib-pdf-spans-py"></a>

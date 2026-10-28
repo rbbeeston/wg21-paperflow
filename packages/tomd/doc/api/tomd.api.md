@@ -1,6 +1,6 @@
 # tomd API surface
 
-113 modules, 92 classes, 298 functions, 89 methods, 381 fields. Typed: 924 of 1185 functions and methods (77%).
+114 modules, 93 classes, 302 functions, 89 methods, 382 fields. Typed: 926 of 1189 functions and methods (77%).
 
 ## Contents
 
@@ -34,6 +34,7 @@
 - [`lib/metadata_yaml/strip.py`](#lib-metadata-yaml-strip-py): strip_metadata_headings, strip_pre_content_paragraphs, strip_pre_heading_fragments
 - [`lib/pdf/__init__.py`](#lib-pdf-init-py)
 - [`lib/pdf/_fitz_lock.py`](#lib-pdf-fitz-lock-py)
+- [`lib/pdf/airepair.py`](#lib-pdf-airepair-py): RepairAnswer, apply_repair, build_columns, code_guard, repair_request, INSTRUCTIONS, MAX_WORDS
 - [`lib/pdf/checks/__init__.py`](#lib-pdf-checks-init-py)
 - [`lib/pdf/checks/_layout.py`](#lib-pdf-checks-layout-py): layout_features, DRAWN
 - [`lib/pdf/checks/base.py`](#lib-pdf-checks-base-py): AreaContext, Check, INFO, LEVELS
@@ -1699,6 +1700,71 @@ def strip_pre_heading_fragments(sections: list[Section]) -> int:
 
 ```python
 """Shared process-wide lock that must be held for all PyMuPDF (fitz) sessions."""
+```
+
+<a id="lib-pdf-airepair-py"></a>
+
+## `lib/pdf/airepair.py` ([source](../../src/tomd/lib/pdf/airepair.py))
+
+Typed: 2 of 4 functions and methods (50%).
+
+```python
+"""The AI step's pure pieces: what to ask about a flagged table, and how an answer is used.
+
+tomd never calls a model. The agent that asks (open question 7: in paperflow's
+pipeline framework, `pipeline.run_agent` with RepairAnswer as its output type,
+retries and usage limits) lives outside run_pipeline; the step is off unless
+that caller runs it. tomd gives the agent:
+
+  repair_request(sec, words)  the instructions and the table area's words, by
+                              index; None when the table is not asked about
+  apply_repair(sec, answer, words)
+                              the answer's arrangement checked and, when it holds,
+                              put in place of the table's cells
+
+An answer can only arrange the given words (indices): it cannot add, change or
+drop text. It is rejected when an index is unknown or used twice, a word is left
+out, the rows are ragged, the layout check against the page fails, or it adds a
+column of bare line numbers to code. A repaired table stays flagged (L4); the
+first reading is kept in the metadata and the evidence record.
+"""
+
+@dataclass(frozen=True)
+class RepairAnswer:
+    """A model's arrangement: rows of cells of word indices (no text can be added)."""
+    rows: list[list[list[int]]]
+
+def apply_repair(sec: Section, answer: RepairAnswer, words: list, model: str = '') -> str:
+    """Check the answer and, when it holds, put its arrangement in place of the
+    table's cells. Returns "verified" or "rejected:<why>"; the table stays flagged.
+    """
+    # calls: build_columns, validate.verify_layout, code_guard, runctx.current
+
+def build_columns(rows, words):
+    """Cells of spans from word indices, or (None, reason) if the answer is unusable:
+    an index out of range, used twice, or a word left out.
+    """
+    # untyped: rows, words, return
+    # calls: types.Span
+    # called by: apply_repair
+
+def code_guard(first, repaired) -> str:
+    """A repair may not add a column of bare line numbers to code. Returns the
+    failed check or "" (measured on fresh10's cached answers in tomd-tables: it
+    turned the two breaks repair caused in side-by-side code into no change).
+    """
+    # untyped: first, repaired
+    # called by: apply_repair
+
+def repair_request(sec: Section, words: list) -> dict | None:
+    """What to ask about a flagged table: the instructions and its area's words,
+    by index. None for a trusted table, or an area with no words or too many.
+    """
+
+INSTRUCTIONS = ...
+
+# A table area holding more words than this is not asked about.
+MAX_WORDS = 1500
 ```
 
 <a id="lib-pdf-checks-init-py"></a>
@@ -4600,7 +4666,7 @@ def current() -> RunContext:
     as in unit tests) a detached context is returned, so recording never fails.
     """
     # calls: RunContext
-    # called by: classify.gate_tables, codepair.find_code_pairs, emit._join_hyphenated, emit.set_lexicon, extent.extend, flag.flag_possible_tables, pipeline._content_readings, pipeline._filter_sections_inside_vector_images, pipeline.run_pipeline, ruled._bands_to_table, ruled._column_ruled_tables, ruled._mark_icon_cells, +9 more
+    # called by: airepair.apply_repair, classify.gate_tables, codepair.find_code_pairs, emit._join_hyphenated, emit.set_lexicon, extent.extend, flag.flag_possible_tables, pipeline._content_readings, pipeline._filter_sections_inside_vector_images, pipeline.run_pipeline, ruled._bands_to_table, ruled._column_ruled_tables, +10 more
 
 @contextlib.contextmanager
 def run_scope():
@@ -5688,7 +5754,7 @@ def verify_layout(sec: Section, words: list) -> str:
     `words` are the page's words (fitz "words" tuples) in the table's area.
     """
     # calls: _cell_boxes, _inside, cell_text, _tokens, _gap_threshold, _code_row, _row_baselines, _lines_of, _line_ys
-    # called by: classify.gate_tables, escalate, switch_reader, verify_pieces
+    # called by: airepair.apply_repair, classify.gate_tables, escalate, switch_reader, verify_pieces
 
 def verify_pieces(sec, words_on) -> str:
     """A table stitched across pages: each piece against its own page's
@@ -6838,6 +6904,7 @@ class MarkdownWriter:
 - `annotate`: [`lib/pdf/continuation.py`](#lib-pdf-continuation-py)
 - `apply`: [`lib/pdf/fullwidth.py`](#lib-pdf-fullwidth-py)
 - `apply_pdf_metadata_fallbacks`: [`lib/metadata_yaml/extract.py`](#lib-metadata-yaml-extract-py)
+- `apply_repair`: [`lib/pdf/airepair.py`](#lib-pdf-airepair-py)
 - `apply_strip_leading_h1`: [`lib/shared.py`](#lib-shared-py)
 - `area_features`: [`lib/pdf/scan.py`](#lib-pdf-scan-py)
 - `area_word_features`: [`lib/pdf/docmeasure.py`](#lib-pdf-docmeasure-py)
@@ -6859,6 +6926,7 @@ class MarkdownWriter:
 - `Blockquote`: [`domain/elements.py`](#domain-elements-py)
 - `build`: [`lib/pdf/content.py`](#lib-pdf-content-py)
 - `build`: [`lib/pdf/summary.py`](#lib-pdf-summary-py)
+- `build_columns`: [`lib/pdf/airepair.py`](#lib-pdf-airepair-py)
 - `build_review_prompt`: [`lib/golden_qa.py`](#lib-golden-qa-py)
 - `build_text`: [`lib/pdf/content.py`](#lib-pdf-content-py)
 - `BULLET_CHARS`: [`lib/pdf/types.py`](#lib-pdf-types-py)
@@ -6893,6 +6961,7 @@ class MarkdownWriter:
 - `CLOSED_GRID_EXEMPT`: [`lib/pdf/select.py`](#lib-pdf-select-py)
 - `code_cell`: [`lib/tables.py`](#lib-tables-py)
 - `CODE_ERRORS`: [`lib/pdf/evidence.py`](#lib-pdf-evidence-py)
+- `code_guard`: [`lib/pdf/airepair.py`](#lib-pdf-airepair-py)
 - `CODE_LANG_LABELS`: [`lib/shared.py`](#lib-shared-py)
 - `CodeBlock`: [`domain/elements.py`](#domain-elements-py)
 - `CodeCell`: [`domain/table.py`](#domain-table-py)
@@ -7063,6 +7132,7 @@ class MarkdownWriter:
 - `info_of`: [`lib/pdf/scan.py`](#lib-pdf-scan-py)
 - `inject_glyph_spans`: [`lib/pdf/glyphs.py`](#lib-pdf-glyphs-py)
 - `InsertedSpan`: [`domain/span.py`](#domain-span-py)
+- `INSTRUCTIONS`: [`lib/pdf/airepair.py`](#lib-pdf-airepair-py)
 - `is_code_comparison`: [`lib/pdf/emit.py`](#lib-pdf-emit-py)
 - `is_diagram_block`: [`lib/pdf/code_format.py`](#lib-pdf-code-format-py)
 - `is_flagged_table`: [`lib/pdf/emit.py`](#lib-pdf-emit-py)
@@ -7102,6 +7172,7 @@ class MarkdownWriter:
 - `mark_matrix`: [`lib/pdf/select.py`](#lib-pdf-select-py)
 - `MarkdownWriter`: [`writers/markdown/writer.py`](#writers-markdown-writer-py)
 - `MAX_FILL`: [`lib/pdf/rowbands.py`](#lib-pdf-rowbands-py)
+- `MAX_WORDS`: [`lib/pdf/airepair.py`](#lib-pdf-airepair-py)
 - `maybe_normalize_code_line`: [`lib/pdf/code_format.py`](#lib-pdf-code-format-py)
 - `measure`: [`lib/pdf/docmeasure.py`](#lib-pdf-docmeasure-py)
 - `merge_rule_bands`: [`lib/pdf/rowbands.py`](#lib-pdf-rowbands-py)
@@ -7182,6 +7253,8 @@ class MarkdownWriter:
 - `render_pdf_pages`: [`lib/golden_qa.py`](#lib-golden-qa-py)
 - `renumber_uncertain_markers`: [`lib/pdf/emit.py`](#lib-pdf-emit-py)
 - `reorder_abstract_in_uncertain`: [`lib/body/abstract.py`](#lib-body-abstract-py)
+- `repair_request`: [`lib/pdf/airepair.py`](#lib-pdf-airepair-py)
+- `RepairAnswer`: [`lib/pdf/airepair.py`](#lib-pdf-airepair-py)
 - `REPEATING_THRESHOLD`: [`lib/pdf/types.py`](#lib-pdf-types-py)
 - `REPLY_TO_CONTINUATION_CAP`: [`lib/pdf/wg21.py`](#lib-pdf-wg21-py)
 - `REPLY_TO_RE`: [`lib/pdf/types.py`](#lib-pdf-types-py)

@@ -46,11 +46,12 @@ _log = logging.getLogger(__name__)
 # there, their text kept as prose and marked.
 KEPT_WHEN_UNREPLACED = frozenset({"tomd"})
 
-# No HIGH for a table whose cells hold multi-line code: such a table renders as a
-# pipe table with a whole code block in each cell, while a code comparison is read
-# line by line. Removed by port step 8, which brings the paired-fence rendering of
-# code comparisons.
-WITHHOLD_TRUST_FOR_CODE_CELLS = True
+# No HIGH at all until the checks that follow agreement are ported: the extent
+# step (rows above or below a reading, a title row), layout verification and the
+# classifier gate. Two readers can agree on a reading that misses a row; in
+# tomd-tables those checks lower such tables. Removed by port step 9.
+WITHHOLD_TRUST_UNTIL_VERIFIED = True
+
 
 # No HIGH at all until the checks that follow agreement are ported: the extent
 # step (rows above or below a reading, a title row), layout verification and the
@@ -1194,12 +1195,6 @@ def select_tables(tomd_sections: list[Section],
             reasons.append("unverified")
             notes.append("Two kinds of evidence agree on this table; it is not yet checked "
                          "for rows outside its extent or its layout.")
-        if WITHHOLD_TRUST_FOR_CODE_CELLS and conf == Confidence.HIGH and _multiline_code_cells(primary):
-            # cells holding whole code blocks render as one pipe-table cell each; the
-            # line-by-line rendering of a code comparison is not here yet
-            conf = Confidence.UNCERTAIN
-            reasons.append("code-cells")
-            notes.append("Cells hold multi-line code; check each line against the page.")
         if "cross-reader" in primary.flags:
             # joined from two readers' pieces: no single reading backs the whole table
             conf = Confidence.UNCERTAIN

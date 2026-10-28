@@ -42,8 +42,7 @@ _L4 = {"damaged": "damaged text", "glyph-order": "cells read out of order", "rea
        "repaired": "repaired", "llm-repaired": "repaired by the language model"}
 _L3 = {"disagree": "readers disagree", "cross-reader": "joined from two readers' pieces",
        "extent": "the table may continue on the adjacent page",
-       "rule-check": "the reading fails the rule checks",
-       "code-cells": "cells hold multi-line code"}
+       "rule-check": "the reading fails the rule checks"}
 # Agreement found, checks not yet run: shown as minor (L2), not as a structure doubt.
 _L2 = {"unverified": "two kinds of evidence agree; not yet verified"}
 

@@ -101,6 +101,7 @@ from .select import remove_table_regions, select_tables
 from .tagged import extract_tagged_tables
 from .ruled import extract_ruled_tables, page_hrules
 from .poll import extract_poll_tables
+from .codepair import find_code_pairs
 from .rowbands import merge_rule_bands
 from .levels import assign as assign_level
 from .summary import build as build_summary, generator as pdf_generator, header_comment, prompt_elements
@@ -2319,8 +2320,14 @@ def run_pipeline(
     except Exception as exc:  # a failing table reader must not fail the paper: recorded, its text kept as prose
         current().reader_error("detect_tables", None, exc)
         tomd_sections = []
+    # Table reader: side-by-side code blocks of the same code (a before/after pair).
+    try:
+        code_pairs = find_code_pairs(pre_detect_blocks, lambda pg: page_rules.get(pg, []))
+    except Exception as exc:  # a failing table reader must not fail the paper: recorded
+        current().reader_error("codepair", None, exc)
+        code_pairs = []
     table_sections = select_tables(tomd_sections, ruled_tables, tagged_tables, pre_detect_blocks,
-                                   poll_tables, generator=pdf_generator(doc_metadata))
+                                   poll_tables, None, code_pairs, generator=pdf_generator(doc_metadata))
     # Rows bounded by drawn rules: a record the reader cut into rows is joined.
     for ts in table_sections:
         pages = {ln.page_num for ln in ts.lines or []}

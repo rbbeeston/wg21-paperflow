@@ -964,8 +964,82 @@ def _flatten_cell(text: str) -> str:
     return _CELL_WRAP_RE.sub(" ", text).strip()
 
 
+# Side-by-side code (a code comparison) is written as paired fenced blocks
+# under the column headers: a pipe table cannot hold multi-line code.
+_CODE_SHARE = 0.8       # body text this monospace...
+_CODE_LINES = 3         # ...with a cell this many lines long: a code comparison
+_CODE_MAX_COLS = 3
+_CODE_MAX_ROWS = 2      # a header row and one row of code blocks
+_BACKSLASH = re.compile(r"\\(?=[!-/:-@\[-`{-~])")
+
+
+def _escape_angle(text: str) -> str:
+    """Escape "<" outside code spans so "<a@b.org>" is not read as a link or
+    HTML, and a backslash before punctuation, which Markdown would read as an
+    escape and drop."""
+    parts = re.split(r"(`[^`]*`|<br>)", text)
+    return "".join(p if i % 2 else _BACKSLASH.sub(r"\\\\", p).replace("<", "\\<") for i, p in enumerate(parts))
+
+
+def _code_cell_lines(cell) -> list[list]:
+    out, cur = [], []
+    for s in cell:
+        if s.text == "\n":
+            out.append(cur)
+            cur = []
+        else:
+            cur.append(s)
+    out.append(cur)
+    return [ln for ln in out if any(s.text.strip() for s in ln)]
+
+
+def is_code_comparison(rows) -> bool:
+    """Side-by-side code: at most 3 columns and 2 rows (header + code), the
+    body (nearly) all monospace, some cell several lines long."""
+    if not rows or max(len(r) for r in rows) > _CODE_MAX_COLS or len(rows) > _CODE_MAX_ROWS:
+        return False
+    body = rows[1:] if len(rows) == _CODE_MAX_ROWS else rows
+    spans = [s for r in body for c in r for s in c if s.text.strip() and s.text != "\n"]
+    chars = sum(len(s.text.strip()) for s in spans)
+    mono = sum(len(s.text.strip()) for s in spans if s.monospace)
+    return (chars > 0 and mono >= _CODE_SHARE * chars and len([c for c in body[0] if c]) >= 2
+            and max(len(_code_cell_lines(c)) for r in body for c in r) >= _CODE_LINES)
+
+
+def _code_text(cell) -> str:
+    """A code cell's lines exactly: indentation rebuilt from x offsets."""
+    lines = _code_cell_lines(cell)
+    widths = [(s.bbox[2] - s.bbox[0]) / len(s.text) for ln in lines for s in ln
+              if s.monospace and s.text and s.bbox and s.bbox[2] > s.bbox[0]]
+    em = sorted(widths)[len(widths) // 2] if widths else 0.0
+    left = min((ln[0].bbox[0] for ln in lines if ln and ln[0].bbox), default=0.0)
+    out = []
+    for ln in lines:
+        text = "".join(s.text for s in ln).rstrip()
+        indent = int(round((ln[0].bbox[0] - left) / em)) if em and ln[0].bbox else 0
+        out.append(" " * max(indent, 0) + text.lstrip())
+    return "\n".join(out)
+
+
+def _render_paired_code(rows) -> str:
+    """Paired fenced code blocks under the column headers, after a marker that
+    records the structure."""
+    header = rows[0] if len(rows) == _CODE_MAX_ROWS else [[] for _ in rows[0]]
+    body = rows[-1]
+    parts = [f"<!-- tomd:table kind=code-comparison cols={len(body)} -->"]
+    for h, cell in zip(list(header) + [[]] * (len(body) - len(header)), body):
+        # spans carry their own spacing: joined as they are within a line, lines with a space
+        title = _escape_angle(" ".join("".join(s.text for s in ln).strip() for ln in _code_cell_lines(h)).strip())
+        if title:
+            parts.append(f"**{title}**")
+        parts.append("```cpp\n" + _code_text(cell) + "\n```")
+    return "\n\n".join(parts)
+
+
 def _render_table(sec: Section) -> str:
     """Render a table section according to its assigned strategy."""
+    if sec.columns and is_code_comparison(sec.columns):
+        return _render_paired_code(sec.columns)
     if sec.table_strategy == "code_blocks":
         return _render_code_comparison(sec)
     if sec.table_strategy == "html_table":

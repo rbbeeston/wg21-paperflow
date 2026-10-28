@@ -1,6 +1,6 @@
 # tomd API surface
 
-78 modules, 86 classes, 196 functions, 85 methods, 348 fields. Typed: 862 of 959 functions and methods (89%).
+79 modules, 86 classes, 199 functions, 85 methods, 348 fields. Typed: 872 of 976 functions and methods (89%).
 
 ## Contents
 
@@ -37,8 +37,9 @@
 - [`lib/pdf/cleanup.py`](#lib-pdf-cleanup-py): DehyphenatedPair, HyphenEvidence, cleanup_text, collect_hyphen_evidence, dehyphenate_pair, detect_repeating, escape_leading_atx, find_hidden_regions, get_edge_items, normalize_whitespace, strip_hidden_blocks, strip_repeating
 - [`lib/pdf/code_format.py`](#lib-pdf-code-format-py): is_diagram_block, maybe_normalize_code_line, normalize_code_line
 - [`lib/pdf/code_grid.py`](#lib-pdf-code-grid-py): CodeGrid
+- [`lib/pdf/codepair.py`](#lib-pdf-codepair-py): find_code_pairs, same_code
 - [`lib/pdf/docling_backend.py`](#lib-pdf-docling-backend-py): absorb_cross_page_spec_rows, discover_tables_with_docling, docling_available, enrich_tables_with_docling, extract_docling_tables
-- [`lib/pdf/emit.py`](#lib-pdf-emit-py): emit_markdown, emit_prompts, is_flagged_table, renumber_uncertain_markers, LIST_BULLET
+- [`lib/pdf/emit.py`](#lib-pdf-emit-py): emit_markdown, emit_prompts, is_code_comparison, is_flagged_table, renumber_uncertain_markers, LIST_BULLET
 - [`lib/pdf/emoji_data.py`](#lib-pdf-emoji-data-py): EMOJI_PRESENTATION_RANGES, UNICODE_EMOJI_VERSION
 - [`lib/pdf/evidence.py`](#lib-pdf-evidence-py): Entry, Record, CODE_ERRORS
 - [`lib/pdf/extract.py`](#lib-pdf-extract-py): attach_links, collect_links, extract_mupdf, extract_spatial
@@ -2018,6 +2019,48 @@ class CodeGrid:
 # + 1 private module-level name
 ```
 
+<a id="lib-pdf-codepair-py"></a>
+
+## `lib/pdf/codepair.py` ([source](../../src/tomd/lib/pdf/codepair.py))
+
+Typed: 9 of 12 functions and methods (75%).
+
+```python
+"""Side-by-side code comparisons, found from geometry and confirmed by content.
+
+  observation  two blocks of monospace lines on one page whose vertical
+               extents overlap (by half the shorter one) with a gutter
+               between them - whatever draws them: boxes, shading, rules or
+               white space only;
+  hypothesis   the two blocks do roughly the same thing: they share much of
+               their code (whitespace-free character trigrams, since text
+               layers often drop spaces in code), and the right one is not
+               a column of comments beside the left one;
+  validation   short labels aligned above both blocks become the header row;
+               pairs stacked down the page with the same column starts are
+               rows of one table.
+Measured on the truth sets (cmp_measure.py) before use. A pair is a table
+candidate like any other ("codepair"); it renders with the code-comparison
+convention.
+"""
+
+def find_code_pairs(blocks: list[Block], rules_for=None) -> list[TableCandidate]:
+    """Code-comparison candidates on every page. rules_for(page) gives the
+    page's drawn horizontal rules (y, x0, x1): a rule between two lines
+    separates them (rows of a ruled comparison are not one block).
+    """
+    # untyped: rules_for
+    # calls: _pieces, _mono, _blocks, _box, runctx.current, _comment_share, _code_like, same_code, _label, _spaced, types.TableCandidate
+    # called by: pipeline.run_pipeline
+
+def same_code(left: list[Line], right: list[Line]) -> float:
+    """Share of the smaller block's trigrams that the other block has too."""
+    # calls: _grams
+    # called by: find_code_pairs
+
+# + 10 private module-level names
+```
+
 <a id="lib-pdf-docling-backend-py"></a>
 
 ## `lib/pdf/docling_backend.py` ([source](../../src/tomd/lib/pdf/docling_backend.py))
@@ -2126,7 +2169,7 @@ def extract_docling_tables(pdf_path: Path) -> dict[int, list[dict]]:
 
 ## `lib/pdf/emit.py` ([source](../../src/tomd/lib/pdf/emit.py))
 
-Typed: 42 of 42 functions and methods (100%).
+Typed: 43 of 47 functions and methods (91%).
 
 ```python
 """Markdown and companion prompts file generation."""
@@ -2173,6 +2216,14 @@ def emit_prompts(sections: list[Section]) -> list[str] | None:
     # calls: is_flagged_table, _table_prompt
     # called by: pipeline.run_pipeline
 
+def is_code_comparison(rows) -> bool:
+    """Side-by-side code: at most 3 columns and 2 rows (header + code), the
+    body (nearly) all monospace, some cell several lines long.
+    """
+    # untyped: rows
+    # calls: _code_cell_lines
+    # called by: _render_table
+
 def is_flagged_table(sec: Section) -> bool:
     """A TABLE section no second kind of evidence confirmed (select.trust_tables)."""
     # called by: _is_flagged, emit_markdown, emit_prompts
@@ -2194,7 +2245,7 @@ def renumber_uncertain_markers(md: str) -> str:
 # stray bullet glyph survives mid-text (#303).
 LIST_BULLET = '-'
 
-# + 38 private module-level names
+# + 42 private module-level names
 ```
 
 <a id="lib-pdf-emoji-data-py"></a>
@@ -2972,7 +3023,7 @@ def run_pipeline(path: Path, *, ml_tables: bool = False, visualize: bool = False
     effect when ``extract_vector`` is False.
     labels inside vector figures render as pixels alongside body text.
     """
-    # calls: PipelineResult, images._VectorExtractionStats, _enforce_skip_contract, PipelineResult.for_skip, _is_slide_deck, _is_standards_draft, extract.extract_mupdf, extract.extract_spatial, cleanup.get_edge_items, extract.collect_links, extract.attach_links, images.extract_page_images, +77 more
+    # calls: PipelineResult, images._VectorExtractionStats, _enforce_skip_contract, PipelineResult.for_skip, _is_slide_deck, _is_standards_draft, extract.extract_mupdf, extract.extract_spatial, cleanup.get_edge_items, extract.collect_links, extract.attach_links, images.extract_page_images, +78 more
 
 # + 38 private module-level names
 ```
@@ -3240,7 +3291,7 @@ def current() -> RunContext:
     as in unit tests) a detached context is returned, so recording never fails.
     """
     # calls: RunContext
-    # called by: pipeline._filter_sections_inside_vector_images, pipeline.run_pipeline, ruled._bands_to_table, ruled._column_ruled_tables, ruled._mark_icon_cells, ruled.extract_ruled_tables, select._continuation_votes, select.cross_reader_continuation, select.select_tables, select.stitch_pages, tagged.extract_tagged_tables
+    # called by: codepair.find_code_pairs, pipeline._filter_sections_inside_vector_images, pipeline.run_pipeline, ruled._bands_to_table, ruled._column_ruled_tables, ruled._mark_icon_cells, ruled.extract_ruled_tables, select._continuation_votes, select.cross_reader_continuation, select.select_tables, select.stitch_pages, tagged.extract_tagged_tables
 
 @contextlib.contextmanager
 def run_scope():
@@ -3407,7 +3458,7 @@ def select_tables(tomd_sections: list[Section], ruled: list[TableCandidate], tag
     candidates from the drawing and tag sources are appended to `rejected`
     when given: their area probably is a table, so flag.py marks it.
     """
-    # calls: candidate_from_section, page_furniture, stitch_pages, cross_reader_continuation, split_at_headers, join_split_words, stacked.split_stacked, runctx.current, table_flags, _is_bad, _row_top, _same_region, +14 more
+    # calls: candidate_from_section, page_furniture, stitch_pages, cross_reader_continuation, split_at_headers, join_split_words, stacked.split_stacked, runctx.current, table_flags, _is_bad, _row_top, _same_region, +13 more
     # called by: pipeline.run_pipeline
 
 def sparse_mapping(t) -> bool:
@@ -3474,11 +3525,11 @@ KEPT_WHEN_UNREPLACED = frozenset({'tomd'})
 # "SF F N A SA", "SF WF N WA SA", "F N A", "Strongly Favor ... Strongly Against".
 VOTE_LABELS = ...
 
-# No HIGH for a table whose cells hold multi-line code: such a table renders as a
-# pipe table with a whole code block in each cell, while a code comparison is read
-# line by line. Removed by port step 8, which brings the paired-fence rendering of
-# code comparisons.
-WITHHOLD_TRUST_FOR_CODE_CELLS = True
+# No HIGH at all until the checks that follow agreement are ported: the extent
+# step (rows above or below a reading, a title row), layout verification and the
+# classifier gate. Two readers can agree on a reading that misses a row; in
+# tomd-tables those checks lower such tables. Removed by port step 9.
+WITHHOLD_TRUST_UNTIL_VERIFIED = True
 
 # No HIGH at all until the checks that follow agreement are ported: the extent
 # step (rows above or below a reading, a title row), layout verification and the
@@ -5317,6 +5368,7 @@ class MarkdownWriter:
 - `FigureRegion`: [`lib/pdf/types.py`](#lib-pdf-types-py)
 - `filter_coincident`: [`lib/pdf/glyphs.py`](#lib-pdf-glyphs-py)
 - `finalize_extraction`: [`lib/pdf/images.py`](#lib-pdf-images-py)
+- `find_code_pairs`: [`lib/pdf/codepair.py`](#lib-pdf-codepair-py)
 - `find_hidden_regions`: [`lib/pdf/cleanup.py`](#lib-pdf-cleanup-py)
 - `find_source`: [`lib/golden_qa.py`](#lib-golden-qa-py)
 - `find_toc_indices`: [`lib/toc.py`](#lib-toc-py)
@@ -5352,6 +5404,7 @@ class MarkdownWriter:
 - `implicit_role_for`: [`lib/wording_policy.py`](#lib-wording-policy-py)
 - `inject_glyph_spans`: [`lib/pdf/glyphs.py`](#lib-pdf-glyphs-py)
 - `InsertedSpan`: [`domain/span.py`](#domain-span-py)
+- `is_code_comparison`: [`lib/pdf/emit.py`](#lib-pdf-emit-py)
 - `is_diagram_block`: [`lib/pdf/code_format.py`](#lib-pdf-code-format-py)
 - `is_flagged_table`: [`lib/pdf/emit.py`](#lib-pdf-emit-py)
 - `is_foreign_chromatic`: [`lib/pdf/wording.py`](#lib-pdf-wording-py)
@@ -5451,6 +5504,7 @@ class MarkdownWriter:
 - `run_scope`: [`lib/pdf/runctx.py`](#lib-pdf-runctx-py)
 - `RunContext`: [`lib/pdf/runctx.py`](#lib-pdf-runctx-py)
 - `RUNNING_FOOTER_MAX_WORDS`: [`lib/pdf/types.py`](#lib-pdf-types-py)
+- `same_code`: [`lib/pdf/codepair.py`](#lib-pdf-codepair-py)
 - `sanitize_metadata`: [`lib/metadata_yaml/format.py`](#lib-metadata-yaml-format-py)
 - `score_report`: [`lib/golden_qa.py`](#lib-golden-qa-py)
 - `score_result`: [`lib/golden_qa.py`](#lib-golden-qa-py)
@@ -5528,7 +5582,6 @@ class MarkdownWriter:
 - `VectorUncertaintyStats`: [`lib/pdf/images.py`](#lib-pdf-images-py)
 - `vote_header`: [`lib/pdf/select.py`](#lib-pdf-select-py)
 - `VOTE_LABELS`: [`lib/pdf/select.py`](#lib-pdf-select-py)
-- `WITHHOLD_TRUST_FOR_CODE_CELLS`: [`lib/pdf/select.py`](#lib-pdf-select-py)
 - `WITHHOLD_TRUST_UNTIL_VERIFIED`: [`lib/pdf/select.py`](#lib-pdf-select-py)
 - `witness`: [`lib/pdf/select.py`](#lib-pdf-select-py)
 - `WORD_GAP_RATIO`: [`lib/pdf/types.py`](#lib-pdf-types-py)

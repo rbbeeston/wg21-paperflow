@@ -97,7 +97,8 @@ from .docling_backend import (
 )
 from ._fitz_lock import _FITZ_LOCK
 from .runctx import current, run_scope
-from .select import trust_tables
+from .select import remove_table_regions, select_tables
+from .tagged import extract_tagged_tables
 from .levels import assign as assign_level
 from .summary import build as build_summary, generator as pdf_generator, header_comment, prompt_elements
 
@@ -2149,6 +2150,14 @@ def run_pipeline(
             if all_figure_regions:
                 _log.info("Detected %d figure region(s)", len(all_figure_regions))
 
+            # Table reader: the PDF's accessibility tags (structure tree), the
+            # author's own table markup, for tagged PDFs.
+            try:
+                tagged_tables = extract_tagged_tables(doc)
+            except Exception as exc:  # a failing table reader must not fail the paper: recorded
+                current().reader_error("tagged", None, exc)
+                tagged_tables = []
+
             pdf_info_date = _parse_pdf_info_date(doc.metadata.get("creationDate", ""))
             pdf_info_title = (doc.metadata.get("title") or "").strip()
             doc_metadata = dict(doc.metadata)
@@ -2269,22 +2278,27 @@ def run_pipeline(
     # the rule-based detector) to correctly populate Docling cell grids.
     pre_detect_blocks = list(all_mupdf_blocks)
 
+    # Every table reader proposes readings; select_tables picks one reading
+    # per region and trusts it (HIGH) only when another kind of evidence
+    # agrees. detect_tables is the text-position reader ("tomd"); its own
+    # consumption of blocks is not used: the text of each selected table's
+    # region leaves the prose afterwards (remove_table_regions), and a line
+    # whose words are not in the table stays.
     try:
-        table_sections, all_mupdf_blocks = detect_tables(
-            all_mupdf_blocks,
+        tomd_sections, _ = detect_tables(
+            list(all_mupdf_blocks),
             page_mupdf_tables=page_mupdf_tables,
             two_column_pages=two_column_pages,
         )
     except Exception as exc:  # a failing table reader must not fail the paper: recorded, its text kept as prose
         current().reader_error("detect_tables", None, exc)
-        table_sections = []
-    # A table is trusted (HIGH) only when another kind of evidence agrees;
-    # with one reader every table is UNCERTAIN. No cell changes, and
-    # emit_markdown does not render a table's confidence.
-    trust_tables(table_sections, pre_detect_blocks)
+        tomd_sections = []
+    table_sections = select_tables(tomd_sections, [], tagged_tables, pre_detect_blocks,
+                                   generator=pdf_generator(doc_metadata))
+    all_mupdf_blocks = remove_table_regions(pre_detect_blocks, table_sections)
+    all_spatial_blocks = remove_table_regions(all_spatial_blocks, table_sections)
     if table_sections:
-        _log.info("Detected %d table(s)", len(table_sections))
-        all_spatial_blocks = exclude_table_regions(all_spatial_blocks, table_sections)
+        _log.info("Selected %d table(s)", len(table_sections))
 
     # --- Optional Docling ML table processing ---
     # When ml_tables=True and Docling is available:

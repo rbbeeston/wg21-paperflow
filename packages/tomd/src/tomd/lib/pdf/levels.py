@@ -41,7 +41,9 @@ _CELLS_SHOWN = 40          # most cell markers in a level comment
 _L4 = {"damaged": "damaged text", "glyph-order": "cells read out of order", "reader error": "a reader error",
        "repaired": "repaired", "llm-repaired": "repaired by the language model"}
 _L3 = {"disagree": "readers disagree", "cross-reader": "joined from two readers' pieces",
-       "extent": "the table may continue on the adjacent page"}
+       "extent": "the table may continue on the adjacent page",
+       "rule-check": "the reading fails the rule checks",
+       "code-cells": "cells hold multi-line code"}
 
 
 def _rows(md: str) -> list[list[str]]:

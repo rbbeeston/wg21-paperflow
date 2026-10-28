@@ -14,7 +14,7 @@ from tomd.lib.pdf.select import (
     candidates_agree,
     conservation_error,
     partial_reading,
-    trust_tables,
+    select_tables,
 )
 from tomd.lib.pdf.types import Block, Confidence, Line, Section, SectionKind, Span, TableCandidate
 
@@ -78,17 +78,34 @@ def test_partial_reading_needs_a_ruled_primary():
 
 def test_single_source_table_is_uncertain_with_reasons():
     sec, blk = _table([["Name", "Value"], ["alpha", "1"]])
-    trust_tables([sec], [blk])
-    assert sec.confidence == Confidence.UNCERTAIN
-    assert sec.metadata["table_agreement"] == "none"
-    assert sec.metadata["uncertain_reasons"] == ["single-source"]
-    assert sec.columns[1][0][0].text == "alpha"        # no cell changes
+    [out] = select_tables([sec], [], [], [blk])
+    assert out.confidence == Confidence.UNCERTAIN
+    assert out.metadata["table_agreement"] == "none"
+    assert out.metadata["uncertain_reasons"] == ["single-source"]
+    assert [[sp.text for sp in cell] for cell in out.columns[1]] == [["alpha"], ["1"]]
+
+
+def test_two_readers_agreeing_make_a_table_high():
+    sec, blk = _table([["Name", "Value"], ["alpha", "1"]])
+    tagged = candidate_from_section(_table([["Name", "Value"], ["alpha", "1"]])[0])
+    tagged.source = "tags"
+    [out] = select_tables([sec], [], [tagged], [blk])
+    assert out.confidence == Confidence.HIGH
+    assert out.metadata["table_agreement"] == "exact"
+
+
+def test_paperflow_reading_keeps_its_rendering_strategy():
+    sec, blk = _table([["Name", "Value"], ["alpha", "1"]])
+    sec.table_kind, sec.table_strategy, sec.table_source = "spec_table", "html_table", "pass1"
+    [out] = select_tables([sec], [], [], [blk])
+    assert (out.table_kind, out.table_strategy, out.table_source) == ("spec_table", "html_table", "pass1")
+    assert out.metadata["table_source"] == "tomd"
 
 
 def test_damaged_text_layer_is_a_reason():
     sec, blk = _table([["Name", "ᴀx"], ["alpha", "1"]])
-    trust_tables([sec], [blk])
-    assert "damaged" in sec.metadata["uncertain_reasons"]
+    [out] = select_tables([sec], [], [], [blk])
+    assert "damaged" in out.metadata["uncertain_reasons"]
 
 
 def test_no_table_from_one_reader_is_trusted():

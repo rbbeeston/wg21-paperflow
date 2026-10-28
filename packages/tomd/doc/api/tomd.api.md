@@ -1,6 +1,6 @@
 # tomd API surface
 
-72 modules, 86 classes, 175 functions, 85 methods, 347 fields. Typed: 814 of 858 functions and methods (94%).
+74 modules, 86 classes, 187 functions, 85 methods, 347 fields. Typed: 850 of 903 functions and methods (94%).
 
 ## Contents
 
@@ -50,11 +50,13 @@
 - [`lib/pdf/pipeline.py`](#lib-pdf-pipeline-py): PipelineResult, run_pipeline
 - [`lib/pdf/qa.py`](#lib-pdf-qa-py): QABatchResult, QAMetrics, compute_metrics, format_qa_report, run_qa_batch, write_qa_json_atomic
 - [`lib/pdf/runctx.py`](#lib-pdf-runctx-py): RunContext, current, run_scope, ERROR_MESSAGE_LIMIT
-- [`lib/pdf/select.py`](#lib-pdf-select-py): candidate_from_section, candidates_agree, conservation_error, partial_reading, trust_tables
+- [`lib/pdf/select.py`](#lib-pdf-select-py): candidate_from_section, candidates_agree, class_check, conservation_error, cross_reader_continuation, join_split_words, mark_matrix, page_furniture, partial_reading, remove_table_regions, select_tables, split_at_headers, ...
 - [`lib/pdf/spans.py`](#lib-pdf-spans-py): normalize_spans
+- [`lib/pdf/stacked.py`](#lib-pdf-stacked-py): split_stacked
 - [`lib/pdf/structure.py`](#lib-pdf-structure-py): compare_extractions, drop_leaked_toc_entries, heading_confidence, structure_body, structure_sections
 - [`lib/pdf/summary.py`](#lib-pdf-summary-py): build, generator, header_comment, prompt_elements, unfamiliarity, COMMON_LAYOUTS, KNOWN_GENERATORS
 - [`lib/pdf/table.py`](#lib-pdf-table-py): TableKind, TableStrategy, detect_tables, exclude_table_regions
+- [`lib/pdf/tagged.py`](#lib-pdf-tagged-py): extract_tagged_tables
 - [`lib/pdf/types.py`](#lib-pdf-types-py): Block, Confidence, FigureEdge, FigureGraph, FigureNode, FigureRegion, Line, PageEdgeItem, Section, SectionKind, SkipReason, Span, ...
 - [`lib/pdf/vector_images.py`](#lib-pdf-vector-images-py): extract_page_vector_images, format_uncertainty_marker, should_emit_marker, ALLOWED_REASON_KEYS, REASON_ASPECT_EXTREME, REASON_BBOX_TOO_LARGE, REASON_CLUSTERS_OVERFLOW, REASON_EDGE_BAND, REASON_TEXT_OVERLAP, REASON_TOO_FEW_ITEMS, REASON_TOO_SMALL, REASON_WORDING_COLOR, ...
 - [`lib/pdf/wg21.py`](#lib-pdf-wg21-py): extract_metadata_from_blocks, REPLY_TO_CONTINUATION_CAP
@@ -2853,7 +2855,7 @@ def classify_monospace(font_name: str, char_widths: list[float] | None = None, c
     for proportional fonts.
     """
     # calls: _font_name_is_monospace, _glyph_widths_uniform, _glyph_spacing_uniform
-    # called by: extract.extract_mupdf, extract.extract_spatial, propagate_monospace
+    # called by: extract.extract_mupdf, extract.extract_spatial, propagate_monospace, tagged._lines_of
 
 def propagate_monospace(mupdf_blocks: list[Block], spatial_blocks: list[Block], dominant_font: str) -> None:
     """Apply spatial path's glyph-width monospace decisions to MuPDF spans.
@@ -2945,7 +2947,7 @@ def run_pipeline(path: Path, *, ml_tables: bool = False, visualize: bool = False
     effect when ``extract_vector`` is False.
     labels inside vector figures render as pixels alongside body text.
     """
-    # calls: PipelineResult, images._VectorExtractionStats, _enforce_skip_contract, PipelineResult.for_skip, _is_slide_deck, _is_standards_draft, extract.extract_mupdf, extract.extract_spatial, cleanup.get_edge_items, extract.collect_links, extract.attach_links, images.extract_page_images, +71 more
+    # calls: PipelineResult, images._VectorExtractionStats, _enforce_skip_contract, PipelineResult.for_skip, _is_slide_deck, _is_standards_draft, extract.extract_mupdf, extract.extract_spatial, cleanup.get_edge_items, extract.collect_links, extract.attach_links, images.extract_page_images, +73 more
 
 # + 38 private module-level names
 ```
@@ -3075,7 +3077,7 @@ def current() -> RunContext:
     as in unit tests) a detached context is returned, so recording never fails.
     """
     # calls: RunContext
-    # called by: pipeline._filter_sections_inside_vector_images, pipeline.run_pipeline
+    # called by: pipeline._filter_sections_inside_vector_images, pipeline.run_pipeline, select._continuation_votes, select.cross_reader_continuation, select.select_tables, select.stitch_pages, tagged.extract_tagged_tables
 
 @contextlib.contextmanager
 def run_scope():
@@ -3092,32 +3094,55 @@ ERROR_MESSAGE_LIMIT = 300
 
 ## `lib/pdf/select.py` ([source](../../src/tomd/lib/pdf/select.py))
 
-Typed: 10 of 11 functions and methods (90%).
+Typed: 39 of 45 functions and methods (86%).
 
 ```python
-"""Table trust: a table is HIGH only when another kind of evidence agrees.
+"""Table selection: one reading per region, trusted only when another kind of evidence agrees.
 
-Every table reader proposes candidates (``TableCandidate``). A table read by
-one reader alone, however plausible, is UNCERTAIN: measured on fresh WG21
-papers, single-source tables carry most silent errors. A table whose cells
-lose or repeat the text of its area (``conservation_error``), whose cell text
-is read in an order the page contradicts, or whose text layer is damaged is
-UNCERTAIN too. The reasons are kept in ``Section.metadata`` for the marks, the
-prompts and the paper summary.
+Independent readers propose tables (``TableCandidate``): the text-position
+detector (``table.detect_tables``, source "tomd"), the PDF's accessibility
+tags (``tagged.py``), and the readers ported after them. ``select_tables``
+groups the proposals by position, picks one reading per region, and sets its
+confidence from agreement between readers plus rule checks:
 
-Today the only reader is ``table.detect_tables``, so ``trust_tables`` lowers
-its tables without changing a cell. The other readers and the selection
-between their readings join this module as they are ported.
+  - another reader agrees cell for cell (or the text reading is a correct
+    subset of a ruled table)                     -> HIGH
+  - only one reader found the table              -> UNCERTAIN
+  - readers found it but disagree                -> UNCERTAIN, every version kept
+  - the cells lose or repeat the text of the
+    table's area (``conservation_error``), cell text read out of order,
+    a damaged text layer, an open extent          -> UNCERTAIN
+
+A reading that fails the rule checks (``table_flags``) and has no better
+version is dropped, so its text stays in the document as prose; the evidence
+record keeps it. A selected reading of paperflow's own detector keeps that
+section's table kind and rendering strategy.
 """
 
 def candidate_from_section(sec: Section) -> TableCandidate:
-    """Wrap a ``detect_tables`` section (cells are span lists) as a candidate."""
+    """Wrap a detect_tables() section (cells are span lists) as a candidate."""
     # calls: types.Line, types.TableCandidate
-    # called by: trust_tables
+    # called by: select_tables
 
 def candidates_agree(a: TableCandidate, b: TableCandidate) -> bool:
     """Same grid shape and every cell matching."""
     # calls: _cells_agree
+    # called by: select_tables
+
+def class_check(cand: TableCandidate) -> str:
+    """Why this table can be trusted from one source, or "".
+
+    Each check is specific to how the table was built, and only used when
+    the classifier puts the region in the matching layout class:
+      - poll: exactly the SF F N A SA (or F N A) header, then rows that are
+        all vote counts, or one all-empty row (a suggested poll);
+      - grid: read from drawn cell boundaries, rectangular, no column or
+        row left empty;
+      - tags: from a well-formed structure tree, every row as wide as the
+        table, no empty column.
+    """
+    # calls: _is_bad
+    # called by: select_tables
 
 def conservation_error(cand: TableCandidate, blocks: list[Block]) -> str:
     """Check that the text in the table's area went into its cells exactly once.
@@ -3130,30 +3155,140 @@ def conservation_error(cand: TableCandidate, blocks: list[Block]) -> str:
     Returns "" when conserved, else a note for the prompt.
     """
     # calls: _aligned_neighbour_row
-    # called by: trust_tables
+    # called by: select_tables
+
+def cross_reader_continuation(cands: list[TableCandidate], blocks: list[Block], furniture: frozenset = frozenset()) -> list[TableCandidate]:
+    """A table continuing across a page is the same table whichever reader read
+    each piece (user: preserve meaningful spatial relationships regardless of
+    mechanism). After every reader's own stitching, a piece ending low on page N
+    joins a piece from a different reader starting high on page N+1 under the
+    same conditions as same-reader stitching: the same column count and column
+    starts (or extent), no different header, nothing between them (page
+    furniture aside). Polls are never joined this way. The joined table keeps
+    the first piece's reader, is flagged 'cross-reader' and records both.
+    """
+    # calls: _page_span, _new_header, _same_columns, _text_outside, _overlap, _same_header, _carry, types.TableCandidate, runctx.current
+    # called by: select_tables
+
+def join_split_words(cands: list[TableCandidate], blocks: list[Block]) -> None:
+    """A word split by a narrow cell is still one word (user, 2026-10-21): a cell line
+    that runs to the cell's right edge ending mid-token, followed by a line that
+    continues the token, is joined without a space - when the joined token occurs
+    elsewhere in the document and one of the pieces never occurs on its own there, or
+    when the break splits one identifier (underscores in both pieces, the second piece not
+    a name used on its own elsewhere) or one long number
+    or paper name (a run of 5+ characters ending in a digit, broken before a remainder
+    of at most two digits: "P0876R1" / "1", "20210" / "6") and a piece never occurs on
+    its own. A name followed by a number ("SC 22") and a year followed by a version
+    ("2022" / "17.14") are never joined.
+    The next line is marked (joins_prev); cell text and spans honour the mark.
+    """
+    # called by: select_tables
+
+def mark_matrix(cand: TableCandidate) -> bool:
+    """A check-mark matrix (status, feature or compliance tables): row keys in
+    the first column, and the filled cells beside them are marks. Sparse by
+    design, so empty cells and sparse or ragged columns are not misreadings.
+    """
+    # called by: _is_bad, select_tables
+
+def page_furniture(blocks: list[Block], min_pages: int = 3) -> frozenset:
+    """Lines repeated at the same height on several pages once digits are
+    normalised: running headers and footers with page numbers that header
+    stripping missed (a header block holding the page number).
+    """
+    # calls: _furniture_key
+    # called by: select_tables
 
 def partial_reading(primary: TableCandidate, other: TableCandidate) -> bool:
-    """True when ``other`` is the text-position reading of part of a fully ruled
-    table: same columns, and every one of its rows matches, cell for cell, a row
-    of the ruled table in the same order. The text-position reader often stops
-    early or starts late on ruled tables; a correct subset confirms the rows it
-    saw rather than contradicting the rest.
+    """True when `other` is tomd's text-position reading of part of a fully
+    ruled table: same columns, and every one of its rows matches, cell for
+    cell, a row of the ruled table in the same order. The text-position
+    detector often stops early or starts late on ruled tables; a correct
+    subset confirms the rows it saw rather than contradicting the rest.
     """
     # calls: _cells_agree, _all_bold
+    # called by: select_tables
 
-def trust_tables(table_sections: list[Section], blocks: list[Block]) -> None:
-    """Set each table's confidence from the evidence, in place; no cell changes.
+def remove_table_regions(blocks: list[Block], tables: list[Section]) -> list[Block]:
+    """Drop the lines that fall inside any chosen table's region.
 
-    ``blocks`` are the page blocks before any reader consumed them (the text the
-    conservation check counts). With one reader no second kind of evidence can
-    agree, so every table is UNCERTAIN ("single-source"), plus the reasons its
-    own checks find. Each table's metadata gains ``table_agreement``,
-    ``uncertain_reasons`` and ``table_note``.
+    A line inside the region whose text is not in the table is kept, so it
+    stays in the document as ordinary text: never lose words to a table whose
+    cells missed them.
     """
-    # calls: candidate_from_section, conservation_error, _order_contradiction, _damaged_text
+    # calls: types.Block
     # called by: pipeline.run_pipeline
 
-# + 6 private module-level names
+def select_tables(tomd_sections: list[Section], ruled: list[TableCandidate], tagged: list[TableCandidate], blocks: list[Block], polls: list[TableCandidate] = (), rejected: list[TableCandidate] | None = None, codepairs: list[TableCandidate] = (), content: list[TableCandidate] = (), generator: str = 'unknown') -> list[Section]:
+    """Choose one table per region from the three extractors.
+
+    Primary version by source priority (tags, polls, ruling lines, text positions),
+    skipping versions that fail the rule checks. Confidence:
+      - another source agrees cell for cell, or tomd's
+        reading is a correct subset of a ruled table -> HIGH
+      - only one source found the table            -> UNCERTAIN
+      - other sources found it but disagree        -> UNCERTAIN, and every
+        version is kept for the prompts file
+      - the cells lose or duplicate text of the
+        table's area (conservation_error)          -> UNCERTAIN
+    A candidate that fails the rule checks and has no better version is
+    dropped, so its blocks flow back into normal processing. Dropped
+    candidates from the drawing and tag sources are appended to `rejected`
+    when given: their area probably is a table, so flag.py marks it.
+    """
+    # calls: candidate_from_section, page_furniture, stitch_pages, cross_reader_continuation, split_at_headers, join_split_words, stacked.split_stacked, runctx.current, table_flags, _is_bad, _row_top, _same_region, +14 more
+    # called by: pipeline.run_pipeline
+
+def split_at_headers(cand: TableCandidate) -> list[TableCandidate]:
+    """Two tables stacked in one reading: a different header row inside the body
+    (short bold labels after a non-bold row) starts a new table (the user's
+    header rule; an identical header repeated is the same table and stays).
+    Single-page readings only; tags and polls delimit their own tables.
+    """
+    # calls: _is_header_row, types.TableCandidate, _bold_row, _same_header, _carry
+    # called by: select_tables
+
+def stitch_pages(cands: list[TableCandidate], blocks: list[Block], furniture: frozenset = frozenset()) -> list[TableCandidate]:
+    """Join a table that ends one page with one that starts the next page.
+
+    Requires the same column count and x-extent, and no text after the first
+    part or before the second (headers and footers are already stripped from
+    blocks) - a caption in between means two different tables. A header row
+    that the PDF repeats on the continuation is dropped.
+    """
+    # calls: _new_header, _same_columns, _continuation_votes, _text_outside, _same_header, _carry, types.TableCandidate, runctx.current
+    # called by: select_tables
+
+def table_flags(cand: TableCandidate) -> list[str]:
+    """Rule-based sanity checks. Flags in BAD_TABLE_FLAGS mean the grid is
+    probably wrong; the others are informational.
+    """
+    # calls: _split_code_cell
+    # called by: select_tables
+
+def witness(primary: TableCandidate, agreeing: list[TableCandidate], cands: list[TableCandidate], blocks: list[Block]) -> dict:
+    """Per property, the distinct information sources behind the agreeing readings."""
+    # calls: _extent_open
+    # called by: select_tables
+
+BAD_TABLE_FLAGS = ...
+
+# Readers whose readings are kept (flagged, reason "rule-check") when they fail
+# the rule checks and no other reading covers their region. During the port,
+# the readers that read those layouts in tomd-tables (polls, drawn rules, the
+# content reader) and the marks for dropped readings (flag.py) are not here
+# yet; once they are, this set is emptied and such readings are dropped as
+# there, their text kept as prose and marked.
+KEPT_WHEN_UNREPLACED = frozenset({'tomd'})
+
+# No HIGH for a table whose cells hold multi-line code: such a table renders as a
+# pipe table with a whole code block in each cell, while a code comparison is read
+# line by line. Removed by port step 8, which brings the paired-fence rendering of
+# code comparisons.
+WITHHOLD_TRUST_FOR_CODE_CELLS = True
+
+# + 30 private module-level names
 ```
 
 <a id="lib-pdf-spans-py"></a>
@@ -3180,6 +3315,40 @@ def normalize_spans(blocks: list[Block]) -> list[Block]:
     # called by: pipeline.run_pipeline
 
 # + 7 private module-level names
+```
+
+<a id="lib-pdf-stacked-py"></a>
+
+## `lib/pdf/stacked.py` ([source](../../src/tomd/lib/pdf/stacked.py))
+
+Typed: 5 of 5 functions and methods (100%).
+
+```python
+"""Stacked entries are one row each (table convention, "Rows: one row per entry").
+
+Several entries stacked in one drawn band, on baselines shared across columns
+("Linux / QNX / NetBSD" beside three function names), are one row each; a cell
+whose text wraps is still one row (a wrap breaks at a space, so a line of one
+token followed by another line is a new entry). Learned from the vision readers (Table
+Transformer, Docling): a line is its own row unless something shows it wraps.
+
+A row is split between two baselines when the lower baseline holds lines in
+two or more columns, one of them the row's first column (where an entry's key
+sits), and, in every column with a line on both baselines, the
+upper line did not run to the column's edge (the next line's first word would
+have fitted after it) and the lower line is not a word joined to the upper
+one. Rows of C++ statements (a line ending in ; { or }, a preprocessor line, a
+comment) are code blocks and are
+never split, nor are rows holding a listing (monospace lines with words on them,
+such as assembly); the header row and all-bold rows are left as they are.
+"""
+
+def split_stacked(cand: TableCandidate) -> TableCandidate:
+    # calls: _code_block, _height, _baseline, types.TableCandidate
+    # called by: select.select_tables
+    ...
+
+# + 4 private module-level names
 ```
 
 <a id="lib-pdf-structure-py"></a>
@@ -3481,6 +3650,46 @@ def exclude_table_regions(blocks: list[Block], table_sections: list[Section]) ->
     # called by: pipeline.run_pipeline
 
 # + 102 private module-level names
+```
+
+<a id="lib-pdf-tagged-py"></a>
+
+## `lib/pdf/tagged.py` ([source](../../src/tomd/lib/pdf/tagged.py))
+
+Typed: 2 of 6 functions and methods (33%).
+
+```python
+"""Table detection from the PDF's accessibility tags (Tagged PDF).
+
+When the producing application wrote a structure tree (Google Docs, Word,
+LibreOffice, Typst, Chrome print), tables are explicitly marked up as
+Table / TR / TH / TD elements. PyMuPDF exposes them per page through
+get_text("dict") with TEXT_COLLECT_STRUCTURE: structure nodes appear as
+blocks of type 2 that contain the text blocks they own.
+
+Cross-page tables: a Table element continued on the next page appears on
+both pages with the same structure index, so the parts are joined by
+index; a row split by the page break (same TR index) is joined too.
+
+Empty cells own no text, so a page's dict may omit them. Rows shorter
+than the table are therefore re-aligned by x position against the column
+positions of full rows.
+
+Untagged PDFs (LaTeX/pdfTeX, ReportLab, most tools) simply yield nothing.
+"""
+
+def extract_tagged_tables(doc) -> list[TableCandidate]:
+    """All tables marked up in the document's structure tree.
+
+    When MuPDF reports structure-tree errors while reading the pages (some
+    Word exports), every candidate gets the "tags-malformed" flag so table
+    selection ranks it below the ruling-line version.
+    """
+    # untyped: doc
+    # calls: _page_tables, runctx.current, _realign, types.TableCandidate
+    # called by: pipeline.run_pipeline
+
+# + 5 private module-level names
 ```
 
 <a id="lib-pdf-types-py"></a>
@@ -4790,6 +4999,7 @@ class MarkdownWriter:
 - `AUDIENCE_RE`: [`lib/pdf/types.py`](#lib-pdf-types-py)
 - `AxisReport`: [`lib/golden_qa.py`](#lib-golden-qa-py)
 - `AxisScore`: [`lib/golden_compare.py`](#lib-golden-compare-py)
+- `BAD_TABLE_FLAGS`: [`lib/pdf/select.py`](#lib-pdf-select-py)
 - `BatchRunResult`: [`lib/batch.py`](#lib-batch-py)
 - `bless_stem`: [`lib/golden_qa.py`](#lib-golden-qa-py)
 - `Block`: [`lib/golden_compare.py`](#lib-golden-compare-py)
@@ -4808,6 +5018,7 @@ class MarkdownWriter:
 - `CellAlign`: [`domain/table.py`](#domain-table-py)
 - `check_paper_content`: [`lib/check_content.py`](#lib-check-content-py)
 - `CheckContentArgError`: [`errors.py`](#errors-py)
+- `class_check`: [`lib/pdf/select.py`](#lib-pdf-select-py)
 - `classify_monospace`: [`lib/pdf/mono.py`](#lib-pdf-mono-py)
 - `classify_wording`: [`lib/pdf/wording.py`](#lib-pdf-wording-py)
 - `cleanup_text`: [`lib/pdf/cleanup.py`](#lib-pdf-cleanup-py)
@@ -4841,6 +5052,7 @@ class MarkdownWriter:
 - `convert_paper_full`: [`api.py`](#api-py)
 - `ConvertedPaper`: [`api.py`](#api-py)
 - `ConvertedPaper`: [`domain/document.py`](#domain-document-py)
+- `cross_reader_continuation`: [`lib/pdf/select.py`](#lib-pdf-select-py)
 - `current`: [`lib/pdf/runctx.py`](#lib-pdf-runctx-py)
 - `DATE_RE`: [`lib/shared.py`](#lib-shared-py)
 - `dedup_abstract`: [`lib/body/abstract.py`](#lib-body-abstract-py)
@@ -4887,6 +5099,7 @@ class MarkdownWriter:
 - `extract_page_images`: [`lib/pdf/images.py`](#lib-pdf-images-py)
 - `extract_page_vector_images`: [`lib/pdf/vector_images.py`](#lib-pdf-vector-images-py)
 - `extract_spatial`: [`lib/pdf/extract.py`](#lib-pdf-extract-py)
+- `extract_tagged_tables`: [`lib/pdf/tagged.py`](#lib-pdf-tagged-py)
 - `ExtractedImage`: [`domain/image.py`](#domain-image-py)
 - `ExtractedImage`: [`lib/pdf/images.py`](#lib-pdf-images-py)
 - `ExtractionResult`: [`lib/pdf/images.py`](#lib-pdf-images-py)
@@ -4947,6 +5160,8 @@ class MarkdownWriter:
 - `is_unedited_seed`: [`lib/golden_qa.py`](#lib-golden-qa-py)
 - `is_wording_rgb`: [`lib/pdf/wording.py`](#lib-pdf-wording-py)
 - `issue_for_stem`: [`lib/golden_qa.py`](#lib-golden-qa-py)
+- `join_split_words`: [`lib/pdf/select.py`](#lib-pdf-select-py)
+- `KEPT_WHEN_UNREPLACED`: [`lib/pdf/select.py`](#lib-pdf-select-py)
 - `KNOWN_GENERATORS`: [`lib/pdf/summary.py`](#lib-pdf-summary-py)
 - `KNOWN_SECTIONS`: [`lib/pdf/types.py`](#lib-pdf-types-py)
 - `LEGACY_FENCE_MARKER`: [`lib/wording_markup.py`](#lib-wording-markup-py)
@@ -4962,6 +5177,7 @@ class MarkdownWriter:
 - `load_html_images`: [`lib/html/images.py`](#lib-html-images-py)
 - `locate_gaps`: [`lib/golden_gaps.py`](#lib-golden-gaps-py)
 - `main`: [`cli.py`](#cli-py)
+- `mark_matrix`: [`lib/pdf/select.py`](#lib-pdf-select-py)
 - `MarkdownWriter`: [`writers/markdown/writer.py`](#writers-markdown-writer-py)
 - `maybe_normalize_code_line`: [`lib/pdf/code_format.py`](#lib-pdf-code-format-py)
 - `MIN_IMAGE_DIM_PT`: [`lib/pdf/images.py`](#lib-pdf-images-py)
@@ -4980,6 +5196,7 @@ class MarkdownWriter:
 - `NormalizedDoc`: [`lib/golden_compare.py`](#lib-golden-compare-py)
 - `NUMBERED_LIST_RE`: [`lib/pdf/types.py`](#lib-pdf-types-py)
 - `override_revision_from_filename`: [`lib/shared.py`](#lib-shared-py)
+- `page_furniture`: [`lib/pdf/select.py`](#lib-pdf-select-py)
 - `PAGE_NUM_RE`: [`lib/pdf/types.py`](#lib-pdf-types-py)
 - `PageEdgeItem`: [`lib/pdf/types.py`](#lib-pdf-types-py)
 - `PaperDocument`: [`domain/document.py`](#domain-document-py)
@@ -5007,6 +5224,7 @@ class MarkdownWriter:
 - `rebless_stems`: [`lib/golden_qa.py`](#lib-golden-qa-py)
 - `ReblessOutcome`: [`lib/golden_qa.py`](#lib-golden-qa-py)
 - `Record`: [`lib/pdf/evidence.py`](#lib-pdf-evidence-py)
+- `remove_table_regions`: [`lib/pdf/select.py`](#lib-pdf-select-py)
 - `render_body`: [`lib/html/render.py`](#lib-html-render-py)
 - `render_pdf_pages`: [`lib/golden_qa.py`](#lib-golden-qa-py)
 - `renumber_uncertain_markers`: [`lib/pdf/emit.py`](#lib-pdf-emit-py)
@@ -5034,6 +5252,7 @@ class MarkdownWriter:
 - `SECTION_NUM_PREFIX_RE`: [`lib/shared.py`](#lib-shared-py)
 - `SECTION_NUM_RE`: [`lib/pdf/types.py`](#lib-pdf-types-py)
 - `SectionKind`: [`lib/pdf/types.py`](#lib-pdf-types-py)
+- `select_tables`: [`lib/pdf/select.py`](#lib-pdf-select-py)
 - `should_emit_marker`: [`lib/pdf/vector_images.py`](#lib-pdf-vector-images-py)
 - `SHOWN_FROM`: [`lib/pdf/levels.py`](#lib-pdf-levels-py)
 - `similar`: [`lib/similarity.py`](#lib-similarity-py)
@@ -5043,7 +5262,10 @@ class MarkdownWriter:
 - `source_dir`: [`lib/golden_qa.py`](#lib-golden-qa-py)
 - `Span`: [`domain/span.py`](#domain-span-py)
 - `Span`: [`lib/pdf/types.py`](#lib-pdf-types-py)
+- `split_at_headers`: [`lib/pdf/select.py`](#lib-pdf-select-py)
+- `split_stacked`: [`lib/pdf/stacked.py`](#lib-pdf-stacked-py)
 - `stage_source`: [`lib/golden_qa.py`](#lib-golden-qa-py)
+- `stitch_pages`: [`lib/pdf/select.py`](#lib-pdf-select-py)
 - `strip_body_metadata_text`: [`writers/markdown/normalizers.py`](#writers-markdown-normalizers-py)
 - `strip_boilerplate`: [`lib/html/extract.py`](#lib-html-extract-py)
 - `strip_format_chars`: [`lib/shared.py`](#lib-shared-py)
@@ -5069,6 +5291,7 @@ class MarkdownWriter:
 - `SuperscriptSpan`: [`domain/span.py`](#domain-span-py)
 - `Table`: [`domain/table.py`](#domain-table-py)
 - `TABLE_CLOSE`: [`lib/tables.py`](#lib-tables-py)
+- `table_flags`: [`lib/pdf/select.py`](#lib-pdf-select-py)
 - `TABLE_OPEN`: [`lib/tables.py`](#lib-tables-py)
 - `TableCandidate`: [`lib/pdf/types.py`](#lib-pdf-types-py)
 - `TableKind`: [`lib/pdf/table.py`](#lib-pdf-table-py)
@@ -5083,7 +5306,6 @@ class MarkdownWriter:
 - `tomd_markdown`: [`lib/golden_qa.py`](#lib-golden-qa-py)
 - `TomdError`: [`errors.py`](#errors-py)
 - `TRUNCATION_MARKER_TEMPLATE`: [`lib/pdf/images.py`](#lib-pdf-images-py)
-- `trust_tables`: [`lib/pdf/select.py`](#lib-pdf-select-py)
 - `UncertainElement`: [`domain/elements.py`](#domain-elements-py)
 - `unfamiliarity`: [`lib/pdf/summary.py`](#lib-pdf-summary-py)
 - `UNICODE_EMOJI_VERSION`: [`lib/pdf/emoji_data.py`](#lib-pdf-emoji-data-py)
@@ -5094,6 +5316,8 @@ class MarkdownWriter:
 - `validate_facts_jsonl`: [`lib/golden_qa.py`](#lib-golden-qa-py)
 - `VECTOR_UNCERTAINTY_MARKER_TEMPLATE`: [`lib/pdf/vector_images.py`](#lib-pdf-vector-images-py)
 - `VectorUncertaintyStats`: [`lib/pdf/images.py`](#lib-pdf-images-py)
+- `WITHHOLD_TRUST_FOR_CODE_CELLS`: [`lib/pdf/select.py`](#lib-pdf-select-py)
+- `witness`: [`lib/pdf/select.py`](#lib-pdf-select-py)
 - `WORD_GAP_RATIO`: [`lib/pdf/types.py`](#lib-pdf-types-py)
 - `word_jaccard`: [`lib/similarity.py`](#lib-similarity-py)
 - `WORDING_CLASSES`: [`lib/wording_markup.py`](#lib-wording-markup-py)

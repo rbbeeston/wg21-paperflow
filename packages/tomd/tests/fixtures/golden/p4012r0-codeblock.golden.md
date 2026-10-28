@@ -8,6 +8,10 @@ reply-to:
 
 <!-- tomd:summary tables=0 trusted=0 flagged=0 likely=0 marked=0 confidence=n/a unfamiliarity=0.40 -->
 
+###### P4012R0 A `really_convertible_to` definition
+
+###### 11.3 modify [simd.ctor]
+
 #### In [simd.ctore], change:
 
 ```cpp

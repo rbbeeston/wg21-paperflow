@@ -17,6 +17,7 @@ globals: two papers converted on two threads each see only their own context
 import contextlib
 import contextvars
 import logging
+from collections import Counter
 from dataclasses import dataclass, field
 
 from .evidence import CODE_ERRORS, Record
@@ -34,6 +35,11 @@ class RunContext:
     discards: list[tuple[str, str, str]] = field(default_factory=list)
     # drawn grids the rule reader excluded (failed checks): rejected readings for the marks
     excluded_grids: list = field(default_factory=list)
+    # the paper's running-text words (lower case), counted: a line-end hyphen in a
+    # table cell is decided by how the paper itself writes the word (emit.py)
+    lexicon: Counter = field(default_factory=Counter)
+    # does this document's maker hyphenate words at line ends (docmeasure.hyphenates)?
+    hyphenates: bool = True
     # re-raise reader errors instead of recording them (tests of a reader's own failures)
     strict: bool = False
 

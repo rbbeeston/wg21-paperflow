@@ -102,9 +102,9 @@ from .tagged import extract_tagged_tables
 from .ruled import extract_ruled_tables, page_hrules
 from .poll import extract_poll_tables
 from .codepair import find_code_pairs
-from .classify import gate_tables
+from .classify import gate_tables, withhold_trust
 from .content import content_candidates
-from .docmeasure import measure as doc_measure
+from .docmeasure import hyphenates as doc_hyphenates, measure as doc_measure
 from .extent import extend as extend_readings
 from .flag import (aligned_regions, dropped_uncovered, flag_possible_tables, gutter_regions,
                    outside_view_regions, rejected_regions, text_regions)
@@ -2485,6 +2485,7 @@ def run_pipeline(
         code_pairs = []
     # What ordinary prose looks like in this document, for the region scan.
     current().record.doc_measure = doc_measure(page_words)
+    current().hyphenates = doc_hyphenates(page_words)
     # The steps around selection reopen the PDF (the readers' first session
     # closed above). The content-first builder and the records reader read every
     # region any reader located (kept or not) and the areas aligned like a table
@@ -2513,6 +2514,7 @@ def run_pipeline(
                 gate_tables(tdoc, tpages, table_sections)
             except Exception as exc:  # the gate only lowers trust; never fail on it, never silently
                 current().reader_error("table classification", None, exc)
+            withhold_trust(table_sections)
         finally:
             tdoc.close()
     # Rows bounded by drawn rules: a record the reader cut into rows is joined.

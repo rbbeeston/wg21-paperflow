@@ -1,5 +1,6 @@
 """Markdown and companion prompts file generation."""
 
+import dataclasses
 import html as _html
 import logging
 import re
@@ -25,6 +26,7 @@ from .glyphs import (
 )
 from .images import TRUNCATION_MARKER_TEMPLATE, VectorUncertaintyStats
 from .levels import SHOWN_FROM, comment as level_comment
+from .runctx import current
 from .types import Line, Span, Section, SectionKind, Confidence, BULLET_CHARS, BULLET_RE, NUMBERED_LIST_RE, FALLBACK_FONT_SIZE
 from .vector_images import format_uncertainty_marker, should_emit_marker
 _log = logging.getLogger(__name__)
@@ -951,19 +953,6 @@ def _render_html_table(sec: Section) -> str:
     return "\n".join(parts)
 
 
-_CELL_WRAP_RE = re.compile(r"\s*\n\s*")
-
-
-def _flatten_cell(text: str) -> str:
-    """Collapse a soft-wrapped cell onto one line for pipe-table rendering.
-
-    Only whitespace runs containing a newline are collapsed, so how much
-    space surrounds the wrap point does not matter and space runs elsewhere
-    (inline code) are left alone.
-    """
-    return _CELL_WRAP_RE.sub(" ", text).strip()
-
-
 # Side-by-side code (a code comparison) is written as paired fenced blocks
 # under the column headers: a pipe table cannot hold multi-line code.
 _CODE_SHARE = 0.8       # body text this monospace...
@@ -1060,7 +1049,7 @@ def _render_table(sec: Section) -> str:
     else:
         header = rows[0]
         header_cells = [
-            _flatten_cell(_render_cell_spans(cell, suppress_bold=True))
+            _render_table_cell(cell, suppress_bold=True)
             for cell in header
         ]
         while len(header_cells) < num_cols:
@@ -1071,7 +1060,7 @@ def _render_table(sec: Section) -> str:
 
     for row in data_rows:
         cells = [
-            _flatten_cell(_render_cell_spans(cell))
+            _render_table_cell(cell)
             for cell in row
         ]
         while len(cells) < num_cols:
@@ -1288,6 +1277,7 @@ def emit_markdown(
     duplicate-paragraph collapse) so it matches a grep of the output.
     """
     _assign_emdash_nesting(sections)
+    set_lexicon(sections)
 
     # Pre-pass: fold cross-page table continuations into the preceding
     # table so they render as a single HTML/pipe table.  The detection
@@ -1619,3 +1609,119 @@ def table_use(rows) -> str:
                     and all(not c for c in r[1:-1]) for r in texts)):
         return "heading"
     return "table"
+
+
+# Pipe-table cells (tomd-tables' cell renderer): a wrapped cell keeps its lines
+# (joined with <br>), a line-end hyphen is decided by how the paper writes the
+# word, and "|", "<", a backslash and a literal "*" cannot change the table.
+_HYPHEN_END = re.compile(r"([A-Za-z_][\w]*(?:-[\w]+)*)-(\*\*|\*)?$")
+_LEX_WORD = re.compile(r"[A-Za-z]+(?:-[A-Za-z]+)*")
+_STAR = "\x00"      # a literal asterisk in cell text, escaped once the cell is rendered
+_CELL_WRAP = re.compile(r"[ \t]*\n\s*")
+# Prefixes that form compounds: a line-end hyphen after one is kept ("non-" + "enforced").
+COMPOUND_PREFIXES = frozenset({
+    "self", "non", "well", "cross", "pre", "post", "re", "co", "anti",
+    "multi", "semi", "sub", "inter", "intra", "over", "under", "out",
+})
+# A hyphen-split part this short (or a continuation this short) is a syllable break.
+_SYLLABLE_PREFIX = 3
+_SYLLABLE_SUFFIX = 4
+
+
+def set_lexicon(sections: list[Section]) -> None:
+    """Count the running-text words of the paper (tables excluded) for cell hyphens."""
+    lex = current().lexicon
+    lex.clear()
+    for sec in sections:
+        if sec.kind != SectionKind.TABLE:
+            lex.update(w.lower() for w in _LEX_WORD.findall(sec.text))
+
+
+def _join_hyphenated(line: str, nxt: str, prefix: str) -> str:
+    """Join a cell line ending in "word-" with the next line.
+
+    The paper's own text decides first: if it writes "automatically" and
+    never "automati-cally", the hyphen was a line break; if it writes
+    "non-enforced", the hyphen is part of the word. Otherwise a syllable
+    break drops the hyphen ("com-" + "patibility"): the part before it is a
+    short fragment or the continuation is short. A compound keeps it
+    ("non-" + "enforced", "effect-" + "parameterized").
+    """
+    lex = current().lexicon
+    suffix = re.match(r"[A-Za-z]*", nxt).group(0)
+    joined, hyphened = (prefix + suffix).lower(), f"{prefix}-{suffix}".lower()
+    if suffix and (lex[joined] or lex[hyphened]):
+        return (line if lex[hyphened] >= lex[joined] else line[:-1]) + nxt
+    if "-" in prefix:
+        return line + nxt                 # inside a hyphenated chain: "warnings-as-" + "errors"
+    if not current().hyphenates:
+        return line + nxt                 # a maker that never hyphenates: the hyphen is the word's
+    p = prefix.lower()
+    acronym = len(prefix) >= 2 and prefix.isupper()     # "ABI-" + "independent" is a compound
+    syllable = (not acronym and p not in COMPOUND_PREFIXES
+                and (len(p) <= _SYLLABLE_PREFIX or len(suffix) <= _SYLLABLE_SUFFIX))
+    return (line[:-1] if syllable else line) + nxt
+
+
+def _mark_asterisks(spans: list) -> list:
+    """Asterisks in plain text ("/*...*/" in a cell of prose) would read as
+    emphasis and vanish; code spans keep theirs literally."""
+    return [s if s.monospace or "*" not in s.text else dataclasses.replace(s, text=s.text.replace("*", _STAR))
+            for s in spans]
+
+
+def _coalesce(spans: list) -> list:
+    """Neighbouring spans with the same style as one span: rendered apart,
+    two italic runs touch as "*a**b*", which Markdown reads as bold."""
+    out: list = []
+    for s in spans:
+        p = out[-1] if out else None
+        if (p is not None and (p.bold, p.italic, p.monospace, p.link_url) == (s.bold, s.italic, s.monospace, s.link_url)
+                and (s.bold or s.italic) and not s.monospace and not s.link_url):
+            out[-1] = dataclasses.replace(p, text=p.text + s.text,
+                                          bbox=(min(p.bbox[0], s.bbox[0]), min(p.bbox[1], s.bbox[1]),
+                                                max(p.bbox[2], s.bbox[2]), max(p.bbox[3], s.bbox[3])))
+        else:
+            out.append(s)
+    return out
+
+
+def _render_table_cell(spans: list, suppress_bold: bool = False) -> str:
+    """Render a pipe-table cell's spans with inline formatting.
+
+    A whitespace span holding a newline separates the lines of a wrapped cell;
+    they are joined with <br>. Pipes are escaped so they cannot split the cell
+    (GFM honours the escape inside code spans too).
+    """
+    parts: list[list] = [[]]
+    for s in (_decode_dingbats(s) for s in spans):
+        if not s.text.strip() and "\n" in s.text:
+            parts.append([])
+            continue
+        # a wrap point inside a span ("integers \nSlides") separates lines too:
+        # a pipe-table cell never holds a literal newline
+        pieces = _CELL_WRAP.split(s.text)
+        for k, piece in enumerate(pieces):
+            if k:
+                parts.append([])
+            if piece:
+                parts[-1].append(s if len(pieces) == 1 else dataclasses.replace(s, text=piece))
+    rendered = [r for r in (_render_line_spans(Line(spans=_coalesce(_mark_asterisks(p))),
+                                               suppress_bold=suppress_bold).strip()
+                            for p in parts if p) if r]
+    if len(rendered) > 1 and all(len(r) == 1 and r.isalpha() for r in rendered):
+        return "".join(rendered)          # letters stacked in a narrow cell: "S" / "F" -> "SF"
+    out = rendered[:1]
+    for r in rendered[1:]:
+        # "word-" at the end of a line, possibly inside bold/italic that
+        # continues on the next line ("ap-**" + "**plied"). Code is never
+        # dehyphenated: a "-" ending a code line is part of the code.
+        m = _HYPHEN_END.search(out[-1])
+        n = re.match(r"(\*\*|\*)?(?=[a-z])", r)
+        if m and n and (m.group(2) or "") == (n.group(1) or ""):
+            mark = m.group(2) or ""
+            head = out[-1][:len(out[-1]) - len(mark)]
+            out[-1] = _join_hyphenated(head, r[len(mark):], m.group(1))
+        else:
+            out.append(r)
+    return _escape_angle("<br>".join(out)).replace("|", "\\|").replace(_STAR, "\\*")

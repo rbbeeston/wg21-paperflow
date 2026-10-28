@@ -1,6 +1,6 @@
 # tomd API surface
 
-109 modules, 92 classes, 285 functions, 89 methods, 378 fields. Typed: 910 of 1141 functions and methods (79%).
+110 modules, 92 classes, 288 functions, 89 methods, 380 fields. Typed: 916 of 1153 functions and methods (79%).
 
 ## Contents
 
@@ -49,7 +49,7 @@
 - [`lib/pdf/checks/same_code.py`](#lib-pdf-checks-same-code-py): run, CHECK
 - [`lib/pdf/checks/text_alignment.py`](#lib-pdf-checks-text-alignment-py): run, CHECK
 - [`lib/pdf/checks/wordgap.py`](#lib-pdf-checks-wordgap-py): run, CHECK
-- [`lib/pdf/classify.py`](#lib-pdf-classify-py): gate_tables, image_share, predict, region_features, text_rows, FLAGS, GENERATORS, IMAGE_GRID_SHARE, SOURCES, WITHHOLD_TRUST_UNTIL_CELL_TEXT
+- [`lib/pdf/classify.py`](#lib-pdf-classify-py): gate_tables, image_share, predict, region_features, text_rows, withhold_trust, FLAGS, GENERATORS, IMAGE_GRID_SHARE, SOURCES
 - [`lib/pdf/classify_trees.py`](#lib-pdf-classify-trees-py): LAYOUT_TREE, TABLE_TREE
 - [`lib/pdf/cleanup.py`](#lib-pdf-cleanup-py): DehyphenatedPair, HyphenEvidence, cleanup_text, collect_hyphen_evidence, dehyphenate_pair, detect_repeating, escape_leading_atx, find_hidden_regions, get_edge_items, normalize_whitespace, strip_hidden_blocks, strip_repeating
 - [`lib/pdf/code_format.py`](#lib-pdf-code-format-py): is_diagram_block, maybe_normalize_code_line, normalize_code_line
@@ -60,7 +60,7 @@
 - [`lib/pdf/docling_backend.py`](#lib-pdf-docling-backend-py): absorb_cross_page_spec_rows, discover_tables_with_docling, docling_available, enrich_tables_with_docling, extract_docling_tables
 - [`lib/pdf/docmeasure.py`](#lib-pdf-docmeasure-py): DocMeasure, area_word_features, gap_stats, hyphenates, measure, visual_lines
 - [`lib/pdf/dvf_model.py`](#lib-pdf-dvf-model-py): MODEL
-- [`lib/pdf/emit.py`](#lib-pdf-emit-py): emit_markdown, emit_prompts, is_code_comparison, is_flagged_table, renumber_uncertain_markers, table_use, LIST_BULLET
+- [`lib/pdf/emit.py`](#lib-pdf-emit-py): emit_markdown, emit_prompts, is_code_comparison, is_flagged_table, renumber_uncertain_markers, set_lexicon, table_use, COMPOUND_PREFIXES, LIST_BULLET
 - [`lib/pdf/emoji_data.py`](#lib-pdf-emoji-data-py): EMOJI_PRESENTATION_RANGES, UNICODE_EMOJI_VERSION
 - [`lib/pdf/evidence.py`](#lib-pdf-evidence-py): Entry, Record, CODE_ERRORS
 - [`lib/pdf/extent.py`](#lib-pdf-extent-py): extend, EXTENT_RULE
@@ -79,6 +79,7 @@
 - [`lib/pdf/qa.py`](#lib-pdf-qa-py): QABatchResult, QAMetrics, compute_metrics, format_qa_report, run_qa_batch, write_qa_json_atomic
 - [`lib/pdf/records.py`](#lib-pdf-records-py): line_kind, periodic_runs, read_region, records_candidates
 - [`lib/pdf/relations.py`](#lib-pdf-relations-py): RelationRecord, Violation, check, record_for
+- [`lib/pdf/repair.py`](#lib-pdf-repair-py): place_stray_words
 - [`lib/pdf/rowbands.py`](#lib-pdf-rowbands-py): merge_rule_bands, MAX_FILL, MIN_RULES, MIN_SEGMENT
 - [`lib/pdf/ruled.py`](#lib-pdf-ruled-py): drawn_spans, extract_ruled_tables, page_hrules
 - [`lib/pdf/runctx.py`](#lib-pdf-runctx-py): RunContext, current, run_scope, ERROR_MESSAGE_LIMIT
@@ -2152,7 +2153,7 @@ CHECK = ...
 
 ## `lib/pdf/classify.py` ([source](../../src/tomd/lib/pdf/classify.py))
 
-Typed: 0 of 5 functions and methods (0%).
+Typed: 1 of 7 functions and methods (14%).
 
 ```python
 """Stage-2 gate: is a selected table really a table, and how is it built?
@@ -2189,7 +2190,7 @@ def gate_tables(doc, pages, sections: list[Section]) -> dict:
     summary for logging.
     """
     # untyped: doc, pages
-    # calls: summary.generator, region_features, pagecache.words_in, validate.verify_layout, validate.verify_pieces, fullwidth.apply, runctx.current, fit.fit, fit.fit_rows, ruled.page_hrules, relations.record_for, plausible.plausibility, +4 more
+    # calls: summary.generator, region_features, pagecache.words_in, validate.verify_layout, validate.verify_pieces, fullwidth.apply, runctx.current, fit.fit, fit.fit_rows, ruled.page_hrules, relations.record_for, _repair_stray_words, +5 more
     # called by: pipeline._build_scan_tables, pipeline.run_pipeline
 
 def image_share(page, bbox) -> float:
@@ -2215,6 +2216,10 @@ def text_rows(page, rect):
     # untyped: page, rect, return
     # called by: region_features
 
+def withhold_trust(tables: list[Section]) -> None:
+    """Lower a HIGH table whose trust a port sequencing guard withholds (demotion only)."""
+    # called by: pipeline.run_pipeline
+
 FLAGS = ...
 
 GENERATORS = ...
@@ -2223,11 +2228,7 @@ IMAGE_GRID_SHARE = 0.5  # images covering half a table's area: a figure grid, no
 
 SOURCES = ['tags', 'poll', 'grid', 'rules', 'tomd', 'text']
 
-# No HIGH until tomd-tables' cell rendering is ported (port step 11): a trusted
-# table's cells are written by paperflow's renderer, which the readers' agreement
-# does not check (a literal "|" beside bold text, line-end hyphens inside cells).
-# The agreement, the checks and the level are kept. Removed by port step 11.
-WITHHOLD_TRUST_UNTIL_CELL_TEXT = True
+# + 1 private module-level name
 ```
 
 <a id="lib-pdf-classify-trees-py"></a>
@@ -2937,6 +2938,7 @@ def hyphenates(page_words: list[list]) -> bool:
     papers that never hyphenate. The maker alone does not tell (Word can do
     either).
     """
+    # called by: pipeline.run_pipeline
 
 def measure(page_words: list[list]) -> DocMeasure:
     """page_words: per page, fitz "words" tuples (x0, y0, x1, y1, text, block, line, n)."""
@@ -2963,7 +2965,7 @@ MODEL = ...
 
 ## `lib/pdf/emit.py` ([source](../../src/tomd/lib/pdf/emit.py))
 
-Typed: 43 of 48 functions and methods (89%).
+Typed: 47 of 52 functions and methods (90%).
 
 ```python
 """Markdown and companion prompts file generation."""
@@ -2998,7 +3000,7 @@ def emit_markdown(metadata: dict, sections: list[Section], *, annotate: bool = F
     ``placeholders`` count is taken from the finished body (after
     duplicate-paragraph collapse) so it matches a grep of the output.
     """
-    # calls: _assign_emdash_nesting, _annotate_wrap, _render_section_md, is_flagged_table, levels.comment, vector_images.should_emit_marker, vector_images.format_uncertainty_marker, shared._find_front_matter_end, renumber_uncertain_markers
+    # calls: _assign_emdash_nesting, set_lexicon, _annotate_wrap, _render_section_md, is_flagged_table, levels.comment, vector_images.should_emit_marker, vector_images.format_uncertainty_marker, shared._find_front_matter_end, renumber_uncertain_markers
     # called by: pipeline.run_pipeline
 
 def emit_prompts(sections: list[Section]) -> list[str] | None:
@@ -3033,6 +3035,11 @@ def renumber_uncertain_markers(md: str) -> str:
     """
     # called by: api.convert_paper_full, emit_markdown, pipeline._insert_after_front_matter
 
+def set_lexicon(sections: list[Section]) -> None:
+    """Count the running-text words of the paper (tables excluded) for cell hyphens."""
+    # calls: runctx.current
+    # called by: emit_markdown
+
 def table_use(rows) -> str:
     """What a grid is used for (conventions decided by a person, 2026-10-19):
     "label-value" - repeated per-item "label: value" entries (not a table);
@@ -3043,13 +3050,16 @@ def table_use(rows) -> str:
     # untyped: rows
     # called by: pipeline._build_scan_tables
 
+# Prefixes that form compounds: a line-end hyphen after one is kept ("non-" + "enforced").
+COMPOUND_PREFIXES = ...
+
 # The single Markdown unordered-list marker this converter emits, at every
 # nesting depth. "-" over "*" because the HTML renderer already emits "-", the
 # blessed ideals standardize on it, and it cannot be read as emphasis if a
 # stray bullet glyph survives mid-text (#303).
 LIST_BULLET = '-'
 
-# + 42 private module-level names
+# + 45 private module-level names
 ```
 
 <a id="lib-pdf-emoji-data-py"></a>
@@ -4080,7 +4090,7 @@ def run_pipeline(path: Path, *, ml_tables: bool = False, visualize: bool = False
     effect when ``extract_vector`` is False.
     labels inside vector figures render as pixels alongside body text.
     """
-    # calls: PipelineResult, images._VectorExtractionStats, _enforce_skip_contract, PipelineResult.for_skip, _is_slide_deck, _is_standards_draft, extract.extract_mupdf, extract.extract_spatial, cleanup.get_edge_items, extract.collect_links, extract.attach_links, images.extract_page_images, +91 more
+    # calls: PipelineResult, images._VectorExtractionStats, _enforce_skip_contract, PipelineResult.for_skip, _is_slide_deck, _is_standards_draft, extract.extract_mupdf, extract.extract_spatial, cleanup.get_edge_items, extract.collect_links, extract.attach_links, images.extract_page_images, +93 more
 
 # + 42 private module-level names
 ```
@@ -4321,9 +4331,47 @@ def record_for(sec, words, hrules=()) -> RelationRecord:
     """The relationship record of an emitted table section (cells from its spans)."""
     # untyped: sec, words, hrules
     # calls: check
-    # called by: classify.gate_tables
+    # called by: classify._repair_stray_words, classify.gate_tables
 
 # + 2 private module-level names
+```
+
+<a id="lib-pdf-repair-py"></a>
+
+## `lib/pdf/repair.py` ([source](../../src/tomd/lib/pdf/repair.py))
+
+Typed: 1 of 6 functions and methods (16%).
+
+```python
+"""Stage 3 (relationship plan): blind smallest-set repair and inferred cells.
+
+A flagged table whose region holds page words that lie in no cell (the
+relational checker's "word outside every cell") lost text. The smallest
+correction that explains it, made without the answer key (amendment D):
+
+  - a stray word inside a column's span and a row's span belongs to that
+    cell: it is placed there, in reading order;
+  - stray words outside every row (above the first, between two, below the
+    last) form an inferred row, one cell per column;
+  - a stray word in no column means the column structure itself does not
+    explain it: no smallest repair, the table is left as it was.
+
+The repair is kept only when the relational check of the result has fewer
+violations and no kind it did not have before. Inferred cells are marked in
+the output (a comment after the table) and the table stays UNCERTAIN; the
+first reading, the stray words and the repair go in the metadata
+(amendment E: no erasure).
+"""
+
+def place_stray_words(columns: list, words: list, nl: Span):
+    """(new columns, inferred [(row, col)], stray words) or None when the stray
+    words are not explained by the table's own rows and columns.
+    """
+    # untyped: return
+    # calls: _box, _lines, _place, _span_for, _join
+    # called by: classify._repair_stray_words
+
+# + 5 private module-level names
 ```
 
 <a id="lib-pdf-rowbands-py"></a>
@@ -4450,6 +4498,11 @@ class RunContext:
     discards: list[tuple[str, str, str]] = field(default_factory=list)
     # drawn grids the rule reader excluded (failed checks): rejected readings for the marks
     excluded_grids: list = field(default_factory=list)
+    # the paper's running-text words (lower case), counted: a line-end hyphen in a
+    # table cell is decided by how the paper itself writes the word (emit.py)
+    lexicon: Counter = field(default_factory=Counter)
+    # does this document's maker hyphenate words at line ends (docmeasure.hyphenates)?
+    hyphenates: bool = True
     # re-raise reader errors instead of recording them (tests of a reader's own failures)
     strict: bool = False
     def reader_error(self, stage: str, page: int | None, exc: BaseException, table=None) -> None:
@@ -4465,7 +4518,7 @@ def current() -> RunContext:
     as in unit tests) a detached context is returned, so recording never fails.
     """
     # calls: RunContext
-    # called by: classify.gate_tables, codepair.find_code_pairs, extent.extend, flag.flag_possible_tables, pipeline._content_readings, pipeline._filter_sections_inside_vector_images, pipeline.run_pipeline, ruled._bands_to_table, ruled._column_ruled_tables, ruled._mark_icon_cells, ruled.extract_ruled_tables, select._continuation_votes, +4 more
+    # called by: classify.gate_tables, codepair.find_code_pairs, emit._join_hyphenated, emit.set_lexicon, extent.extend, flag.flag_possible_tables, pipeline._content_readings, pipeline._filter_sections_inside_vector_images, pipeline.run_pipeline, ruled._bands_to_table, ruled._column_ruled_tables, ruled._mark_icon_cells, +6 more
 
 @contextlib.contextmanager
 def run_scope():
@@ -4774,6 +4827,19 @@ BAD_TABLE_FLAGS = ...
 # a closed drawn grid's lines fix its cells: empty, merged and full-width cells are the
 # author's layout there, not a misread (the content checks still apply)
 CLOSED_GRID_EXEMPT = ...
+
+# An agreement trusts a table (HIGH) only between two of tomd-tables' readers:
+# paperflow's text-position reader ("tomd") reads the same text layer, and its
+# agreement trusted ten wrong tables in port step 11 that tomd-tables flags.
+# Demotion only. Removed after the merge, once that agreement is measured on a
+# fresh sample (port_plan.md, carried shortfalls).
+TRUST_EXCLUDES_PAPERFLOW_READER = True
+
+# A table paperflow renders its own way (HTML, separate code blocks, text) is
+# never trusted: the agreement checks the cells, not that rendering (port step
+# 11: two code comparisons trusted, one row lost in the rendering). Demotion
+# only. Removed once open question 9 (the rendering of these kinds) is decided.
+TRUST_ONLY_PIPE_RENDERING = True
 
 # Vote labels and their side: +1 for, 0 neutral, -1 against. A header is a
 # line made only of these, in that order (for ... neutral ... against):
@@ -6661,6 +6727,7 @@ class MarkdownWriter:
 - `COMMON_LAYOUTS`: [`lib/pdf/summary.py`](#lib-pdf-summary-py)
 - `compare`: [`lib/golden_compare.py`](#lib-golden-compare-py)
 - `compare_extractions`: [`lib/pdf/structure.py`](#lib-pdf-structure-py)
+- `COMPOUND_PREFIXES`: [`lib/pdf/emit.py`](#lib-pdf-emit-py)
 - `COMPOUND_PREFIXES`: [`lib/pdf/types.py`](#lib-pdf-types-py)
 - `compute_bbox`: [`lib/pdf/types.py`](#lib-pdf-types-py)
 - `compute_content_coverage`: [`lib/check_content.py`](#lib-check-content-py)
@@ -6891,6 +6958,7 @@ class MarkdownWriter:
 - `periodic_runs`: [`lib/pdf/records.py`](#lib-pdf-records-py)
 - `pieces_of`: [`lib/pdf/content.py`](#lib-pdf-content-py)
 - `PipelineResult`: [`lib/pdf/pipeline.py`](#lib-pdf-pipeline-py)
+- `place_stray_words`: [`lib/pdf/repair.py`](#lib-pdf-repair-py)
 - `plausibility`: [`lib/pdf/checks/plausible.py`](#lib-pdf-checks-plausible-py)
 - `poll_counts`: [`lib/pdf/checks/plausible.py`](#lib-pdf-checks-plausible-py)
 - `predict`: [`lib/pdf/classify.py`](#lib-pdf-classify-py)
@@ -6962,6 +7030,7 @@ class MarkdownWriter:
 - `SectionKind`: [`lib/pdf/types.py`](#lib-pdf-types-py)
 - `select_tables`: [`lib/pdf/select.py`](#lib-pdf-select-py)
 - `sequence_order`: [`lib/pdf/checks/plausible.py`](#lib-pdf-checks-plausible-py)
+- `set_lexicon`: [`lib/pdf/emit.py`](#lib-pdf-emit-py)
 - `shape`: [`lib/pdf/checks/coherence.py`](#lib-pdf-checks-coherence-py)
 - `should_emit_marker`: [`lib/pdf/vector_images.py`](#lib-pdf-vector-images-py)
 - `SHOWN_FROM`: [`lib/pdf/levels.py`](#lib-pdf-levels-py)
@@ -7028,6 +7097,8 @@ class MarkdownWriter:
 - `tomd_markdown`: [`lib/golden_qa.py`](#lib-golden-qa-py)
 - `TomdError`: [`errors.py`](#errors-py)
 - `TRUNCATION_MARKER_TEMPLATE`: [`lib/pdf/images.py`](#lib-pdf-images-py)
+- `TRUST_EXCLUDES_PAPERFLOW_READER`: [`lib/pdf/select.py`](#lib-pdf-select-py)
+- `TRUST_ONLY_PIPE_RENDERING`: [`lib/pdf/select.py`](#lib-pdf-select-py)
 - `UncertainElement`: [`domain/elements.py`](#domain-elements-py)
 - `unfamiliarity`: [`lib/pdf/summary.py`](#lib-pdf-summary-py)
 - `UNICODE_EMOJI_VERSION`: [`lib/pdf/emoji_data.py`](#lib-pdf-emoji-data-py)
@@ -7046,7 +7117,7 @@ class MarkdownWriter:
 - `vote_header`: [`lib/pdf/select.py`](#lib-pdf-select-py)
 - `VOTE_LABELS`: [`lib/pdf/select.py`](#lib-pdf-select-py)
 - `weak_note`: [`lib/pdf/dimensions.py`](#lib-pdf-dimensions-py)
-- `WITHHOLD_TRUST_UNTIL_CELL_TEXT`: [`lib/pdf/classify.py`](#lib-pdf-classify-py)
+- `withhold_trust`: [`lib/pdf/classify.py`](#lib-pdf-classify-py)
 - `witness`: [`lib/pdf/select.py`](#lib-pdf-select-py)
 - `WORD_GAP_RATIO`: [`lib/pdf/types.py`](#lib-pdf-types-py)
 - `word_jaccard`: [`lib/similarity.py`](#lib-similarity-py)

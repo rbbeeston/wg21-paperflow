@@ -17,6 +17,14 @@ from tomd.lib.pdf.select import (
     select_tables,
 )
 from tomd.lib.pdf.types import Block, Confidence, Line, Section, SectionKind, Span, TableCandidate
+from tomd.lib.pdf import select as select_mod
+from tomd.lib.pdf.classify import withhold_trust
+
+@pytest.fixture(autouse=True)
+def _agreement_logic_only(monkeypatch):
+    """These tests pin the agreement logic itself (tomd-tables' rules); the port's
+    sequencing guard on paperflow's reader is tested in test_select.py."""
+    monkeypatch.setattr(select_mod, "TRUST_EXCLUDES_PAPERFLOW_READER", False)
 
 
 _GOLDEN = Path(__file__).resolve().parent / "fixtures" / "golden"
@@ -120,3 +128,33 @@ def test_a_trusted_table_has_agreement():
             assert sec.metadata["table_agreement"] in ("exact", "subset")
         else:
             assert sec.metadata["uncertain_reasons"]
+
+
+
+def test_paperflow_reader_agreement_is_not_trusted_during_the_port(monkeypatch):
+    """Sequencing guard: paperflow's reader agreeing with one of ours does not make HIGH."""
+    monkeypatch.setattr(select_mod, "TRUST_EXCLUDES_PAPERFLOW_READER", True)
+    sec, blk = _table([["Name", "Value"], ["alpha", "1"]])
+    tagged = candidate_from_section(_table([["Name", "Value"], ["alpha", "1"]])[0])
+    tagged.source = "tags"
+    [out] = select_tables([sec], [], [tagged], [blk])
+    assert out.metadata["trust_withheld"] == ["paperflow-reader"]
+    withhold_trust([out])
+    assert out.confidence == Confidence.UNCERTAIN
+    assert out.metadata["table_agreement"] == "exact"
+    assert "paperflow-reader" in out.metadata["uncertain_reasons"]
+
+
+def test_paperflow_rendering_is_not_trusted_during_the_port():
+    """Sequencing guard: a table paperflow renders its own way (HTML) is never HIGH."""
+    sec, blk = _table([["Name", "Value"], ["alpha", "1"]])
+    sec.table_kind, sec.table_strategy = "spec_table", "html_table"
+    tagged = candidate_from_section(_table([["Name", "Value"], ["alpha", "1"]])[0])
+    tagged.source = "tags"
+    tagged.section = sec            # the emitted reading is paperflow's, rendered as HTML
+    [out] = select_tables([], [], [tagged], [blk], polls=[candidate_from_section(
+        _table([["Name", "Value"], ["alpha", "1"]])[0])])
+    assert out.table_strategy == "html_table"
+    withhold_trust([out])
+    assert out.confidence == Confidence.UNCERTAIN
+    assert "rendering" in out.metadata["uncertain_reasons"]

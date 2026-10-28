@@ -48,7 +48,8 @@ from .ruled import page_hrules
 from .runctx import current
 from .summary import generator
 from .types import Confidence, Section, SectionKind
-from .validate import escalate, verify_layout, verify_pieces
+from .repair import place_stray_words
+from .validate import _newline_span, _with_columns, escalate, verify_layout, verify_pieces
 
 _log = logging.getLogger(__name__)
 
@@ -57,11 +58,6 @@ _POLL = re.compile(r"^(SF\s+F\s+N\s+A\s+SA|F\s+N\s+A)$")
 _ZW = dict.fromkeys(map(ord, "​‌‍﻿‪‫‬‭‮"), None)
 _GAP = 10.0
 _TREE_SURE = 0.9
-# No HIGH until tomd-tables' cell rendering is ported (port step 11): a trusted
-# table's cells are written by paperflow's renderer, which the readers' agreement
-# does not check (a literal "|" beside bold text, line-end hyphens inside cells).
-# The agreement, the checks and the level are kept. Removed by port step 11.
-WITHHOLD_TRUST_UNTIL_CELL_TEXT = True
 _HEADER_BAND = 22.0      # points above a table searched for a lost header row
 GENERATORS = ["LaTeX", "Word", "Google Docs", "ReportLab", "pypdf", "macOS", "Typst", "Chrome/Skia"]
 SOURCES = ["tags", "poll", "grid", "rules", "tomd", "text"]
@@ -282,6 +278,8 @@ def gate_tables(doc, pages, sections: list[Section]) -> dict:
             rel = record_for(sec, words, rules)
             sec.metadata["relations"] = {"by_dimension": rel.by_dimension(),
                                          "kinds": sorted({v.kind for v in rel.violations})}
+            if sec.confidence != Confidence.HIGH and "word outside every cell" in sec.metadata["relations"]["kinds"]:
+                _repair_stray_words(sec, words, rules, rel)
         except Exception as e:  # the record is diagnosis only; never fail on it, never silently
             current().reader_error("relations", pg, e, table=sec)
         # content plausibility - diagnosis only: measured, a violation is right about a
@@ -332,9 +330,54 @@ def gate_tables(doc, pages, sections: list[Section]) -> dict:
             sec.metadata["table_note"] = (sec.metadata.get("table_note", "") +
                                           f" Images cover {share:.0%} of this table's area: the cells "
                                           "hold pictures, the text is only their captions.").strip()
-    if WITHHOLD_TRUST_UNTIL_CELL_TEXT:
-        for sec in tables:
-            if sec.confidence == Confidence.HIGH:
-                sec.confidence = Confidence.UNCERTAIN
-                sec.metadata.setdefault("uncertain_reasons", []).append("cell-text")
     return summary
+
+
+# Notes for the port's sequencing guards (select.TRUST_EXCLUDES_PAPERFLOW_READER,
+# select.TRUST_ONLY_PIPE_RENDERING), set by selection and applied after the gate.
+_WITHHELD_NOTES = {
+    "paperflow-reader": "Paperflow's own reader agrees with this table; that agreement is not yet "
+                        "measured as independent evidence.",
+    "rendering": "The cells agree, but this table is written by a renderer the agreement does not check.",
+}
+
+
+def withhold_trust(tables: list[Section]) -> None:
+    """Lower a HIGH table whose trust a port sequencing guard withholds (demotion only)."""
+    for sec in tables:
+        withheld = sec.metadata.get("trust_withheld") or []
+        if sec.confidence != Confidence.HIGH or not withheld:
+            continue
+        sec.confidence = Confidence.UNCERTAIN
+        reasons = sec.metadata.setdefault("uncertain_reasons", [])
+        reasons.extend(w for w in withheld if w not in reasons)
+        sec.metadata["table_note"] = (sec.metadata.get("table_note", "") + " " +
+                                      " ".join(_WITHHELD_NOTES[w] for w in withheld)).strip()
+
+
+def _repair_stray_words(sec, words, rules, rel) -> None:
+    """Stage 3: page words in no cell placed by the table's own rows and
+    columns (repair.py), kept only when the relational check improves with no
+    new kind of violation. The table stays flagged; the first reading and the
+    repair are kept in the metadata, the inferred cells are marked."""
+    got = place_stray_words(sec.columns, words, _newline_span(sec))
+    if not got:
+        return
+    columns, inferred, stray = got
+    trial = _with_columns(sec, columns)
+    after = record_for(trial, words, rules)
+    kinds = {v.kind for v in rel.violations}
+    if len(after.violations) >= len(rel.violations) or not {v.kind for v in after.violations} <= kinds:
+        return
+    sec.metadata["repair"] = {"what": "stray words placed by the table's rows and columns",
+                              "stray": stray, "inferred_cells": inferred, "first_reading": sec.text,
+                              "violations_before": rel.by_dimension(), "violations_after": after.by_dimension()}
+    sec.columns, sec.text = trial.columns, trial.text
+    sec.metadata["inferred_cells"] = inferred
+    sec.metadata.pop("likely", None)                         # repaired: the fit was for the first reading
+    sec.metadata["relations"] = {"by_dimension": after.by_dimension(),
+                                 "kinds": sorted({v.kind for v in after.violations})}
+    reasons = sec.metadata.setdefault("uncertain_reasons", [])
+    if "repaired" not in reasons:
+        reasons.append("repaired")
+    sec.confidence = Confidence.UNCERTAIN

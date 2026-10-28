@@ -45,7 +45,8 @@ _L3 = {"disagree": "readers disagree", "cross-reader": "joined from two readers'
        "rule-check": "the reading fails the rule checks"}
 # Agreement found, but the page checks could not run: shown as minor (L2).
 _L2 = {"unverified": "not checked against its page (a rotated page)",
-       "cell-text": "readings agree and pass the page checks; cell text not yet verified"}
+       "paperflow-reader": "agreed with paperflow's own reader only; that agreement is not yet measured",
+       "rendering": "readings agree; written by a renderer the agreement does not check"}
 
 
 def _rows(md: str) -> list[list[str]]:

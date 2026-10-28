@@ -12,6 +12,13 @@ from tomd.lib.pdf.select import (
     table_flags, candidates_agree, select_tables, stitch_pages,
     remove_table_regions,
 )
+from tomd.lib.pdf import select as select_mod
+
+@pytest.fixture(autouse=True)
+def _agreement_logic_only(monkeypatch):
+    """These tests pin the agreement logic itself (tomd-tables' rules); the port's
+    sequencing guard on paperflow's reader is tested in test_select.py."""
+    monkeypatch.setattr(select_mod, "TRUST_EXCLUDES_PAPERFLOW_READER", False)
 
 
 

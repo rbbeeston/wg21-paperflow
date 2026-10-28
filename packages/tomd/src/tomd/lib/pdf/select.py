@@ -38,6 +38,21 @@ from .types import BULLET_CHARS, Block, Confidence, Line, Section, SectionKind, 
 
 _log = logging.getLogger(__name__)
 
+# An agreement trusts a table (HIGH) only between two of tomd-tables' readers:
+# paperflow's text-position reader ("tomd") reads the same text layer, and its
+# agreement trusted ten wrong tables in port step 11 that tomd-tables flags.
+# Demotion only. Removed after the merge, once that agreement is measured on a
+# fresh sample (port_plan.md, carried shortfalls).
+TRUST_EXCLUDES_PAPERFLOW_READER = True
+
+# A table paperflow renders its own way (HTML, separate code blocks, text) is
+# never trusted: the agreement checks the cells, not that rendering (port step
+# 11: two code comparisons trusted, one row lost in the rendering). Demotion
+# only. Removed once open question 9 (the rendering of these kinds) is decided.
+TRUST_ONLY_PIPE_RENDERING = True
+_PAPERFLOW_RENDERINGS = frozenset({"html_table", "code_blocks", "skip"})
+
+
 def _multiline_code_cells(cand: TableCandidate) -> bool:
     """Some cell holds two or more lines of monospace text."""
     for row in cand.rows:
@@ -1163,10 +1178,20 @@ def select_tables(tomd_sections: list[Section],
         agree = exact or any(partial_reading(primary, o) for o in voters)
         conf = Confidence.HIGH if agree else Confidence.UNCERTAIN
         reasons = []                     # why it is UNCERTAIN; the gate reads these
+        withheld = []                    # sequencing guards: trust withheld after the gate
         if not agree:
             reasons.append("single-source" if not voters else "disagree")
             notes.append("Only one table source produced this table." if not voters else
                          "The table sources disagree; every version is below.")
+        if agree and TRUST_EXCLUDES_PAPERFLOW_READER:
+            agreeing_sources = {primary.source} | {o.source for o in voters
+                                                   if candidates_agree(primary, o) or partial_reading(primary, o)}
+            if len(agreeing_sources - {"tomd"}) < 2:
+                # paperflow's reader reads the same text layer as ours: its agreement is recorded,
+                # not trusted (port step 11: ten wrong tables trusted on it, none in tomd-tables).
+                # Withheld after the gate (classify.withhold_trust), so the gate checks the table
+                # as the agreed reading it is
+                withheld.append("paperflow-reader")
         if "cross-reader" in primary.flags:
             # joined from two readers' pieces: no single reading backs the whole table
             conf = Confidence.UNCERTAIN
@@ -1200,6 +1225,12 @@ def select_tables(tomd_sections: list[Section],
                        and c.section.table_kind), None)
             if pf is not None:
                 sec.table_kind, sec.table_strategy = pf.table_kind, pf.table_strategy
+        if TRUST_ONLY_PIPE_RENDERING and sec.table_strategy in _PAPERFLOW_RENDERINGS:
+            # written by paperflow's own renderer (HTML, code blocks, text): the readers'
+            # agreement checks the cells, not that rendering
+            withheld.append("rendering")
+        if withheld:
+            sec.metadata["trust_withheld"] = withheld
         if notes:
             sec.metadata["table_note"] = " ".join(notes)
         sec.metadata["table_agreement"] = "exact" if exact else "subset" if agree else "none"

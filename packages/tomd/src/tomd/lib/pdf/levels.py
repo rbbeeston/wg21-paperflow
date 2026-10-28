@@ -44,6 +44,8 @@ _L3 = {"disagree": "readers disagree", "cross-reader": "joined from two readers'
        "extent": "the table may continue on the adjacent page",
        "rule-check": "the reading fails the rule checks",
        "code-cells": "cells hold multi-line code"}
+# Agreement found, checks not yet run: shown as minor (L2), not as a structure doubt.
+_L2 = {"unverified": "two kinds of evidence agree; not yet verified"}
 
 
 def _rows(md: str) -> list[list[str]]:
@@ -107,7 +109,8 @@ def assign(sec: Section) -> dict:
     elif m.get("likely"):
         level, why = 1, ["the words fit the drawn cells evenly"]
     else:
-        level, why = 2, ["one source" if "single-source" in reasons else "flagged"]
+        level, why = 2, ([v for k, v in _L2.items() if k in reasons]
+                         or ["one source" if "single-source" in reasons else "flagged"])
     cells = cell_markers(sec) if level >= SHOWN_FROM else []
     return {"level": level, "name": NAMES[level], "why": why, "incomplete": incomplete and level == 4,
             "cells": [list(c) for c in cells]}

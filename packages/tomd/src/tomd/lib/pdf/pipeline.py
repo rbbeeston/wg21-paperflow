@@ -99,6 +99,8 @@ from ._fitz_lock import _FITZ_LOCK
 from .runctx import current, run_scope
 from .select import remove_table_regions, select_tables
 from .tagged import extract_tagged_tables
+from .ruled import extract_ruled_tables, page_hrules
+from .rowbands import merge_rule_bands
 from .levels import assign as assign_level
 from .summary import build as build_summary, generator as pdf_generator, header_comment, prompt_elements
 
@@ -1070,6 +1072,8 @@ _STRUCTURAL_INSIDE_VECTOR_THRESHOLD = 0.8
 
 # Possible-table marks (L5): content a reader proposed as a table that is not
 # emitted as one. The reason travels in Section.metadata["possible_table"].
+# Recorded for a rotated page the drawn-rule readers skip.
+_ROTATED_NOT_READ = "rotated page: not read by the drawn-rule readers"
 _MARK_DOT_LEADER = "a table with dot leaders, demoted as contents"
 _MARK_FALSE_POSITIVE = "a table the classifier judged not a table, kept as text"
 # Removed-content entries: examples shown per entry, and their length.
@@ -2078,6 +2082,8 @@ def run_pipeline(
 
             page_drawings: dict[int, list] = {}
             page_mupdf_tables: dict[int, list[dict]] = {}
+            ruled_tables: list = []
+            page_rules: dict[int, list] = {}         # drawn horizontal rules per page
             all_figure_regions = []
             for pg_num in range(result.page_count):
                 page = doc[pg_num]
@@ -2089,6 +2095,19 @@ def run_pipeline(
                 page_figures = detect_figure_regions(
                     raw_drawings, pg_num, page.rect.width)
                 all_figure_regions.extend(page_figures)
+
+                # Table readers from the drawn lines: grids ruled both ways,
+                # column-rule tables, and tables bounded by horizontal rules
+                # (booktabs, shaded bands). They read the page upright; a
+                # rotated page is not read by them yet (recorded).
+                if pg_num in page_rotations:
+                    current().record.exclude("rules", pg_num, tuple(page.rect), _ROTATED_NOT_READ, "paths")
+                else:
+                    try:
+                        page_rules[pg_num] = page_hrules(page, raw_drawings)
+                        ruled_tables.extend(extract_ruled_tables(page, pg_num, raw_drawings))
+                    except Exception as exc:  # a failing table reader must not fail the paper: recorded
+                        current().reader_error("ruled", pg_num, exc)
 
                 # Intentional: runs unconditionally (independent of ml_tables).
                 # Three table-detection passes rely on the MuPDF signal:
@@ -2293,8 +2312,16 @@ def run_pipeline(
     except Exception as exc:  # a failing table reader must not fail the paper: recorded, its text kept as prose
         current().reader_error("detect_tables", None, exc)
         tomd_sections = []
-    table_sections = select_tables(tomd_sections, [], tagged_tables, pre_detect_blocks,
+    table_sections = select_tables(tomd_sections, ruled_tables, tagged_tables, pre_detect_blocks,
                                    generator=pdf_generator(doc_metadata))
+    # Rows bounded by drawn rules: a record the reader cut into rows is joined.
+    for ts in table_sections:
+        pages = {ln.page_num for ln in ts.lines or []}
+        if len(pages) == 1:
+            try:
+                merge_rule_bands(ts, page_rules.get(next(iter(pages)), []))
+            except Exception as exc:  # a join only; never fail on it, never silently
+                current().reader_error("rule-band rows", next(iter(pages)), exc, table=ts)
     all_mupdf_blocks = remove_table_regions(pre_detect_blocks, table_sections)
     all_spatial_blocks = remove_table_regions(all_spatial_blocks, table_sections)
     if table_sections:

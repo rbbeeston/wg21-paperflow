@@ -8,7 +8,7 @@ reply-to:
 
 This synthetic fixture contains only table borders and horizontal rules. The vector-extraction pipeline must produce zero image candidates from this page.
 
-<!-- tomd:level L2 minor: one source -->
+<!-- tomd:level L2 minor: two kinds of evidence agree; not yet verified -->
 
 <!-- tomd:uncertain:L15-L19 -->
 

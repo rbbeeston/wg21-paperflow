@@ -52,6 +52,12 @@ KEPT_WHEN_UNREPLACED = frozenset({"tomd"})
 # code comparisons.
 WITHHOLD_TRUST_FOR_CODE_CELLS = True
 
+# No HIGH at all until the checks that follow agreement are ported: the extent
+# step (rows above or below a reading, a title row), layout verification and the
+# classifier gate. Two readers can agree on a reading that misses a row; in
+# tomd-tables those checks lower such tables. Removed by port step 9.
+WITHHOLD_TRUST_UNTIL_VERIFIED = True
+
 
 def _multiline_code_cells(cand: TableCandidate) -> bool:
     """Some cell holds two or more lines of monospace text."""
@@ -84,9 +90,6 @@ def _priority(c: TableCandidate) -> int:
     if c.source == "content" and "refines-rules" in c.flags:
         return _SOURCE_PRIORITY["rules"]
     if c.source == "tags" and "tags-malformed" in c.flags:
-        if KEPT_WHEN_UNREPLACED:
-            # no drawn-grid reader yet to outrank a malformed tree: below the text reader
-            return _SOURCE_PRIORITY["tomd"] + 1
         return _SOURCE_PRIORITY["tags-malformed"]
     return _SOURCE_PRIORITY[c.source]
 _GROUP_OVERLAP = 0.3       # vertical overlap (share of the smaller table)
@@ -423,6 +426,46 @@ def mark_matrix(cand: TableCandidate) -> bool:
     return len(keyed) >= 1 and len(body) >= need and sum(bool(_MARK.match(c)) for c in body) >= 0.8 * len(body)
 
 
+# a closed drawn grid's lines fix its cells: empty, merged and full-width cells are the
+# author's layout there, not a misread (the content checks still apply)
+CLOSED_GRID_EXEMPT = frozenset({"ragged-columns", "empty-cells", "sparse-columns"})
+
+
+def closed_exempt(t) -> bool:
+    """a closed grid's own layout explains its empty cells, unless a whole column is
+    empty (a doubled rule read as a column of its own)"""
+    if "closed-grid" not in t.flags:
+        return False
+    rows = t.text_rows()
+    ncol = max((len(r) for r in rows), default=0)
+    # a row of running prose across the grid (a framed section holding a table and its
+    # text, "Abstract" then paragraphs) is not the grid's own layout
+    for r in rows:
+        filled = [c for c in r if c.strip()]
+        if len(filled) == 1 and len(filled[0].split()) >= 15 and re.search(r"[a-z]\.(\s|$)", filled[0]):
+            return False
+    filled = [[c < len(r) and bool(r[c].strip()) for c in range(ncol)] for r in rows]
+    # two neighbouring columns never filled in the same row, each filled somewhere: one
+    # column split by a rule the header and the body place differently (staggered cells)
+    for j in range(ncol - 1):
+        if not any(f[j] and f[j + 1] for f in filled) and sum(f[j] or f[j + 1] for f in filled) >= 2 \
+                and any(f[j] for f in filled) and any(f[j + 1] for f in filled):
+            return False
+    return all(any(f[c] for f in filled) for c in range(ncol))
+
+
+def sparse_mapping(t) -> bool:
+    """a closed grid of two or more drawn columns whose rows mostly fill only their first
+    cell with a short label (a mapping where most entries have no counterpart): a table,
+    not a framed paragraph under a lead-in line (whose single cells are prose)"""
+    if not closed_exempt(t):
+        return False
+    rows = t.text_rows()
+    singles = [next(c for c in r if c.strip()) for r in rows if sum(1 for c in r if c.strip()) == 1]
+    return bool(singles) and max(len(c.split()) for c in singles) <= 6
+
+
+
 def _is_bad(cand: TableCandidate) -> bool:
     bad = set(cand.flags) & BAD_TABLE_FLAGS
     if bad & _SPARSE_FLAGS and (mark_matrix(cand)
@@ -439,6 +482,10 @@ def _is_bad(cand: TableCandidate) -> bool:
             bad.discard("sparse-two-rows")
     if "icon-cells" in cand.flags:
         bad -= _SPARSE_FLAGS | {"single-cell-rows"}   # its empty cells hold icons (check, cross)
+    if "closed-grid" in cand.flags and closed_exempt(cand):
+        bad -= CLOSED_GRID_EXEMPT
+        if sparse_mapping(cand):
+            bad.discard("single-cell-rows")
     if cand.source == "poll":
         bad -= {"empty-cells", "sparse-two-rows", "single-cell-rows", "ragged-columns"}   # a suggested poll's blank vote row
     if cand.source == "codepair" or (cand.source == "content" and getattr(cand, "trace", {}).get("code")):
@@ -1122,6 +1169,12 @@ def select_tables(tomd_sections: list[Section],
             reasons.append("single-source" if not voters else "disagree")
             notes.append("Only one table source produced this table." if not voters else
                          "The table sources disagree; every version is below.")
+        if WITHHOLD_TRUST_UNTIL_VERIFIED and conf == Confidence.HIGH:
+            # agreement is recorded; trust waits for the extent, layout and classifier checks
+            conf = Confidence.UNCERTAIN
+            reasons.append("unverified")
+            notes.append("Two kinds of evidence agree on this table; it is not yet checked "
+                         "for rows outside its extent or its layout.")
         if WITHHOLD_TRUST_FOR_CODE_CELLS and conf == Confidence.HIGH and _multiline_code_cells(primary):
             # cells holding whole code blocks render as one pipe-table cell each; the
             # line-by-line rendering of a code comparison is not here yet

@@ -1,6 +1,6 @@
 # tomd API surface
 
-74 modules, 86 classes, 187 functions, 85 methods, 347 fields. Typed: 850 of 903 functions and methods (94%).
+77 modules, 86 classes, 194 functions, 85 methods, 348 fields. Typed: 859 of 950 functions and methods (90%).
 
 ## Contents
 
@@ -47,10 +47,13 @@
 - [`lib/pdf/images.py`](#lib-pdf-images-py): ExtractedImage, ExtractionResult, VectorUncertaintyStats, extract_page_images, finalize_extraction, MIN_IMAGE_DIM_PT, TRUNCATION_MARKER_TEMPLATE
 - [`lib/pdf/levels.py`](#lib-pdf-levels-py): assign, cell_markers, comment, NAMES, SHOWN_FROM
 - [`lib/pdf/mono.py`](#lib-pdf-mono-py): classify_monospace, propagate_monospace
+- [`lib/pdf/pagecache.py`](#lib-pdf-pagecache-py): rawdict
 - [`lib/pdf/pipeline.py`](#lib-pdf-pipeline-py): PipelineResult, run_pipeline
 - [`lib/pdf/qa.py`](#lib-pdf-qa-py): QABatchResult, QAMetrics, compute_metrics, format_qa_report, run_qa_batch, write_qa_json_atomic
+- [`lib/pdf/rowbands.py`](#lib-pdf-rowbands-py): merge_rule_bands, MAX_FILL, MIN_RULES, MIN_SEGMENT
+- [`lib/pdf/ruled.py`](#lib-pdf-ruled-py): drawn_spans, extract_ruled_tables, page_hrules
 - [`lib/pdf/runctx.py`](#lib-pdf-runctx-py): RunContext, current, run_scope, ERROR_MESSAGE_LIMIT
-- [`lib/pdf/select.py`](#lib-pdf-select-py): candidate_from_section, candidates_agree, class_check, conservation_error, cross_reader_continuation, join_split_words, mark_matrix, page_furniture, partial_reading, remove_table_regions, select_tables, split_at_headers, ...
+- [`lib/pdf/select.py`](#lib-pdf-select-py): candidate_from_section, candidates_agree, class_check, closed_exempt, conservation_error, cross_reader_continuation, join_split_words, mark_matrix, page_furniture, partial_reading, remove_table_regions, select_tables, ...
 - [`lib/pdf/spans.py`](#lib-pdf-spans-py): normalize_spans
 - [`lib/pdf/stacked.py`](#lib-pdf-stacked-py): split_stacked
 - [`lib/pdf/structure.py`](#lib-pdf-structure-py): compare_extractions, drop_leaked_toc_entries, heading_confidence, structure_body, structure_sections
@@ -2855,7 +2858,7 @@ def classify_monospace(font_name: str, char_widths: list[float] | None = None, c
     for proportional fonts.
     """
     # calls: _font_name_is_monospace, _glyph_widths_uniform, _glyph_spacing_uniform
-    # called by: extract.extract_mupdf, extract.extract_spatial, propagate_monospace, tagged._lines_of
+    # called by: extract.extract_mupdf, extract.extract_spatial, propagate_monospace, ruled._chars_to_lines, ruled._page_words, tagged._lines_of
 
 def propagate_monospace(mupdf_blocks: list[Block], spatial_blocks: list[Block], dominant_font: str) -> None:
     """Apply spatial path's glyph-width monospace decisions to MuPDF spans.
@@ -2874,6 +2877,27 @@ def propagate_monospace(mupdf_blocks: list[Block], spatial_blocks: list[Block], 
     # called by: pipeline.run_pipeline
 
 # + 6 private module-level names
+```
+
+<a id="lib-pdf-pagecache-py"></a>
+
+## `lib/pdf/pagecache.py` ([source](../../src/tomd/lib/pdf/pagecache.py))
+
+Typed: 1 of 2 functions and methods (50%).
+
+```python
+"""One rawdict extraction per page, shared by the readers that need characters.
+The cache lives on the document object, so it goes away with it and is never
+shared between conversions.
+"""
+
+def rawdict(page):
+    # untyped: page, return
+    # calls: _dedup_raw
+    # called by: ruled._grid_tables_in, ruled.extract_ruled_tables
+    ...
+
+# + 1 private module-level name
 ```
 
 <a id="lib-pdf-pipeline-py"></a>
@@ -2947,7 +2971,7 @@ def run_pipeline(path: Path, *, ml_tables: bool = False, visualize: bool = False
     effect when ``extract_vector`` is False.
     labels inside vector figures render as pixels alongside body text.
     """
-    # calls: PipelineResult, images._VectorExtractionStats, _enforce_skip_contract, PipelineResult.for_skip, _is_slide_deck, _is_standards_draft, extract.extract_mupdf, extract.extract_spatial, cleanup.get_edge_items, extract.collect_links, extract.attach_links, images.extract_page_images, +73 more
+    # calls: PipelineResult, images._VectorExtractionStats, _enforce_skip_contract, PipelineResult.for_skip, _is_slide_deck, _is_standards_draft, extract.extract_mupdf, extract.extract_spatial, cleanup.get_edge_items, extract.collect_links, extract.attach_links, images.extract_page_images, +76 more
 
 # + 38 private module-level names
 ```
@@ -3041,6 +3065,107 @@ def write_qa_json_atomic(path: Path, results: Sequence[QAMetrics]) -> None:
 # + 12 private module-level names
 ```
 
+<a id="lib-pdf-rowbands-py"></a>
+
+## `lib/pdf/rowbands.py` ([source](../../src/tomd/lib/pdf/rowbands.py))
+
+Typed: 0 of 3 functions and methods (0%).
+
+```python
+"""Rows bounded by drawn rules (2026-10-24).
+
+In a drawn grid whose records are separated by horizontal rules (comment forms such as national-
+body ballots), every text line between the same pair of rules belongs to one record. A reader
+that cuts a multi-line record into several rows leaves the continuation lines as rows whose key
+(first) column is empty. Such a row is joined to the row above when it lies wholly below that
+row and no drawn rule crosses the two rows' combined extent; the joined cell keeps its lines
+("
+" span between them).
+
+Only joins, never splits. Applies to single-page readings inside a ruled grid: at least
+MIN_RULES horizontal rules each covering 60% of the table's width (segments at one height
+merged). Measured on the tuning sets (REPORT.md, rule-bounded rows, version 4b): 14 tables
+changed, all better, none worse; a version without the empty-key condition broke tables whose
+grids rule only the header and border, and one testing only the gap between rows merged across
+a rule running through a reading's rows.
+"""
+
+def merge_rule_bands(sec, rules) -> int:
+    """Join empty-key continuation rows into the record above within one rule band; returns the
+    number of rows joined. rules: the page's horizontal rule segments (y, x0, x1).
+    """
+    # untyped: sec, rules
+    # calls: _full_rules, _text, types.Span
+    # called by: pipeline.run_pipeline
+
+# a row filling this share of its other (non-key) columns is a record of its own, never a
+# continuation (user, 2026-10-24): in a grouped grid the first column is blank on every row of a
+# group after the first, and those rows are full. 0.67 is the strictest value that keeps every
+# tuning-set gain (0.5 keeps 7 of 14).
+MAX_FILL = 0.67
+
+MIN_RULES = 4
+
+MIN_SEGMENT = 15.0  # pt: shorter strokes are not row separators
+
+# + 2 private module-level names
+```
+
+<a id="lib-pdf-ruled-py"></a>
+
+## `lib/pdf/ruled.py` ([source](../../src/tomd/lib/pdf/ruled.py))
+
+Typed: 8 of 40 functions and methods (20%).
+
+```python
+"""Table detection from ruling lines (vector drawings).
+
+An extractor independent of the MuPDF text blocks that table.py uses: it
+looks only at the lines and thin rectangles a page draws, and at character
+positions to fill cells.
+
+Two techniques:
+  Grid tables: PyMuPDF's page.find_tables(strategy="lines") for tables
+    ruled in both directions (Word, Google Docs, LibreOffice exports).
+  Rule-band tables: LaTeX/booktabs and ReportLab tables draw only
+    horizontal rules. Rules sharing an x-extent form a group; rows come
+    from the bands between rules, columns from x positions where a column
+    starts in most rows, plus x ranges that no word covers.
+
+Cell text is rebuilt from the page's characters (rawdict), grouped into
+Lines and Spans the same way extract.py builds them, so fonts, bold,
+italic and monospace survive. Words are assigned to a cell whole, by
+their starting x, so text that overruns into the next column stays in its
+own cell.
+
+Known gaps: a booktabs table split by a page break is not detected (each
+part has too few rules); column boundaries are ambiguous for tables with
+very few rows. Both are caught downstream by the rule checks or by
+disagreement with the other extractors.
+"""
+
+def drawn_spans(page, columns, spans) -> list[dict]:
+    """the spans a closed grid's own lines allow: a span inferred from the text's
+    position is dropped when a drawn line separates the cells it would join (the
+    grid draws every cell it has; an empty drawn cell is not part of its neighbour)
+    """
+    # untyped: page, columns, spans
+    # calls: _segments
+
+def extract_ruled_tables(page, page_num: int, drawings=None) -> list[TableCandidate]:
+    """All tables on one page that ruling lines reveal."""
+    # untyped: page, drawings
+    # calls: _unrotate, pagecache.rawdict, _page_chars, _page_words, _grid_tables, _column_ruled_tables, _bad_flags, runctx.current, select.table_flags, _horizontal_rules, _rule_groups, _overlaps, +2 more
+    # called by: pipeline.run_pipeline
+
+def page_hrules(page, drawings=None) -> list[tuple[float, float, float]]:
+    """Drawn horizontal separators on the page: (y, x0, x1)."""
+    # untyped: page, drawings
+    # called by: pipeline.run_pipeline
+
+# + 37 private module-level names
+```
+
 <a id="lib-pdf-runctx-py"></a>
 
 ## `lib/pdf/runctx.py` ([source](../../src/tomd/lib/pdf/runctx.py))
@@ -3062,6 +3187,8 @@ class RunContext:
     record: Record = field(default_factory=Record)
     # content removed on purpose: (what, why, an example); listed in the summary and prompts
     discards: list[tuple[str, str, str]] = field(default_factory=list)
+    # drawn grids the rule reader excluded (failed checks): rejected readings for the marks
+    excluded_grids: list = field(default_factory=list)
     # re-raise reader errors instead of recording them (tests of a reader's own failures)
     strict: bool = False
     def reader_error(self, stage: str, page: int | None, exc: BaseException, table=None) -> None:
@@ -3077,7 +3204,7 @@ def current() -> RunContext:
     as in unit tests) a detached context is returned, so recording never fails.
     """
     # calls: RunContext
-    # called by: pipeline._filter_sections_inside_vector_images, pipeline.run_pipeline, select._continuation_votes, select.cross_reader_continuation, select.select_tables, select.stitch_pages, tagged.extract_tagged_tables
+    # called by: pipeline._filter_sections_inside_vector_images, pipeline.run_pipeline, ruled._bands_to_table, ruled._column_ruled_tables, ruled._mark_icon_cells, ruled.extract_ruled_tables, select._continuation_votes, select.cross_reader_continuation, select.select_tables, select.stitch_pages, tagged.extract_tagged_tables
 
 @contextlib.contextmanager
 def run_scope():
@@ -3094,7 +3221,7 @@ ERROR_MESSAGE_LIMIT = 300
 
 ## `lib/pdf/select.py` ([source](../../src/tomd/lib/pdf/select.py))
 
-Typed: 39 of 45 functions and methods (86%).
+Typed: 39 of 47 functions and methods (82%).
 
 ```python
 """Table selection: one reading per region, trusted only when another kind of evidence agrees.
@@ -3143,6 +3270,13 @@ def class_check(cand: TableCandidate) -> str:
     """
     # calls: _is_bad
     # called by: select_tables
+
+def closed_exempt(t) -> bool:
+    """a closed grid's own layout explains its empty cells, unless a whole column is
+    empty (a doubled rule read as a column of its own)
+    """
+    # untyped: t
+    # called by: ruled._bad_flags, _is_bad, sparse_mapping
 
 def conservation_error(cand: TableCandidate, blocks: list[Block]) -> str:
     """Check that the text in the table's area went into its cells exactly once.
@@ -3240,6 +3374,15 @@ def select_tables(tomd_sections: list[Section], ruled: list[TableCandidate], tag
     # calls: candidate_from_section, page_furniture, stitch_pages, cross_reader_continuation, split_at_headers, join_split_words, stacked.split_stacked, runctx.current, table_flags, _is_bad, _row_top, _same_region, +14 more
     # called by: pipeline.run_pipeline
 
+def sparse_mapping(t) -> bool:
+    """a closed grid of two or more drawn columns whose rows mostly fill only their first
+    cell with a short label (a mapping where most entries have no counterpart): a table,
+    not a framed paragraph under a lead-in line (whose single cells are prose)
+    """
+    # untyped: t
+    # calls: closed_exempt
+    # called by: ruled._bad_flags, _is_bad
+
 def split_at_headers(cand: TableCandidate) -> list[TableCandidate]:
     """Two tables stacked in one reading: a different header row inside the body
     (short bold labels after a non-bold row) starts a new table (the user's
@@ -3265,7 +3408,7 @@ def table_flags(cand: TableCandidate) -> list[str]:
     probably wrong; the others are informational.
     """
     # calls: _split_code_cell
-    # called by: select_tables
+    # called by: ruled._bad_flags, ruled.extract_ruled_tables, select_tables
 
 def witness(primary: TableCandidate, agreeing: list[TableCandidate], cands: list[TableCandidate], blocks: list[Block]) -> dict:
     """Per property, the distinct information sources behind the agreeing readings."""
@@ -3273,6 +3416,10 @@ def witness(primary: TableCandidate, agreeing: list[TableCandidate], cands: list
     # called by: select_tables
 
 BAD_TABLE_FLAGS = ...
+
+# a closed drawn grid's lines fix its cells: empty, merged and full-width cells are the
+# author's layout there, not a misread (the content checks still apply)
+CLOSED_GRID_EXEMPT = ...
 
 # Readers whose readings are kept (flagged, reason "rule-check") when they fail
 # the rule checks and no other reading covers their region. During the port,
@@ -3287,6 +3434,12 @@ KEPT_WHEN_UNREPLACED = frozenset({'tomd'})
 # line by line. Removed by port step 8, which brings the paired-fence rendering of
 # code comparisons.
 WITHHOLD_TRUST_FOR_CODE_CELLS = True
+
+# No HIGH at all until the checks that follow agreement are ported: the extent
+# step (rows above or below a reading, a title row), layout verification and the
+# classifier gate. Two readers can agree on a reading that misses a row; in
+# tomd-tables those checks lower such tables. Removed by port step 9.
+WITHHOLD_TRUST_UNTIL_VERIFIED = True
 
 # + 30 private module-level names
 ```
@@ -5022,6 +5175,8 @@ class MarkdownWriter:
 - `classify_monospace`: [`lib/pdf/mono.py`](#lib-pdf-mono-py)
 - `classify_wording`: [`lib/pdf/wording.py`](#lib-pdf-wording-py)
 - `cleanup_text`: [`lib/pdf/cleanup.py`](#lib-pdf-cleanup-py)
+- `closed_exempt`: [`lib/pdf/select.py`](#lib-pdf-select-py)
+- `CLOSED_GRID_EXEMPT`: [`lib/pdf/select.py`](#lib-pdf-select-py)
 - `code_cell`: [`lib/tables.py`](#lib-tables-py)
 - `CODE_ERRORS`: [`lib/pdf/evidence.py`](#lib-pdf-evidence-py)
 - `CODE_LANG_LABELS`: [`lib/shared.py`](#lib-shared-py)
@@ -5074,6 +5229,7 @@ class MarkdownWriter:
 - `DocumentWriter`: [`writers/base.py`](#writers-base-py)
 - `download_source`: [`lib/golden_qa.py`](#lib-golden-qa-py)
 - `draft_issues`: [`lib/golden_gaps.py`](#lib-golden-gaps-py)
+- `drawn_spans`: [`lib/pdf/ruled.py`](#lib-pdf-ruled-py)
 - `drop_glyphs_in_code_and_tables`: [`lib/pdf/glyphs.py`](#lib-pdf-glyphs-py)
 - `drop_leaked_toc_entries`: [`lib/pdf/structure.py`](#lib-pdf-structure-py)
 - `EDGE_BAND_BOTTOM_FRACTION`: [`lib/pdf/types.py`](#lib-pdf-types-py)
@@ -5098,6 +5254,7 @@ class MarkdownWriter:
 - `extract_mupdf`: [`lib/pdf/extract.py`](#lib-pdf-extract-py)
 - `extract_page_images`: [`lib/pdf/images.py`](#lib-pdf-images-py)
 - `extract_page_vector_images`: [`lib/pdf/vector_images.py`](#lib-pdf-vector-images-py)
+- `extract_ruled_tables`: [`lib/pdf/ruled.py`](#lib-pdf-ruled-py)
 - `extract_spatial`: [`lib/pdf/extract.py`](#lib-pdf-extract-py)
 - `extract_tagged_tables`: [`lib/pdf/tagged.py`](#lib-pdf-tagged-py)
 - `ExtractedImage`: [`domain/image.py`](#domain-image-py)
@@ -5179,8 +5336,12 @@ class MarkdownWriter:
 - `main`: [`cli.py`](#cli-py)
 - `mark_matrix`: [`lib/pdf/select.py`](#lib-pdf-select-py)
 - `MarkdownWriter`: [`writers/markdown/writer.py`](#writers-markdown-writer-py)
+- `MAX_FILL`: [`lib/pdf/rowbands.py`](#lib-pdf-rowbands-py)
 - `maybe_normalize_code_line`: [`lib/pdf/code_format.py`](#lib-pdf-code-format-py)
+- `merge_rule_bands`: [`lib/pdf/rowbands.py`](#lib-pdf-rowbands-py)
 - `MIN_IMAGE_DIM_PT`: [`lib/pdf/images.py`](#lib-pdf-images-py)
+- `MIN_RULES`: [`lib/pdf/rowbands.py`](#lib-pdf-rowbands-py)
+- `MIN_SEGMENT`: [`lib/pdf/rowbands.py`](#lib-pdf-rowbands-py)
 - `MIN_TOC_RUN`: [`lib/toc.py`](#lib-toc-py)
 - `MIN_UNCERTAIN_WORDS`: [`lib/pdf/types.py`](#lib-pdf-types-py)
 - `MisalignedRegion`: [`lib/check_content.py`](#lib-check-content-py)
@@ -5197,6 +5358,7 @@ class MarkdownWriter:
 - `NUMBERED_LIST_RE`: [`lib/pdf/types.py`](#lib-pdf-types-py)
 - `override_revision_from_filename`: [`lib/shared.py`](#lib-shared-py)
 - `page_furniture`: [`lib/pdf/select.py`](#lib-pdf-select-py)
+- `page_hrules`: [`lib/pdf/ruled.py`](#lib-pdf-ruled-py)
 - `PAGE_NUM_RE`: [`lib/pdf/types.py`](#lib-pdf-types-py)
 - `PageEdgeItem`: [`lib/pdf/types.py`](#lib-pdf-types-py)
 - `PaperDocument`: [`domain/document.py`](#domain-document-py)
@@ -5213,6 +5375,7 @@ class MarkdownWriter:
 - `propagate_monospace`: [`lib/pdf/mono.py`](#lib-pdf-mono-py)
 - `QABatchResult`: [`lib/pdf/qa.py`](#lib-pdf-qa-py)
 - `QAMetrics`: [`lib/pdf/qa.py`](#lib-pdf-qa-py)
+- `rawdict`: [`lib/pdf/pagecache.py`](#lib-pdf-pagecache-py)
 - `REASON_ASPECT_EXTREME`: [`lib/pdf/vector_images.py`](#lib-pdf-vector-images-py)
 - `REASON_BBOX_TOO_LARGE`: [`lib/pdf/vector_images.py`](#lib-pdf-vector-images-py)
 - `REASON_CLUSTERS_OVERFLOW`: [`lib/pdf/vector_images.py`](#lib-pdf-vector-images-py)
@@ -5262,6 +5425,7 @@ class MarkdownWriter:
 - `source_dir`: [`lib/golden_qa.py`](#lib-golden-qa-py)
 - `Span`: [`domain/span.py`](#domain-span-py)
 - `Span`: [`lib/pdf/types.py`](#lib-pdf-types-py)
+- `sparse_mapping`: [`lib/pdf/select.py`](#lib-pdf-select-py)
 - `split_at_headers`: [`lib/pdf/select.py`](#lib-pdf-select-py)
 - `split_stacked`: [`lib/pdf/stacked.py`](#lib-pdf-stacked-py)
 - `stage_source`: [`lib/golden_qa.py`](#lib-golden-qa-py)
@@ -5317,6 +5481,7 @@ class MarkdownWriter:
 - `VECTOR_UNCERTAINTY_MARKER_TEMPLATE`: [`lib/pdf/vector_images.py`](#lib-pdf-vector-images-py)
 - `VectorUncertaintyStats`: [`lib/pdf/images.py`](#lib-pdf-images-py)
 - `WITHHOLD_TRUST_FOR_CODE_CELLS`: [`lib/pdf/select.py`](#lib-pdf-select-py)
+- `WITHHOLD_TRUST_UNTIL_VERIFIED`: [`lib/pdf/select.py`](#lib-pdf-select-py)
 - `witness`: [`lib/pdf/select.py`](#lib-pdf-select-py)
 - `WORD_GAP_RATIO`: [`lib/pdf/types.py`](#lib-pdf-types-py)
 - `word_jaccard`: [`lib/similarity.py`](#lib-similarity-py)

@@ -9,6 +9,7 @@ from pathlib import Path
 import pytest
 
 from tomd.lib.pdf import run_pipeline
+from tomd.lib.pdf import select
 from tomd.lib.pdf.select import (
     candidate_from_section,
     candidates_agree,
@@ -17,6 +18,13 @@ from tomd.lib.pdf.select import (
     select_tables,
 )
 from tomd.lib.pdf.types import Block, Confidence, Line, Section, SectionKind, Span, TableCandidate
+
+@pytest.fixture(autouse=True)
+def _agreement_trusts(monkeypatch):
+    """These tests check the agreement logic itself: trust is not withheld for the
+    checks still to be ported (select.WITHHOLD_TRUST_UNTIL_VERIFIED, port step 9)."""
+    monkeypatch.setattr(select, "WITHHOLD_TRUST_UNTIL_VERIFIED", False)
+
 
 _GOLDEN = Path(__file__).resolve().parent / "fixtures" / "golden"
 
@@ -108,12 +116,14 @@ def test_damaged_text_layer_is_a_reason():
     assert "damaged" in out.metadata["uncertain_reasons"]
 
 
-def test_no_table_from_one_reader_is_trusted():
+def test_a_trusted_table_has_agreement():
     pdf = _GOLDEN / "p4012r0-page-6.pdf"
     if not pdf.is_file():
         pytest.skip(f"missing PDF fixture: {pdf.name}")
     tables = [s for s in run_pipeline(pdf).sections if s.kind == SectionKind.TABLE]
     assert tables, "fixture should hold a table"
     for sec in tables:
-        assert sec.confidence == Confidence.UNCERTAIN
-        assert "single-source" in sec.metadata["uncertain_reasons"]
+        if sec.confidence == Confidence.HIGH:
+            assert sec.metadata["table_agreement"] in ("exact", "subset")
+        else:
+            assert sec.metadata["uncertain_reasons"]

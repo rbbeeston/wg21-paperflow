@@ -79,7 +79,9 @@ def test_failing_table_reader_is_recorded_not_fatal(monkeypatch):
     assert not result.skipped and result.md.strip()
     assert [(e["stage"], e["type"], e["kind"]) for e in result.reader_errors] == [
         ("detect_tables", "RuntimeError", "data")]
-    assert not any(s.kind == SectionKind.TABLE for s in result.sections)
+    # other readers may still find tables; none comes from the reader that broke
+    assert not any(s.kind == SectionKind.TABLE and s.metadata.get("table_source") == "tomd"
+                   for s in result.sections)
 
 
 def test_clean_run_has_no_reader_errors():

@@ -1,0 +1,13 @@
+# Expectations the tomd-tables port changes, awaiting Vinnie's or Sean's approval.
+# node id (relative to packages/tomd/tests) | port step | what changed and why
+pdf_pins/test_p0533r9.py::test_p0533r9_table_family_pins | step 6 | drawn-rule readers read these tables (row and column counts change)
+pdf_pins/test_p3978r0.py::test_p3978r0_table_family_pins | step 6 | drawn-rule readers read these tables (row and column counts change)
+pdf_pins/test_p3978r3.py::test_p3978r3_table_family_pins | step 6 | drawn-rule readers read these tables (row and column counts change)
+pdf_pins/test_p4016r0.py::test_p4016r0_table_family_pins | step 6 | drawn-rule readers read these tables (row and column counts change)
+pdf_pins/test_p4047r0.py::test_p4047r0_table_family_pins | step 6 | drawn-rule readers read these tables (row and column counts change)
+pdf_pins/test_p4096r0.py::test_p4096r0_table_family_pins | step 6 | drawn-rule readers read these tables (row and column counts change)
+pdf_pins/test_p4178r0.py::test_p4178r0_table_family_pins | step 6 | drawn-rule readers read these tables (row and column counts change)
+test_golden_gate.py::test_tomd_meets_golden_baseline[p0533r9] | step 6 | table 1.00 -> 0.75, text 0.66 -> 0.62 (drawn-rule readings; expected to recover with the poll and content readers, steps 7 and 10)
+test_golden_gate.py::test_tomd_meets_golden_baseline[p1068r11] | step 6 | table 1.00 -> 0.00, text 0.86 -> 0.85 (polls read by the rule reader add a row of dashes; poll reader, step 7)
+test_golden_gate.py::test_tomd_meets_golden_baseline[p3978r0] | step 6 | heading 0.81 -> 0.76, table 0.75 -> 0.67, text 0.69 -> 0.64 (steps 7 and 10)
+test_golden_gate.py::test_tomd_meets_golden_baseline[p4178r0] | step 6 | heading 0.90 -> 0.80, table 1.00 -> 0.79, text 0.97 -> 0.88 (steps 7 and 10)

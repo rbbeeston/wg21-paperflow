@@ -1,6 +1,6 @@
 # tomd API surface
 
-112 modules, 92 classes, 291 functions, 89 methods, 380 fields. Typed: 918 of 1166 functions and methods (78%).
+113 modules, 92 classes, 298 functions, 89 methods, 381 fields. Typed: 921 of 1180 functions and methods (78%).
 
 ## Contents
 
@@ -97,6 +97,7 @@
 - [`lib/pdf/types.py`](#lib-pdf-types-py): Block, Confidence, FigureEdge, FigureGraph, FigureNode, FigureRegion, Line, PageEdgeItem, Section, SectionKind, SkipReason, Span, ...
 - [`lib/pdf/validate.py`](#lib-pdf-validate-py): add_header_above, cell_text, escalate, resegment_rows, split_hidden_column, split_stacked_rows, switch_reader, verify_layout, verify_pieces
 - [`lib/pdf/vector_images.py`](#lib-pdf-vector-images-py): extract_page_vector_images, format_uncertainty_marker, should_emit_marker, ALLOWED_REASON_KEYS, REASON_ASPECT_EXTREME, REASON_BBOX_TOO_LARGE, REASON_CLUSTERS_OVERFLOW, REASON_EDGE_BAND, REASON_TEXT_OVERLAP, REASON_TOO_FEW_ITEMS, REASON_TOO_SMALL, REASON_WORDING_COLOR, ...
+- [`lib/pdf/visibility.py`](#lib-pdf-visibility-py): check_page, classify, discards, hide_recorded, recorded_regions, remove_hidden_text, summary, WHY_TEXT
 - [`lib/pdf/wg21.py`](#lib-pdf-wg21-py): extract_metadata_from_blocks, REPLY_TO_CONTINUATION_CAP
 - [`lib/pdf/wording.py`](#lib-pdf-wording-py): classify_wording, collect_line_drawings, is_foreign_chromatic, is_green_ins, is_red_del, is_wording_rgb
 - [`lib/pdf/wording_emit.py`](#lib-pdf-wording-emit-py)
@@ -4168,7 +4169,7 @@ def run_pipeline(path: Path, *, ml_tables: bool = False, visualize: bool = False
     effect when ``extract_vector`` is False.
     labels inside vector figures render as pixels alongside body text.
     """
-    # calls: PipelineResult, images._VectorExtractionStats, _enforce_skip_contract, PipelineResult.for_skip, _is_slide_deck, _is_standards_draft, extract.extract_mupdf, extract.extract_spatial, cleanup.get_edge_items, extract.collect_links, extract.attach_links, images.extract_page_images, +95 more
+    # calls: PipelineResult, images._VectorExtractionStats, _enforce_skip_contract, PipelineResult.for_skip, _is_slide_deck, _is_standards_draft, visibility.remove_hidden_text, visibility.check_page, extract.extract_mupdf, extract.extract_spatial, cleanup.get_edge_items, extract.collect_links, +101 more
 
 # + 42 private module-level names
 ```
@@ -4581,6 +4582,9 @@ class RunContext:
     lexicon: Counter = field(default_factory=Counter)
     # does this document's maker hyphenate words at line ends (docmeasure.hyphenates)?
     hyphenates: bool = True
+    # text the page does not show, per page (visibility.py): classified once, removed
+    # from every copy of the document a reader opens
+    hidden: dict[int, list[dict]] = field(default_factory=dict)
     # re-raise reader errors instead of recording them (tests of a reader's own failures)
     strict: bool = False
     def reader_error(self, stage: str, page: int | None, exc: BaseException, table=None) -> None:
@@ -4596,7 +4600,7 @@ def current() -> RunContext:
     as in unit tests) a detached context is returned, so recording never fails.
     """
     # calls: RunContext
-    # called by: classify.gate_tables, codepair.find_code_pairs, emit._join_hyphenated, emit.set_lexicon, extent.extend, flag.flag_possible_tables, pipeline._content_readings, pipeline._filter_sections_inside_vector_images, pipeline.run_pipeline, ruled._bands_to_table, ruled._column_ruled_tables, ruled._mark_icon_cells, +6 more
+    # called by: classify.gate_tables, codepair.find_code_pairs, emit._join_hyphenated, emit.set_lexicon, extent.extend, flag.flag_possible_tables, pipeline._content_readings, pipeline._filter_sections_inside_vector_images, pipeline.run_pipeline, ruled._bands_to_table, ruled._column_ruled_tables, ruled._mark_icon_cells, +9 more
 
 @contextlib.contextmanager
 def run_scope():
@@ -4663,7 +4667,7 @@ def run_scan(path, record, tables, builds: list | None = None) -> list:
     rows) for the build and mark bands; the rest are only recorded.
     """
     # untyped: path, record, tables
-    # calls: summary.generator, areas, _inter, _area, _table_boxes, scan_model.likelihood, _at_mean, area_features, info_of, band, data_or_format.likelihood_data
+    # calls: visibility.hide_recorded, summary.generator, areas, _inter, _area, _table_boxes, scan_model.likelihood, _at_mean, area_features, info_of, band, data_or_format.likelihood_data
     # called by: pipeline.run_pipeline
 
 # information type of each feature family (stage 0: same-type features do not
@@ -5832,6 +5836,104 @@ VECTOR_UNCERTAINTY_MARKER_TEMPLATE = ...
 # + 19 private module-level names
 ```
 
+<a id="lib-pdf-visibility-py"></a>
+
+## `lib/pdf/visibility.py` ([source](../../src/tomd/lib/pdf/visibility.py))
+
+Typed: 3 of 14 functions and methods (21%).
+
+```python
+"""Text the PDF holds but the page does not show.
+
+A PDF's text layer can carry text a reader never sees: invisible render mode,
+zero opacity, text clipped away, text outside the page, text under something
+drawn over it, text the colour of what is behind it, text too small to see.
+Most of it is accidental (LaTeXiT base64 blobs, slide builds, clipped figure
+labels); some could be deliberate (instructions aimed at the model that reads
+the Markdown). Either way it is not the paper as people read it.
+
+Each page is classified once, from the paint trace (get_texttrace: render mode,
+colour, opacity, size, drawing order) and the paint log (get_bboxlog: what was
+drawn when). Text of a removable class is redacted from the in-memory page
+before any reader sees it, and every region is listed - page, box, why, and its
+text - at the end of the summary and the prompts, so nothing is lost and
+nothing hidden is presented as the paper's words. The rules are the cheap,
+deterministic classes of work/hidden_text/scan.py (HIDDEN_TEXT.md), kept to the
+ones whose precision on the corpus allows removal:
+
+  invisible-render-mode  render mode 3/7, not over an image (an image under it is
+                         a scan's OCR layer: the only text of the page, kept)
+  opacity-0              fill opacity <= 0.05, not over an image (macOS emoji are
+                         images under a transparent copy of the character: kept)
+  clipped                kept by get_text(flags=0), dropped by TEXT_CLIP
+  tiny                   size < 1 pt and glyph box < 1.5 pt high, on a page with
+                         no Type3 font (old Type3 text reports 0.24 pt sizes)
+  under-image            every character under an opaque image drawn later
+  same-colour            the colour of a known background under every character
+                         (the page, or an opaque rectangle; anything else under it
+                         - an image, a shading, a curved path - is unknown: kept)
+                         These two guess at what is under the text, so each is
+                         confirmed by the picture: the region is rendered as is and
+                         with the text redacted, and the text is kept if it shows
+                         (white text on a black glyph drawn first; an image drawn
+                         with a blend mode: p2988r6, n5024, p3389r0)
+  under-box              under an opaque rectangle drawn later; removed by
+                         pagecache.remove_covered_text, only listed here
+  off-page               outside the page box; MuPDF drops it, only listed here
+
+A hidden run that duplicates visible text at the same place (an invisible copy
+of a visible line) is kept: the page shows that text.
+"""
+
+def check_page(page) -> list[dict]:
+    """Classify the page once per run, record its regions on the run context
+    and return them (before any redaction: the caller removes them).
+    """
+    # untyped: page
+    # calls: runctx.current, classify
+    # called by: pipeline.run_pipeline
+
+def classify(page) -> list[dict]:
+    """The page's text that the page does not show, as regions:
+    {page, bbox, why, chars, text, action, points}; points are the character
+    centres to redact (empty when the text is kept or already gone).
+    """
+    # untyped: page
+    # calls: _clipped_origins, _image_masks, _inside, _rgb, _centre, _text, _shows
+    # called by: check_page
+
+def discards(regions: list[dict]) -> list[tuple]:
+    """the Removed-content lines: one per reason, with its pages"""
+    # calls: summary
+    # called by: pipeline.run_pipeline
+
+def hide_recorded(doc) -> None:
+    """Remove the recorded hidden text from a reopened copy of the document, so
+    every reader of every session sees the page as shown.
+    """
+    # untyped: doc
+    # calls: runctx.current, remove_hidden_text
+    # called by: pipeline._build_scan_tables, pipeline.run_pipeline, scan.run_scan
+
+def recorded_regions() -> list[dict]:
+    """Every region recorded in this run, in page order."""
+    # calls: runctx.current
+    # called by: pipeline.run_pipeline
+
+def remove_hidden_text(page, regions) -> bool:
+    """redact (in memory) the characters of the removable regions; True if any"""
+    # untyped: page, regions
+    # called by: pipeline.run_pipeline, hide_recorded
+
+def summary(regions: list[dict]) -> dict:
+    """the summary's `visibility` object"""
+    # called by: pipeline.run_pipeline, discards
+
+WHY_TEXT = ...
+
+# + 7 private module-level names
+```
+
 <a id="lib-pdf-wg21-py"></a>
 
 ## `lib/pdf/wg21.py` ([source](../../src/tomd/lib/pdf/wg21.py))
@@ -6779,9 +6881,11 @@ class MarkdownWriter:
 - `CHECK`: [`lib/pdf/checks/text_alignment.py`](#lib-pdf-checks-text-alignment-py)
 - `CHECK`: [`lib/pdf/checks/wordgap.py`](#lib-pdf-checks-wordgap-py)
 - `check`: [`lib/pdf/relations.py`](#lib-pdf-relations-py)
+- `check_page`: [`lib/pdf/visibility.py`](#lib-pdf-visibility-py)
 - `check_paper_content`: [`lib/check_content.py`](#lib-check-content-py)
 - `CheckContentArgError`: [`errors.py`](#errors-py)
 - `class_check`: [`lib/pdf/select.py`](#lib-pdf-select-py)
+- `classify`: [`lib/pdf/visibility.py`](#lib-pdf-visibility-py)
 - `classify_monospace`: [`lib/pdf/mono.py`](#lib-pdf-mono-py)
 - `classify_wording`: [`lib/pdf/wording.py`](#lib-pdf-wording-py)
 - `cleanup_text`: [`lib/pdf/cleanup.py`](#lib-pdf-cleanup-py)
@@ -6838,6 +6942,7 @@ class MarkdownWriter:
 - `detect_repeating`: [`lib/pdf/cleanup.py`](#lib-pdf-cleanup-py)
 - `detect_tables`: [`lib/pdf/table.py`](#lib-pdf-table-py)
 - `dimensions`: [`lib/pdf/dimensions.py`](#lib-pdf-dimensions-py)
+- `discards`: [`lib/pdf/visibility.py`](#lib-pdf-visibility-py)
 - `discover_tables_with_docling`: [`lib/pdf/docling_backend.py`](#lib-pdf-docling-backend-py)
 - `DOC_FIELD_RE`: [`lib/pdf/types.py`](#lib-pdf-types-py)
 - `DOC_NUM_PATTERN`: [`lib/shared.py`](#lib-shared-py)
@@ -6945,6 +7050,7 @@ class MarkdownWriter:
 - `header_contrast`: [`lib/pdf/checks/coherence.py`](#lib-pdf-checks-coherence-py)
 - `Heading`: [`domain/elements.py`](#domain-elements-py)
 - `heading_confidence`: [`lib/pdf/structure.py`](#lib-pdf-structure-py)
+- `hide_recorded`: [`lib/pdf/visibility.py`](#lib-pdf-visibility-py)
 - `HtmlImagesResult`: [`lib/html/images.py`](#lib-html-images-py)
 - `hyphenates`: [`lib/pdf/docmeasure.py`](#lib-pdf-docmeasure-py)
 - `HyphenEvidence`: [`lib/pdf/cleanup.py`](#lib-pdf-cleanup-py)
@@ -7064,11 +7170,13 @@ class MarkdownWriter:
 - `ReblessOutcome`: [`lib/golden_qa.py`](#lib-golden-qa-py)
 - `Record`: [`lib/pdf/evidence.py`](#lib-pdf-evidence-py)
 - `record_for`: [`lib/pdf/relations.py`](#lib-pdf-relations-py)
+- `recorded_regions`: [`lib/pdf/visibility.py`](#lib-pdf-visibility-py)
 - `records_candidates`: [`lib/pdf/records.py`](#lib-pdf-records-py)
 - `region_features`: [`lib/pdf/classify.py`](#lib-pdf-classify-py)
 - `REGISTRY`: [`lib/pdf/checks/registry.py`](#lib-pdf-checks-registry-py)
 - `rejected_regions`: [`lib/pdf/flag.py`](#lib-pdf-flag-py)
 - `RelationRecord`: [`lib/pdf/relations.py`](#lib-pdf-relations-py)
+- `remove_hidden_text`: [`lib/pdf/visibility.py`](#lib-pdf-visibility-py)
 - `remove_table_regions`: [`lib/pdf/select.py`](#lib-pdf-select-py)
 - `render_body`: [`lib/html/render.py`](#lib-html-render-py)
 - `render_pdf_pages`: [`lib/golden_qa.py`](#lib-golden-qa-py)
@@ -7155,6 +7263,7 @@ class MarkdownWriter:
 - `structure_body`: [`lib/pdf/structure.py`](#lib-pdf-structure-py)
 - `structure_sections`: [`lib/pdf/structure.py`](#lib-pdf-structure-py)
 - `SubscriptSpan`: [`domain/span.py`](#domain-span-py)
+- `summary`: [`lib/pdf/visibility.py`](#lib-pdf-visibility-py)
 - `SuperscriptSpan`: [`domain/span.py`](#domain-span-py)
 - `switch_reader`: [`lib/pdf/validate.py`](#lib-pdf-validate-py)
 - `Table`: [`domain/table.py`](#domain-table-py)
@@ -7199,6 +7308,7 @@ class MarkdownWriter:
 - `vote_header`: [`lib/pdf/select.py`](#lib-pdf-select-py)
 - `VOTE_LABELS`: [`lib/pdf/select.py`](#lib-pdf-select-py)
 - `weak_note`: [`lib/pdf/dimensions.py`](#lib-pdf-dimensions-py)
+- `WHY_TEXT`: [`lib/pdf/visibility.py`](#lib-pdf-visibility-py)
 - `withhold_trust`: [`lib/pdf/classify.py`](#lib-pdf-classify-py)
 - `witness`: [`lib/pdf/select.py`](#lib-pdf-select-py)
 - `WORD_GAP_RATIO`: [`lib/pdf/types.py`](#lib-pdf-types-py)

@@ -30,6 +30,7 @@ from .checks.registry import AreaContext, run_region_checks
 from .scan_model import MODEL, likelihood
 from .summary import generator as _generator
 from .types import Confidence
+from .visibility import hide_recorded
 
 
 
@@ -154,6 +155,7 @@ def run_scan(path, record, tables, builds: list | None = None) -> list:
     out = []
     pending: list = []
     with _FITZ_LOCK, fitz.open(str(path)) as doc:  # see _fitz_lock.py for why this lock is required
+        hide_recorded(doc)
         generator = _generator(doc.metadata or {})
         doc_tagged = doc.xref_get_key(doc.pdf_catalog(), "StructTreeRoot")[0] != "null"
         all_areas = areas(record)

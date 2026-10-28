@@ -104,6 +104,8 @@ from .poll import extract_poll_tables
 from .codepair import find_code_pairs
 from .classify import gate_tables, withhold_trust
 from .content import content_candidates
+from .visibility import (check_page, discards as hidden_discards, hide_recorded,
+                         recorded_regions, remove_hidden_text, summary as hidden_summary)
 from .continuation import annotate as annotate_continuations
 from .figure_tables import label_figure_tables
 from .docmeasure import hyphenates as doc_hyphenates, measure as doc_measure
@@ -1196,6 +1198,7 @@ def _build_scan_tables(path, builds, blocks, page_rotations):
     built, unbuilt, cands, info = [], [], [], {}
     with _FITZ_LOCK:  # see _fitz_lock.py for why this lock is required
         doc = fitz.open(str(path))
+        hide_recorded(doc)
         try:
             pages = {pg: doc[pg] for pg in {b[0] for b in builds} if pg not in page_rotations}
             for page, bbox, p, why, nrows in builds:
@@ -2180,6 +2183,11 @@ def run_pipeline(
 
             for pg_num in range(result.page_count):
                 page = doc[pg_num]
+                # text the page does not show (invisible, transparent, clipped, tiny,
+                # under an image, the colour of its background): removed from the
+                # in-memory page before any reader sees it, and listed in the summary
+                if remove_hidden_text(page, check_page(page)):
+                    page = doc[pg_num]
                 page_widths[pg_num] = page.rect.width
                 if page.rotation:
                     page_rotations[pg_num] = tuple(page.rotation_matrix)
@@ -2501,6 +2509,7 @@ def run_pipeline(
     rejected: list = []
     with _FITZ_LOCK:  # see _fitz_lock.py for why this lock is required
         tdoc = fitz.open(str(path))
+        hide_recorded(tdoc)
         try:
             tpages = {pg: tdoc[pg] for pg in range(tdoc.page_count) if pg not in page_rotations}
             content_tables = _content_readings(
@@ -2539,6 +2548,7 @@ def run_pipeline(
         # join), and the figure label of a table drawn inside a figure.
         with _FITZ_LOCK:  # see _fitz_lock.py for why this lock is required
             kdoc = fitz.open(str(path))
+            hide_recorded(kdoc)
             try:
                 try:
                     annotate_continuations(kdoc, table_sections)
@@ -3094,7 +3104,12 @@ def run_pipeline(
     # removed content, reader errors and summary as prompt elements when the
     # paper has prompts at all.
     ctx = current()
+    # hidden text removed from the pages: listed in the summary and prompts (open question 4)
+    hidden_regions = recorded_regions()
+    ctx.discards.extend(hidden_discards(hidden_regions))
     summary = build_summary(sections, ctx.discards, ctx.record.errors, pdf_generator(doc_metadata))
+    if hidden_regions:
+        summary["visibility"] = hidden_summary(hidden_regions)
     if md.strip():
         md = _insert_after_front_matter(md, header_comment(summary))
     if prompts:

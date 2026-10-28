@@ -40,6 +40,9 @@ class RunContext:
     lexicon: Counter = field(default_factory=Counter)
     # does this document's maker hyphenate words at line ends (docmeasure.hyphenates)?
     hyphenates: bool = True
+    # text the page does not show, per page (visibility.py): classified once, removed
+    # from every copy of the document a reader opens
+    hidden: dict[int, list[dict]] = field(default_factory=dict)
     # re-raise reader errors instead of recording them (tests of a reader's own failures)
     strict: bool = False
 

@@ -62,6 +62,8 @@ _COL_GAP_EM = 0.6         # ...if this share of a line height wide, or if
 _COL_GAP_PAIRS = 3        #    this many distinct rows straddle it
 _COL_START_TOL = 3.0      # word starts within this distance share a column
 _COL_START_SUPPORT = 0.6  # a column start must occur in this share of rows
+_EMPTY_COLUMN_ROWS = 2    # body rows needed before a header word over blank space heads an empty column
+_CENTRE_TOL = 1.5         # body text centred under a header word: centres this close
 _LINE_Y_TOL = 3.0         # characters within this y distance share a line
 _ZERO_WIDTH = frozenset("\u200b\u200c\u200d\u2060\ufeff")
 _CAPTION_INDENT = 4.0     # captions start this far left of padded cell text
@@ -849,11 +851,15 @@ def _column_starts(row_words: list[list]) -> list[float]:
     # otherwise the boundary would cut through ordinary text, as it does for
     # a centred column.
     header = sorted(row_words[0], key=lambda w: w[0]) if row_words else []
+    body = row_words[1:]
     for a, b in zip(header, header[1:]):
         x = b[0]
         if b[0] - a[2] < wide:
+            left_edge = max((s for s in seps if s <= a[0]), default=float("-inf"))
+            if _heads_empty_column(left_edge, a, x, body):
+                k = round(x / _COL_START_TOL)
+                starts[k] = max(starts[k], len(row_words))
             continue
-        body = row_words[1:]
         starts_here = [any(abs(w[0] - x) <= _COL_START_TOL for w in ws) for ws in body]
         crosses = [any(w[0] < x - _COL_START_TOL and w[2] > x + _COL_START_TOL for w in ws)
                    for ws in body]
@@ -868,6 +874,24 @@ def _column_starts(row_words: list[list]) -> list[float]:
             if not any(abs(x - s) < 4 * _COL_START_TOL for s in seps):
                 seps.add(x - _COL_START_TOL)
     return [float("-inf")] + sorted(seps)
+
+
+def _heads_empty_column(left_edge: float, a, x: float, body: list[list]) -> bool:
+    """Header words "Pass Comment" one word space apart head two columns when
+    the body column is centred under "Pass" alone (centred under one cell
+    "Pass Comment" it would sit further right) and no body text reaches
+    "Comment": a column nobody filled in. Body text sharing the header's left
+    edge ("1.00" under "Normalised time") says nothing: a left-aligned column
+    under a two-word header looks the same."""
+    if len(body) < _EMPTY_COLUMN_ROWS:
+        return False
+    words = [w for ws in body for w in ws]
+    if any(w[2] >= x - _COL_START_TOL for w in words):
+        return False                     # something reaches the right word
+    under = [w for w in words if w[0] > left_edge]      # the body column of word a
+    centre = (a[0] + a[2]) / 2
+    return (bool(under) and all(abs((w[0] + w[2]) / 2 - centre) <= _CENTRE_TOL for w in under)
+            and any(w[0] - a[0] > _CENTRE_TOL for w in under))
 
 
 def _raised(words: list) -> list:

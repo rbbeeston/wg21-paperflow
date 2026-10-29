@@ -1693,6 +1693,25 @@ def _coalesce(spans: list) -> list:
     return out
 
 
+def _bridge_code_spaces(spans: list) -> list:
+    """One code span per run of code words: readers that build cells from
+    words put a plain space span between them, which would split a signature
+    into a code span per word."""
+    out: list = []
+    for i, s in enumerate(spans):
+        p = out[-1] if out else None
+        bridge = not s.text.strip() and i + 1 < len(spans) and spans[i + 1].monospace
+        joins = (p is not None and p.monospace and not p.link_url and not s.link_url
+                 and (bridge or s.monospace and (p.bold, p.italic) == (s.bold, s.italic)))
+        if joins:
+            out[-1] = dataclasses.replace(p, text=p.text + s.text,
+                                          bbox=(min(p.bbox[0], s.bbox[0]), min(p.bbox[1], s.bbox[1]),
+                                                max(p.bbox[2], s.bbox[2]), max(p.bbox[3], s.bbox[3])))
+        else:
+            out.append(s)
+    return out
+
+
 def _render_table_cell(spans: list, suppress_bold: bool = False) -> str:
     """Render a pipe-table cell's spans with inline formatting.
 
@@ -1713,7 +1732,7 @@ def _render_table_cell(spans: list, suppress_bold: bool = False) -> str:
                 parts.append([])
             if piece:
                 parts[-1].append(s if len(pieces) == 1 else dataclasses.replace(s, text=piece))
-    rendered = [r for r in (_render_line_spans(Line(spans=_coalesce(_mark_asterisks(p))),
+    rendered = [r for r in (_render_line_spans(Line(spans=_bridge_code_spaces(_coalesce(_mark_asterisks(p)))),
                                                suppress_bold=suppress_bold).strip()
                             for p in parts if p) if r]
     if len(rendered) > 1 and all(len(r) == 1 and r.isalpha() for r in rendered):

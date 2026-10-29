@@ -397,15 +397,32 @@ def _split_at_region(sec: Section, page, bbox) -> list[Section]:
     pages = [ln.page_num for ln in sec.lines]
     if len(set(pages)) <= 1:
         return [sec]
+    offsets = _line_offsets(sec)
+    cuts = [i for i in range(1, len(pages)) if pages[i] != pages[i - 1]]
     sep = "\n" if "\n" in sec.text else " "
-    parts, start = [], 0
-    for i in range(1, len(pages) + 1):
-        if i == len(pages) or pages[i] != pages[start]:
-            lines = sec.lines[start:i]
-            parts.append(replace(sec, lines=list(lines), text=sep.join(ln.text for ln in lines),
-                                 page_num=lines[0].page_num, metadata=dict(sec.metadata)))
-            start = i
+    parts = []
+    for start, end in zip([0] + cuts, cuts + [len(pages)]):
+        lines = sec.lines[start:end]
+        if offsets is not None:          # keep the section's own breaks (blank lines between paragraphs)
+            text = sec.text[offsets[start]:offsets[end] if end < len(pages) else len(sec.text)].strip("\n")
+        else:
+            text = sep.join(ln.text for ln in lines)
+        parts.append(replace(sec, lines=list(lines), text=text,
+                             page_num=lines[0].page_num, metadata=dict(sec.metadata)))
     return parts
+
+
+def _line_offsets(sec: Section) -> list[int] | None:
+    """Where each line's text starts in the section's text, or None when the text was
+    rewritten and a line cannot be found in order."""
+    out, pos = [], 0
+    for ln in sec.lines:
+        at = sec.text.find(ln.text.strip(), pos) if ln.text.strip() else pos
+        if at < 0:
+            return None
+        out.append(at)
+        pos = at + len(ln.text.strip())
+    return out
 
 
 def flag_possible_tables(sections: list[Section], regions: list[Region]) -> int:

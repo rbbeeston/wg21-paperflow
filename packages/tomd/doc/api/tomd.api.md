@@ -1,6 +1,6 @@
 # tomd API surface
 
-114 modules, 93 classes, 302 functions, 89 methods, 382 fields. Typed: 926 of 1189 functions and methods (77%).
+114 modules, 93 classes, 302 functions, 89 methods, 382 fields. Typed: 928 of 1192 functions and methods (77%).
 
 ## Contents
 
@@ -3075,7 +3075,7 @@ MODEL = ...
 
 ## `lib/pdf/emit.py` ([source](../../src/tomd/lib/pdf/emit.py))
 
-Typed: 48 of 53 functions and methods (90%).
+Typed: 49 of 54 functions and methods (90%).
 
 ```python
 """Markdown and companion prompts file generation."""
@@ -3169,7 +3169,7 @@ COMPOUND_PREFIXES = ...
 # stray bullet glyph survives mid-text (#303).
 LIST_BULLET = '-'
 
-# + 46 private module-level names
+# + 47 private module-level names
 ```
 
 <a id="lib-pdf-emoji-data-py"></a>
@@ -3486,7 +3486,7 @@ def grid_of(page, bbox):
 
 ## `lib/pdf/flag.py` ([source](../../src/tomd/lib/pdf/flag.py))
 
-Typed: 9 of 17 functions and methods (52%).
+Typed: 10 of 18 functions and methods (55%).
 
 ```python
 """Mark text that is probably a table but was not extracted as one.
@@ -3564,7 +3564,7 @@ def text_regions(blocks: list[Block]) -> list[Region]:
     # calls: _rows, _is_not_table, _is_table_row, _shared_starts
     # called by: pipeline.run_pipeline
 
-# + 10 private module-level names
+# + 11 private module-level names
 ```
 
 <a id="lib-pdf-fullwidth-py"></a>
@@ -4569,7 +4569,7 @@ MIN_SEGMENT = 15.0  # pt: shorter strokes are not row separators
 
 ## `lib/pdf/ruled.py` ([source](../../src/tomd/lib/pdf/ruled.py))
 
-Typed: 8 of 40 functions and methods (20%).
+Typed: 8 of 41 functions and methods (19%).
 
 ```python
 """Table detection from ruling lines (vector drawings).
@@ -4617,7 +4617,7 @@ def page_hrules(page, drawings=None) -> list[tuple[float, float, float]]:
     # untyped: page, drawings
     # called by: classify.gate_tables, pipeline.run_pipeline
 
-# + 37 private module-level names
+# + 38 private module-level names
 ```
 
 <a id="lib-pdf-runctx-py"></a>

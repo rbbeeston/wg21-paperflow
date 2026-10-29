@@ -33,7 +33,9 @@ _P4047R0_TABLE_PINS = {
     (5, 4, 5, "prose_table", "side_by_side_prepass"),
     (5, 3, 5, "clean_matrix", "side_by_side_prepass"),
     (6, 9, 6, "clean_matrix", "horizontal_rows"),
-    (6, 4, 2, "clean_matrix", "horizontal_rows"),
+    # the Conclusion's fifth row ("Implementation maturity concerns") is read
+    # since port step 6; the old 4-row shape dropped it
+    (6, 5, 2, "clean_matrix", None),
 }
 _P4047R0_PREDICTION_HEADER = ["#", "Prediction", "Source", "Date", "Outcome"]
 

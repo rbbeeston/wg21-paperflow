@@ -1,19 +1,13 @@
-# Expectations the tomd-tables port changes, awaiting Vinnie's or Sean's approval.
+# Expectations the tomd-tables port changes that are not yet accepted (run as expected failures).
+# Approved and applied 2026-10-28: the <br> cell convention (test_emit), p3290r4, p4047r0, n5040.
+# HELD entries read worse than paperflow did before the port; each is a post-merge fix (port_plan.md).
 # node id (relative to packages/tomd/tests) | port step | what changed and why
-pdf_pins/test_p0533r9.py::test_p0533r9_table_family_pins | step 6 | drawn-rule readers read these tables (row and column counts change)
-pdf_pins/test_p3978r0.py::test_p3978r0_table_family_pins | step 6 | drawn-rule readers read these tables (row and column counts change)
-pdf_pins/test_p3978r3.py::test_p3978r3_table_family_pins | step 6 | drawn-rule readers read these tables (row and column counts change)
-pdf_pins/test_p4016r0.py::test_p4016r0_table_family_pins | step 6 | drawn-rule readers read these tables (row and column counts change)
-pdf_pins/test_p4047r0.py::test_p4047r0_table_family_pins | step 6 | drawn-rule readers read these tables (row and column counts change)
-pdf_pins/test_p4096r0.py::test_p4096r0_table_family_pins | step 6 | drawn-rule readers read these tables (row and column counts change)
-pdf_pins/test_p4178r0.py::test_p4178r0_table_family_pins | step 6 | drawn-rule readers read these tables (row and column counts change)
-test_golden_gate.py::test_tomd_meets_golden_baseline[p0533r9] | step 6 | table 1.00 -> 0.75, text 0.66 -> 0.62 (drawn-rule readings; expected to recover with the poll and content readers, steps 7 and 10)
-test_golden_gate.py::test_tomd_meets_golden_baseline[p1068r11] | step 6 | table 1.00 -> 0.00, text 0.86 -> 0.85 (polls read by the rule reader add a row of dashes; poll reader, step 7)
-test_golden_gate.py::test_tomd_meets_golden_baseline[p3978r0] | step 6 | heading 0.81 -> 0.76, table 0.75 -> 0.67, text 0.69 -> 0.64 (steps 7 and 10)
-test_golden_gate.py::test_tomd_meets_golden_baseline[n5040] | step 7 | table 1.00 -> 0.89, text 0.98 -> 0.97 (polls now read by the poll reader: labels beside a poll are not cells; accepted as in tomd-tables)
-test_emit.py::TestFlattenPipeCell::test_bare_newline_marker_joins_with_one_space | step 11 | a wrapped cell's lines are joined with <br> (tomd-tables cell renderer replaces _flatten_cell), not a space; no cell holds a literal newline (test_table_cell_render.py)
-test_emit.py::TestFlattenPipeCell::test_marker_padded_with_spaces_joins_with_one_space | step 11 | a wrapped cell's lines are joined with <br> (tomd-tables cell renderer replaces _flatten_cell), not a space; no cell holds a literal newline (test_table_cell_render.py)
-test_emit.py::TestFlattenPipeCell::test_marker_without_surrounding_space_still_joins | step 11 | a wrapped cell's lines are joined with <br> (tomd-tables cell renderer replaces _flatten_cell), not a space; no cell holds a literal newline (test_table_cell_render.py)
-test_emit.py::TestFlattenPipeCell::test_embedded_newline_collapses_without_doubling_spaces | step 11 | a wrapped cell's lines are joined with <br> (tomd-tables cell renderer replaces _flatten_cell), not a space; no cell holds a literal newline (test_table_cell_render.py)
-test_emit.py::TestFlattenPipeCell::test_a_cell_never_emits_a_literal_newline | step 11 | a wrapped cell's lines are joined with <br> (tomd-tables cell renderer replaces _flatten_cell), not a space; no cell holds a literal newline (test_table_cell_render.py)
-pdf_pins/test_p3290r4.py::test_p3290r4_bibliography_is_prose_and_table_family_pins | step 12 | page 16 table kind clean_matrix -> key_value: a line-end hyphen inside a located table is left for the cell renderer (open question 11), and paperflow's kind classifier sees that text; shape unchanged
+pdf_pins/test_p0533r9.py::test_p0533r9_table_family_pins | step 6 | HELD 2026-10-28: page-4 13-row table merges the Pass and Comment headers into one column (13x3 -> 13x2), flagged L3
+pdf_pins/test_p3978r0.py::test_p3978r0_table_family_pins | step 6 | HELD 2026-10-28: page-2 8x4 table read as one 1x2 row of lumped code; a heading on page 1 read as a 4x2 table; both flagged L3
+pdf_pins/test_p3978r3.py::test_p3978r3_table_family_pins | step 6 | HELD 2026-10-28: page-2 8x4 table read as one 1x2 row; page-3 prose and code read as a 3x2 table (the test forbids a page-3 table); flagged L3
+pdf_pins/test_p4016r0.py::test_p4016r0_table_family_pins | step 6 | HELD 2026-10-28: page 44 pulls the 'Godbolt links' note in as a row (9 -> 10); page 54 pulls ASCII art and prose in (5 -> 8); page 51 loses its kind; flagged
+pdf_pins/test_p4096r0.py::test_p4096r0_table_family_pins | step 6 | HELD 2026-10-28: page-9 table splits 'Predicted outcome' into two columns (5x4 -> 5x5), flagged L3
+pdf_pins/test_p4178r0.py::test_p4178r0_table_family_pins | step 6 | HELD 2026-10-28: shapes unchanged, but seven 2x2 tables lose their kind and their readers disagree on content; not checked cell by cell
+test_golden_gate.py::test_tomd_meets_golden_baseline[p0533r9] | step 6 | HELD 2026-10-28: the drop is the page-4 header merge above
+test_golden_gate.py::test_tomd_meets_golden_baseline[p1068r11] | step 6 | HELD 2026-10-28: approved by the user with the fix tracked, but kept as an expected failure so the gate still guards table 1.00 (post-merge bug: letter-spaced poll labels)
+test_golden_gate.py::test_tomd_meets_golden_baseline[p3978r0] | step 6 | HELD 2026-10-28: the drop is the page-2 table read as one row above

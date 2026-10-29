@@ -28,7 +28,8 @@ _P3290R4_TABLE_PINS = (
     (3, 2, 5, "clean_matrix", None),
     (6, 2, 5, "clean_matrix", None),
     (11, 2, 5, "clean_matrix", None),
-    (15, 4, 2, "clean_matrix", None),
+    # page-16 hyphen left for the cell renderer (port step 12): kind reads key_value
+    (15, 4, 2, "key_value", None),
     (15, 6, 2, "clean_matrix", None),
 )
 _P3290R4_BIBLIOGRAPHY_LABELS = (

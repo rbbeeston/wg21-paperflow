@@ -1,6 +1,6 @@
 # tomd API surface
 
-114 modules, 93 classes, 302 functions, 89 methods, 382 fields. Typed: 931 of 1196 functions and methods (77%).
+114 modules, 93 classes, 302 functions, 89 methods, 382 fields. Typed: 931 of 1198 functions and methods (77%).
 
 ## Contents
 
@@ -3571,7 +3571,7 @@ def text_regions(blocks: list[Block]) -> list[Region]:
 
 ## `lib/pdf/fullwidth.py` ([source](../../src/tomd/lib/pdf/fullwidth.py))
 
-Typed: 0 of 4 functions and methods (0%).
+Typed: 0 of 5 functions and methods (0%).
 
 ```python
 """Full-width rows in drawn tables: titles and spanning rows read as spans.
@@ -3600,11 +3600,11 @@ def apply(sec, page, bbox) -> list[int]:
 
 def full_width_rows(columns, page, bbox) -> list[int]:
     # untyped: columns, page, bbox
-    # calls: _vertical_rules, _row_band
+    # calls: _vertical_rules, _inside_cell, _row_band
     # called by: apply
     ...
 
-# + 2 private module-level names
+# + 3 private module-level names
 ```
 
 <a id="lib-pdf-glyphs-py"></a>
@@ -4772,7 +4772,7 @@ MODEL = ...
 
 ## `lib/pdf/select.py` ([source](../../src/tomd/lib/pdf/select.py))
 
-Typed: 44 of 54 functions and methods (81%).
+Typed: 44 of 55 functions and methods (80%).
 
 ```python
 """Table selection: one reading per region, trusted only when another kind of evidence agrees.
@@ -4994,7 +4994,7 @@ TRUST_ONLY_PIPE_RENDERING = True
 # "SF F N A SA", "SF WF N WA SA", "F N A", "Strongly Favor ... Strongly Against".
 VOTE_LABELS = ...
 
-# + 36 private module-level names
+# + 37 private module-level names
 ```
 
 <a id="lib-pdf-spans-py"></a>

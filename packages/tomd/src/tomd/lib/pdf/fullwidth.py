@@ -48,8 +48,23 @@ def _row_band(row):
     return (min(b[1] for b in ys), max(b[3] for b in ys)) if ys else None
 
 
+def _inside_cell(rule, columns) -> bool:
+    """The segment lies inside a cell's text on a row it overlaps: the side of an inline
+    code highlight ("await_transform" on a shaded box), not a rule between columns."""
+    x, a, b = rule
+    for row in columns:
+        band = _row_band(row)
+        if band is None or not (a < band[1] and b > band[0]):
+            continue
+        for cell in row:
+            xs = [s.bbox for s in cell if s.text.strip() and s.text != "\n" and s.bbox and s.bbox[2] > s.bbox[0]]
+            if xs and min(q[0] for q in xs) < x < max(q[2] for q in xs):
+                return True
+    return False
+
+
 def full_width_rows(columns, page, bbox) -> list[int]:
-    rules = _vertical_rules(page, bbox)
+    rules = [r for r in _vertical_rules(page, bbox) if not _inside_cell(r, columns)]
     if not rules or not columns or max(len(r) for r in columns) < 2:
         return []
     out = []

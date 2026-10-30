@@ -116,6 +116,7 @@ def _split_at_repeated_header(cand: TableCandidate) -> list[TableCandidate]:
     return parts
 
 
+_PROSE_LINE_WORDS = 4     # a wrapped line of prose holds at least this many words
 # A row is packed (several rows read as one) when at least this share of its
 # filled cells hold the same number of lines, two or more.
 _PACKED_SHARE = 0.75
@@ -135,9 +136,21 @@ def _packed_rows(cand: TableCandidate) -> int:
         if len(filled) < 2:
             continue
         common = max(set(filled), key=filled.count)
-        if common >= 2 and filled.count(common) >= _PACKED_SHARE * len(filled):
+        if common >= 2 and filled.count(common) >= _PACKED_SHARE * len(filled) and not _wrapped_prose(row):
             extra += common - 1
     return extra
+
+
+def _wrapped_prose(row) -> bool:
+    """Every cell of the row is one wrapped sentence: each line after the first goes on
+    in lower case from a line of several words ('"coroutine frames require an
+    unavoidable' / 'allocation"'). Packed values are short lines, one value each."""
+    for cell in row:
+        lines = [part.strip() for ln in cell for part in ln.text.split("\n") if part.strip()]
+        for prev, line in zip(lines, lines[1:]):
+            if len(prev.split()) < _PROSE_LINE_WORDS or not line[:1].islower():
+                return False
+    return any(_cell_line_count(cell) >= 2 for cell in row)
 
 
 def _priority(c: TableCandidate) -> int:

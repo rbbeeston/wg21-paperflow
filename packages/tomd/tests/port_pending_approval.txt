@@ -2,6 +2,5 @@
 # Approved and applied 2026-10-28: the <br> cell convention (test_emit), p3290r4, p4047r0, n5040.
 # HELD entries read worse than paperflow did before the port; each is a post-merge fix (port_plan.md).
 # node id (relative to packages/tomd/tests) | port step | what changed and why
-pdf_pins/test_p4178r0.py::test_p4178r0_table_family_pins | step 6 | HELD 2026-10-28: shapes unchanged, but seven 2x2 tables lose their kind and their readers disagree on content; not checked cell by cell
 test_golden_gate.py::test_tomd_meets_golden_baseline[p0533r9] | step 10 | HELD 2026-10-29: table back to 1.00; text 0.65 < 0.66 because a mark cuts its section at the page break (locality), splitting one paragraph that runs over the break
 test_golden_gate.py::test_tomd_meets_golden_baseline[p1068r11] | step 6 | HELD 2026-10-28: approved by the user with the fix tracked, but kept as an expected failure so the gate still guards table 1.00 (post-merge bug: letter-spaced poll labels)

@@ -44,7 +44,7 @@ _MIN_GUTTER = 4.0      # points: narrower white space is word spacing, not a col
 _SPAN_LINES = 1        # a gutter may be crossed by this many lines (spanning cells)
 _GAP_RATIO = 1.5       # row gap: at least this many times the typical leading
 _KEY_FILL = 0.5
-_ROW_VOTES = int(__import__('os').environ.get('TOMD_ROW_VOTES', '99'))   # record-only by default: measured, the votes split one-box programs (3 votes: inert)
+_ROW_VOTES = 99       # record-only: measured, the votes split one-box programs (3 votes: inert)
 # a code unit's opening: declaration keyword(s) and the declared name, or a
 # function signature head (return type and name)
 _DECL = re.compile(r"^\s*(template\s*<[^>]*>\s*)?((enum|struct|class|union|namespace|concept|using)\s+(class\s+)?[A-Za-z_]\w*"

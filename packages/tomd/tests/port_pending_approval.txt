@@ -2,8 +2,8 @@
 # Approved and applied 2026-10-28: the <br> cell convention (test_emit), p3290r4, p4047r0, n5040.
 # HELD entries read worse than paperflow did before the port; each is a post-merge fix (port_plan.md).
 # node id (relative to packages/tomd/tests) | port step | what changed and why
-pdf_pins/test_p3978r0.py::test_p3978r0_table_family_pins | step 6 | HELD 2026-10-28: page-2 8x4 table read as one 1x2 row of lumped code; a heading on page 1 read as a 4x2 table; both flagged L3
-pdf_pins/test_p3978r3.py::test_p3978r3_table_family_pins | step 6 | HELD 2026-10-28: page-2 8x4 table read as one 1x2 row; page-3 prose and code read as a 3x2 table (the test forbids a page-3 table); flagged L3
+pdf_pins/test_p3978r0.py::test_p3978r0_table_family_pins | step 6 | HELD 2026-10-29: page-2 table fixed (held fix 2); a heading on page 1 still read as a 4x2 table, flagged L3
+pdf_pins/test_p3978r3.py::test_p3978r3_table_family_pins | step 6 | HELD 2026-10-29: page-2 table fixed (held fix 2); page-3 prose and code read as a 3x2 table (the test forbids a page-3 table); flagged L3
 pdf_pins/test_p4016r0.py::test_p4016r0_table_family_pins | step 6 | HELD 2026-10-28: page 44 pulls the 'Godbolt links' note in as a row (9 -> 10); page 54 pulls ASCII art and prose in (5 -> 8); page 51 loses its kind; flagged
 pdf_pins/test_p4096r0.py::test_p4096r0_table_family_pins | step 6 | HELD 2026-10-28: page-9 table splits 'Predicted outcome' into two columns (5x4 -> 5x5), flagged L3
 pdf_pins/test_p4178r0.py::test_p4178r0_table_family_pins | step 6 | HELD 2026-10-28: shapes unchanged, but seven 2x2 tables lose their kind and their readers disagree on content; not checked cell by cell

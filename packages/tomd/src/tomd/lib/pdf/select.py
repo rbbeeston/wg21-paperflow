@@ -159,6 +159,9 @@ _PAGE_NUM_CELL_RE = re.compile(r"^\d{1,4}$")
 # a cell holding only a reference or pointer qualifier ("&&", "const&", "*") is a value
 # in a table of qualifiers, not a code line split at an operator
 _QUALIFIER_CELL = re.compile(r"^\s*((const|volatile)\s*)*[&*]{0,2}\s*$")
+# a function type ending in its ref-qualifier ("R(Args...) &&", "F() const&&") is a whole
+# declaration, not a line cut at "&&"
+_QUALIFIED_FUNCTION_CELL = re.compile(r"^\s*[\w:<>]+\s*\([^()]*\)\s*((const|volatile)\s*)*&{1,2}\s*$")
 _WORD_RE = re.compile(r"\w+")
 _REF_LABEL_RE = re.compile(r"(^|\S)\[[A-Z][A-Za-z0-9.+_'\u2019-]{1,29}\]$")    # [N2529], [P3847R1], [O'Dwyer2018]
 _REF_LEAD_RE = re.compile(r"^\[[A-Z][A-Za-z0-9.+_'\u2019-]{1,29}\]\s+\S")  # "[P2831R0] Timur ..."
@@ -301,7 +304,7 @@ def _split_code_cell(c: str) -> bool:
     with an unmatched bracket are values, not split code: 63 key tables -> 12 rejected. But
     releasing those readings let worse readings win on reader priority in g86/g87 - a
     selection weakness to fix first - so the check is unchanged; REPORT.md, round 1.)"""
-    if _QUALIFIER_CELL.match(c):
+    if _QUALIFIER_CELL.match(c) or _QUALIFIED_FUNCTION_CELL.match(c):
         return False
     return bool(_TRAIL_OP_RE.search(c) or _LEAD_CONT_RE.search(c)
                 or any(c.count(o) != c.count(k) for o, k in ("()", "[]", "{}")))

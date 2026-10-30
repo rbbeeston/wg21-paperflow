@@ -1,6 +1,6 @@
 # tomd API surface
 
-114 modules, 93 classes, 302 functions, 89 methods, 382 fields. Typed: 928 of 1192 functions and methods (77%).
+114 modules, 93 classes, 302 functions, 89 methods, 382 fields. Typed: 929 of 1193 functions and methods (77%).
 
 ## Contents
 
@@ -2680,7 +2680,7 @@ class CodeGrid:
 
 ## `lib/pdf/codepair.py` ([source](../../src/tomd/lib/pdf/codepair.py))
 
-Typed: 9 of 12 functions and methods (75%).
+Typed: 10 of 13 functions and methods (76%).
 
 ```python
 """Side-by-side code comparisons, found from geometry and confirmed by content.
@@ -2707,7 +2707,7 @@ def find_code_pairs(blocks: list[Block], rules_for=None) -> list[TableCandidate]
     separates them (rows of a ruled comparison are not one block).
     """
     # untyped: rules_for
-    # calls: _pieces, _mono, _blocks, _box, runctx.current, _comment_share, _code_like, same_code, _label, _spaced, types.TableCandidate
+    # calls: _pieces, _mono, _blocks, _box, runctx.current, _comment_share, _row_text_share, _code_like, same_code, _label, _spaced, types.TableCandidate
     # called by: pipeline.run_pipeline
 
 def same_code(left: list[Line], right: list[Line]) -> float:
@@ -2715,7 +2715,7 @@ def same_code(left: list[Line], right: list[Line]) -> float:
     # calls: _grams
     # called by: find_code_pairs
 
-# + 10 private module-level names
+# + 11 private module-level names
 ```
 
 <a id="lib-pdf-content-py"></a>

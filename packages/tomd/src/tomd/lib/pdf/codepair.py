@@ -46,6 +46,7 @@ _COMMENT = ("//", "/*", "#", "--")
 _CODE_MARK = re.compile(r"[;{}()<>\[\]=]|::|->")
 _CODE_LINES = 0.3          # a code block: this share of its lines carry code punctuation
 _FURNITURE_PAGES = 3       # the same pair text on this many pages is page furniture
+_ROW_TEXT = 0.5            # this share of left lines with plain text on their row, between or right of the code: rows
 
 
 def _pieces(line: Line) -> list[Line]:
@@ -136,6 +137,21 @@ def _code_like(block: list[Line]) -> bool:
     return sum(bool(_CODE_MARK.search(l.text)) for l in block) >= _CODE_LINES * len(block)
 
 
+def _row_text_share(left: list[Line], right: list[Line], rest: list[Line]) -> float:
+    """Share of the left block's lines that have plain (non-code) text on the same row
+    between the two blocks or right of the right one ("cw<1> + 1 | -> | 2 | the thing it
+    holds"): a mapping table whose rows hold code, not two listings side by side."""
+    lb, rb = _box(left), _box(right)
+    def on_row(ln, other):
+        h = ln.bbox[3] - ln.bbox[1]
+        return abs((ln.bbox[1] + ln.bbox[3]) / 2 - (other.bbox[1] + other.bbox[3]) / 2) <= h / 2
+    beside = [r for r in rest if not r.text.strip().isdigit()        # line numbers belong to listings
+              and lb[1] - 2 <= (r.bbox[1] + r.bbox[3]) / 2 <= max(lb[3], rb[3]) + 2
+              and (lb[2] <= r.bbox[0] and r.bbox[2] <= rb[0] or r.bbox[0] >= rb[2])]
+    hits = sum(1 for ln in left if any(on_row(ln, r) for r in beside))
+    return hits / len(left) if left else 0.0
+
+
 def _label(block: list[Line], others: list[Line]) -> Line | None:
     x0, y0, x1, _ = _box(block)
     near = [l for l in others if y0 - _LABEL_REACH <= l.bbox[3] <= y0 + 1
@@ -173,6 +189,9 @@ def find_code_pairs(blocks: list[Block], rules_for=None) -> list[TableCandidate]
                 if _comment_share(right) >= _COMMENTS:
                     rec.exclude("codepair", page, box, "code with a comment column", "words")
                     continue                          # code with its comments beside it
+                if _row_text_share(left, right, rest) >= _ROW_TEXT:
+                    rec.exclude("codepair", page, box, "rows continue with text beside the code (a wider table)", "words")
+                    continue                          # two code columns of a wider table
                 if not (_code_like(left) and _code_like(right)):
                     rec.exclude("codepair", page, box, "monospace prose, not code", "words")
                     continue                          # monospace prose (a form, a template)

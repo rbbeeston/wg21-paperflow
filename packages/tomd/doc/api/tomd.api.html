@@ -3725,13 +3725,13 @@ a.t{color:inherit;text-decoration:underline dotted}a.ln{color:var(--mut);font-si
     <span class="c u"># untyped: page, columns, spans</span>
     <span class="c"># calls: </span>_segments<span class="c"></span>
 
-<span class="k">def </span><span class="n" id="lib.pdf.ruled.extract_ruled_tables">extract_ruled_tables</span>(page, page_num: int, drawings=None) -&gt; list[<a class="t" href="#lib.pdf.types.TableCandidate">TableCandidate</a>]:<a class="ln" href="../../src/tomd/lib/pdf/ruled.py#L1269">ruled.py:1269</a>
+<span class="k">def </span><span class="n" id="lib.pdf.ruled.extract_ruled_tables">extract_ruled_tables</span>(page, page_num: int, drawings=None) -&gt; list[<a class="t" href="#lib.pdf.types.TableCandidate">TableCandidate</a>]:<a class="ln" href="../../src/tomd/lib/pdf/ruled.py#L1275">ruled.py:1275</a>
 <span class="d">    &quot;&quot;&quot;All tables on one page that ruling lines reveal.&quot;&quot;&quot;</span>
     <span class="c u"># untyped: page, drawings</span>
     <span class="c"># calls: </span>_unrotate, <a class="t" href="#lib.pdf.pagecache.rawdict">pagecache.rawdict</a>, _page_chars, _page_words, _grid_tables, _column_ruled_tables, _bad_flags, <a class="t" href="#lib.pdf.runctx.current">runctx.current</a>, <a class="t" href="#lib.pdf.select.table_flags">select.table_flags</a>, _horizontal_rules, _rule_groups, _overlaps<span class="c">, +2 more</span>
     <span class="c"># called by: </span><a class="t" href="#lib.pdf.pipeline.run_pipeline">pipeline.run_pipeline</a><span class="c"></span>
 
-<span class="k">def </span><span class="n" id="lib.pdf.ruled.page_hrules">page_hrules</span>(page, drawings=None) -&gt; list[tuple[float, float, float]]:<a class="ln" href="../../src/tomd/lib/pdf/ruled.py#L1321">ruled.py:1321</a>
+<span class="k">def </span><span class="n" id="lib.pdf.ruled.page_hrules">page_hrules</span>(page, drawings=None) -&gt; list[tuple[float, float, float]]:<a class="ln" href="../../src/tomd/lib/pdf/ruled.py#L1327">ruled.py:1327</a>
 <span class="d">    &quot;&quot;&quot;Drawn horizontal separators on the page: (y, x0, x1).&quot;&quot;&quot;</span>
     <span class="c u"># untyped: page, drawings</span>
     <span class="c"># called by: </span><a class="t" href="#lib.pdf.classify.gate_tables">classify.gate_tables</a>, <a class="t" href="#lib.pdf.pipeline.run_pipeline">pipeline.run_pipeline</a><span class="c"></span>
@@ -5363,12 +5363,13 @@ a.t{color:inherit;text-decoration:underline dotted}a.ln{color:var(--mut);font-si
 <span class="d"></span>
 <span class="d">    ``tag`` is ``&quot;th&quot;`` or ``&quot;td&quot;``. ``code_text`` is raw code; this function</span>
 <span class="d">    escapes it, so ``&lt;``/``&amp;``/quotes survive inside the ``&lt;pre&gt;``.</span>
-<span class="d">    Blank lines are preserved as ``&amp;#10;`` so they survive HTML rendering.</span>
+<span class="d">    Blank lines, whitespace-only ones included, are preserved as ``&amp;#10;``: a</span>
+<span class="d">    blank line inside the table would end its HTML block in Markdown.</span>
 <span class="d">    &quot;&quot;&quot;</span>
     <span class="c"># calls: </span>_rowspan_attr<span class="c"></span>
     <span class="c"># called by: </span>render._render_mixed_code_table, emit._render_html_table<span class="c"></span>
 
-<span class="k">def </span><span class="n" id="lib.tables.text_cell">text_cell</span>(tag: str, inner_html: str, style: str, *, rowspan: int = 1) -&gt; str:<a class="ln" href="../../src/tomd/lib/tables.py#L66">tables.py:66</a>
+<span class="k">def </span><span class="n" id="lib.tables.text_cell">text_cell</span>(tag: str, inner_html: str, style: str, *, rowspan: int = 1) -&gt; str:<a class="ln" href="../../src/tomd/lib/tables.py#L67">tables.py:67</a>
 <span class="d">    &quot;&quot;&quot;Render a non-code cell. ``inner_html`` is emitted verbatim.</span>
 <span class="d"></span>
 <span class="d">    The caller is responsible for preparing ``inner_html``: the PDF side passes</span>

@@ -899,6 +899,12 @@ def _column_starts(row_words: list[list]) -> list[float]:
     need = max(2, _COL_START_SUPPORT * len(row_words))
     for k, n in starts.items():
         x = k * _COL_START_TOL
+        # text running across the start in as many rows as start there: a word
+        # inside a column ("provides" after a wrapped "[8]"), not a column's edge
+        crossed = sum(1 for ws in row_words
+                      if any(w[0] < x - _COL_START_TOL and w[2] > x + _COL_START_TOL for w in ws))
+        if crossed >= n:
+            continue
         if n >= need and x - left > 2 * _COL_START_TOL:
             if not any(abs(x - s) < 4 * _COL_START_TOL for s in seps):
                 seps.add(x - _COL_START_TOL)

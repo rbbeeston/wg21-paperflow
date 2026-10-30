@@ -6444,7 +6444,8 @@ def code_cell(tag: str, code_text: str, style: str, *, rowspan: int = 1) -> str:
 
     ``tag`` is ``"th"`` or ``"td"``. ``code_text`` is raw code; this function
     escapes it, so ``<``/``&``/quotes survive inside the ``<pre>``.
-    Blank lines are preserved as ``&#10;`` so they survive HTML rendering.
+    Blank lines, whitespace-only ones included, are preserved as ``&#10;``: a
+    blank line inside the table would end its HTML block in Markdown.
     """
     # calls: _rowspan_attr
     # called by: render._render_mixed_code_table, emit._render_html_table

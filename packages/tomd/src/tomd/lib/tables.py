@@ -55,10 +55,11 @@ def code_cell(tag: str, code_text: str, style: str, *, rowspan: int = 1) -> str:
 
     ``tag`` is ``"th"`` or ``"td"``. ``code_text`` is raw code; this function
     escapes it, so ``<``/``&``/quotes survive inside the ``<pre>``.
-    Blank lines are preserved as ``&#10;`` so they survive HTML rendering.
+    Blank lines, whitespace-only ones included, are preserved as ``&#10;``: a
+    blank line inside the table would end its HTML block in Markdown.
     """
     escaped = html.escape(code_text)
-    escaped = "\n".join(line or "&#10;" for line in escaped.split("\n"))
+    escaped = "\n".join(line if line.strip() else "&#10;" for line in escaped.split("\n"))
     return (f'<{tag} style="{style}"{_rowspan_attr(rowspan)}>'
             f'<pre style="margin: 0;"><code>{escaped}</code></pre></{tag}>')
 

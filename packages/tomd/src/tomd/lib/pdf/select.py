@@ -34,6 +34,7 @@ from difflib import SequenceMatcher
 
 from .runctx import current
 from .stacked import split_stacked
+from .table import _STRATEGY_MAP, TableStrategy, _classify_table, _compute_table_signals
 from .types import BULLET_CHARS, Block, Confidence, Line, Section, SectionKind, Span, TableCandidate
 
 _log = logging.getLogger(__name__)
@@ -1012,6 +1013,16 @@ def _as_markdown_rows(cand: TableCandidate) -> str:
     return "\n".join(lines)
 
 
+def _pipe_kind(sec: Section) -> None:
+    """Another reader's table gets the kind paperflow's classifier gives its cells (a
+    clean matrix, prose table, key-value list), so a table paperflow did not read
+    still carries one. Only kinds rendered as pipe tables: a kind paperflow would
+    render as HTML or code blocks would change how the table is written."""
+    kind = _classify_table(_compute_table_signals(sec.columns))
+    if _STRATEGY_MAP[kind] is TableStrategy.PIPE_TABLE:
+        sec.table_kind, sec.table_strategy = kind.value, TableStrategy.PIPE_TABLE.value
+
+
 def _to_section(cand: TableCandidate, confidence: Confidence,
                 alternatives: list[TableCandidate]) -> Section:
     all_lines = sorted((ln for row in cand.rows for cell in row for ln in cell),
@@ -1033,6 +1044,8 @@ def _to_section(cand: TableCandidate, confidence: Confidence,
         sec.table_strategy = origin.table_strategy
         sec.table_source = origin.table_source
         sec.table_continuation = origin.table_continuation
+    else:
+        _pipe_kind(sec)
     if "closed-grid" in cand.flags and len(cand.pages) == 1:
         sec.metadata["closed_grid"] = True       # its spans are checked against the drawn lines
     if "extent:header-below" in cand.flags:

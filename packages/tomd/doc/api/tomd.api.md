@@ -1,6 +1,6 @@
 # tomd API surface
 
-114 modules, 93 classes, 302 functions, 89 methods, 382 fields. Typed: 930 of 1194 functions and methods (77%).
+114 modules, 93 classes, 302 functions, 89 methods, 382 fields. Typed: 931 of 1196 functions and methods (77%).
 
 ## Contents
 
@@ -4569,7 +4569,7 @@ MIN_SEGMENT = 15.0  # pt: shorter strokes are not row separators
 
 ## `lib/pdf/ruled.py` ([source](../../src/tomd/lib/pdf/ruled.py))
 
-Typed: 8 of 41 functions and methods (19%).
+Typed: 8 of 42 functions and methods (19%).
 
 ```python
 """Table detection from ruling lines (vector drawings).
@@ -4617,7 +4617,7 @@ def page_hrules(page, drawings=None) -> list[tuple[float, float, float]]:
     # untyped: page, drawings
     # called by: classify.gate_tables, pipeline.run_pipeline
 
-# + 38 private module-level names
+# + 39 private module-level names
 ```
 
 <a id="lib-pdf-runctx-py"></a>
@@ -4772,7 +4772,7 @@ MODEL = ...
 
 ## `lib/pdf/select.py` ([source](../../src/tomd/lib/pdf/select.py))
 
-Typed: 43 of 53 functions and methods (81%).
+Typed: 44 of 54 functions and methods (81%).
 
 ```python
 """Table selection: one reading per region, trusted only when another kind of evidence agrees.
@@ -4994,7 +4994,7 @@ TRUST_ONLY_PIPE_RENDERING = True
 # "SF F N A SA", "SF WF N WA SA", "F N A", "Strongly Favor ... Strongly Against".
 VOTE_LABELS = ...
 
-# + 35 private module-level names
+# + 36 private module-level names
 ```
 
 <a id="lib-pdf-spans-py"></a>

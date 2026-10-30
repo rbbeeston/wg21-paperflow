@@ -48,6 +48,8 @@ _MUPDF_ITALIC_BIT = 1 << 1
 
 _RULE_MAX_THICK = 2.5     # a "rule" is a line or a very thin filled rect
 _RULE_MIN_LEN = 40.0
+_WHITE = 0.99             # a fill this light on every channel is white
+_BACKGROUND_SHARE = 0.5   # an unoutlined white box over this share of the page is its background, whatever lies under it
 _FILL_MAX_HEIGHT = 90.0   # taller filled boxes are panels, not row shading (3-line headers fit)
 _RULE_JOIN_GAP = 2.0      # Word draws one segment per cell; join them
 _RULE_MERGE_Y = 3.5       # booktabs double rules collapse to one
@@ -567,6 +569,31 @@ def _without_decorations(drawings, chars):
     return out if dropped else None
 
 
+def _without_backgrounds(drawings, page_rect):
+    """The page's drawings without white backgrounds (None when there are none): a white
+    box with no outline draws no edge on a white page - the page's own background, or
+    the box behind a line of text - but find_tables reads its sides as rules and joins
+    it to the tables it touches (a page-sized grid around every table and paragraph; a
+    note under a poll read as its last row). A white box on a coloured fill does show
+    its edges and is kept."""
+    def white(d):
+        return d.get("fill") is not None and min(d["fill"]) >= _WHITE and d.get("color") is None
+    coloured = [it[1] for d in drawings if d.get("fill") is not None and not white(d)
+                for it in d["items"] if it[0] == "re"]
+    area = page_rect.width * page_rect.height
+    def invisible(r):
+        return r.width * r.height >= _BACKGROUND_SHARE * area or not any(
+            c.x0 <= r.x0 + 0.5 and c.y0 <= r.y0 + 0.5 and c.x1 >= r.x1 - 0.5 and c.y1 >= r.y1 - 0.5
+            for c in coloured)
+    out, dropped = [], 0
+    for d in drawings:
+        items = [it for it in d["items"] if not (white(d) and it[0] == "re" and invisible(it[1]))]
+        dropped += len(d["items"]) - len(items)
+        if items:
+            out.append({**d, "items": items})
+    return out if dropped else None
+
+
 def _tiled_cells(drawings) -> int:
     """edges shared by two filled boxes side by side: a grid drawn as coloured
     cells with no lines (slides, macOS exports)"""
@@ -628,7 +655,9 @@ def _with_overflow(cell_chars, chars, right):
 def _grid_tables_in(page, page_num, chars, clip, drawings=()) -> list[TableCandidate]:
     out = []
     # (None: no decorations on the page, find_tables reads the page's own drawings)
-    paths = _without_decorations(list(drawings), chars) if drawings else None
+    shown = _without_backgrounds(list(drawings), page.rect) if drawings else None
+    paths = _without_decorations(shown if shown is not None else list(drawings), chars) if drawings else None
+    paths = paths if paths is not None else shown
     kw = {"paths": paths} if paths is not None else {}
     finder = page.find_tables(strategy="lines", clip=clip, **kw) if clip else page.find_tables(strategy="lines", **kw)
     # each character placed by where its word starts: a word overrunning its cell's

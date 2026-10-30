@@ -1,6 +1,6 @@
 # tomd API surface
 
-114 modules, 93 classes, 302 functions, 89 methods, 382 fields. Typed: 929 of 1193 functions and methods (77%).
+114 modules, 93 classes, 302 functions, 89 methods, 382 fields. Typed: 930 of 1194 functions and methods (77%).
 
 ## Contents
 
@@ -4772,7 +4772,7 @@ MODEL = ...
 
 ## `lib/pdf/select.py` ([source](../../src/tomd/lib/pdf/select.py))
 
-Typed: 42 of 52 functions and methods (80%).
+Typed: 43 of 53 functions and methods (81%).
 
 ```python
 """Table selection: one reading per region, trusted only when another kind of evidence agrees.
@@ -4958,7 +4958,7 @@ def table_flags(cand: TableCandidate) -> list[str]:
     """Rule-based sanity checks. Flags in BAD_TABLE_FLAGS mean the grid is
     probably wrong; the others are informational.
     """
-    # calls: _split_code_cell
+    # calls: _split_code_cell, _numbered_headings
     # called by: ruled._bad_flags, ruled.extract_ruled_tables, select_tables
 
 def vote_header(labels: list[str]) -> bool:
@@ -4994,7 +4994,7 @@ TRUST_ONLY_PIPE_RENDERING = True
 # "SF F N A SA", "SF WF N WA SA", "F N A", "Strongly Favor ... Strongly Against".
 VOTE_LABELS = ...
 
-# + 34 private module-level names
+# + 35 private module-level names
 ```
 
 <a id="lib-pdf-spans-py"></a>

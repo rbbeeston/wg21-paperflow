@@ -166,6 +166,7 @@ _WORD_RE = re.compile(r"\w+")
 _REF_LABEL_RE = re.compile(r"(^|\S)\[[A-Z][A-Za-z0-9.+_'\u2019-]{1,29}\]$")    # [N2529], [P3847R1], [O'Dwyer2018]
 _REF_LEAD_RE = re.compile(r"^\[[A-Z][A-Za-z0-9.+_'\u2019-]{1,29}\]\s+\S")  # "[P2831R0] Timur ..."
 _SECTION_NUM_CELL_RE = re.compile(r"^(\d+(\.\d+)+\.?|[IVXLC]+\.)$")        # "9.1", "1.2.3", "IV."
+_SECTION_NO_RE = re.compile(r"^\d+(\.\d+)*\.?$")                            # "2", "2.1", "3."
 _ASCII_ART_RE = re.compile(r"[+|]-{2,}|-{3,}[+|]")
 
 
@@ -371,6 +372,19 @@ def _all_bold(row) -> bool:
     return bool(spans) and all(s.bold for s in spans)
 
 
+def _numbered_headings(cand: TableCandidate) -> bool:
+    """Section headings laid out as number and title, with a paragraph under each
+    that fills only the first column (headings underlined by rules give such a
+    region): every row with two filled cells starts with a section number, one of
+    them a subsection ("2.1"), and some row is prose alone in the first column."""
+    firsts = [[next((ln.text.strip() for ln in cell if ln.text.strip()), "") for cell in row]
+              for row in cand.rows]
+    pairs = [f for f in firsts if sum(1 for c in f if c) >= 2]
+    prose = [f for f in firsts if f and f[0] and not any(f[1:]) and not _SECTION_NO_RE.match(f[0])]
+    return (bool(pairs) and bool(prose) and all(_SECTION_NO_RE.match(f[0]) for f in pairs)
+            and any(_SECTION_NUM_CELL_RE.match(f[0]) for f in pairs))
+
+
 def table_flags(cand: TableCandidate) -> list[str]:
     """Rule-based sanity checks. Flags in BAD_TABLE_FLAGS mean the grid is
     probably wrong; the others are informational."""
@@ -438,6 +452,8 @@ def table_flags(cand: TableCandidate) -> list[str]:
             and all(_SECTION_NUM_CELL_RE.match(c) for c in first)) \
             or (rows[0] and _SECTION_NUM_CELL_RE.match(rows[0][0])):
         flags.append("numbered-list")               # "9.1 | feature test macro" (a header cell is never a section number)
+    elif ncol == 2 and _numbered_headings(cand):
+        flags.append("numbered-list")               # "2 | STRAW POLLS", "2.1 | suggested polls", a paragraph under each
     if sum(1 for c in cells if c and _ASCII_ART_RE.search(c)) >= 2:
         flags.append("ascii-art")                   # "+---+ +---+" box diagrams
     comment_cols = [j for j in range(ncol)

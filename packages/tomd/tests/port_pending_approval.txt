@@ -3,4 +3,3 @@
 # HELD entries read worse than paperflow did before the port; each is a post-merge fix (port_plan.md).
 # node id (relative to packages/tomd/tests) | port step | what changed and why
 test_golden_gate.py::test_tomd_meets_golden_baseline[p0533r9] | step 10 | HELD 2026-10-29: table back to 1.00; text 0.65 < 0.66 because a mark cuts its section at the page break (locality), splitting one paragraph that runs over the break
-test_golden_gate.py::test_tomd_meets_golden_baseline[p1068r11] | step 6 | HELD 2026-10-28: approved by the user with the fix tracked, but kept as an expected failure so the gate still guards table 1.00 (post-merge bug: letter-spaced poll labels)

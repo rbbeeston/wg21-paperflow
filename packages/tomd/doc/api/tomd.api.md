@@ -1,6 +1,6 @@
 # tomd API surface
 
-114 modules, 93 classes, 302 functions, 89 methods, 382 fields. Typed: 931 of 1198 functions and methods (77%).
+114 modules, 93 classes, 302 functions, 89 methods, 382 fields. Typed: 931 of 1199 functions and methods (77%).
 
 ## Contents
 
@@ -3075,7 +3075,7 @@ MODEL = ...
 
 ## `lib/pdf/emit.py` ([source](../../src/tomd/lib/pdf/emit.py))
 
-Typed: 49 of 54 functions and methods (90%).
+Typed: 49 of 55 functions and methods (89%).
 
 ```python
 """Markdown and companion prompts file generation."""
@@ -3169,7 +3169,7 @@ COMPOUND_PREFIXES = ...
 # stray bullet glyph survives mid-text (#303).
 LIST_BULLET = '-'
 
-# + 47 private module-level names
+# + 48 private module-level names
 ```
 
 <a id="lib-pdf-emoji-data-py"></a>

@@ -1025,6 +1025,13 @@ def _render_paired_code(rows) -> str:
     return "\n\n".join(parts)
 
 
+def _separator_row(row) -> bool:
+    """A row of dashes ("- | - | -"): a Markdown table's separator line that the program
+    which made the PDF printed as text under the header."""
+    cells = ["".join(s.text for s in cell).strip() for cell in row]
+    return sum(1 for c in cells if c) >= 2 and all(not c or _SEPARATOR_CELL.match(c) for c in cells)
+
+
 def _render_table(sec: Section) -> str:
     """Render a table section according to its assigned strategy."""
     if sec.columns and is_code_comparison(sec.columns):
@@ -1057,6 +1064,10 @@ def _render_table(sec: Section) -> str:
         lines.append("| " + " | ".join(header_cells) + " |")
         lines.append("| " + " | ".join(["---"] * num_cols) + " |")
         data_rows = rows[1:]
+        # the source's own separator line, printed: it is the line above. A dash row
+        # with no body under it is the table's content ("-" for no votes)
+        if len(data_rows) > 1 and _separator_row(data_rows[0]):
+            data_rows = data_rows[1:]
 
     for row in data_rows:
         cells = [
@@ -1070,6 +1081,7 @@ def _render_table(sec: Section) -> str:
     return "\n".join(lines)
 
 
+_SEPARATOR_CELL = re.compile(r"^:?-+:?$")      # "-", "---", ":--:"
 _ITALIC_INLINE_ESCAPE_RE = re.compile(r"([\\*_`])")
 # Leading characters that would otherwise be parsed as a list marker,
 # blockquote, ATX heading, or ordered-list start. The synthesised

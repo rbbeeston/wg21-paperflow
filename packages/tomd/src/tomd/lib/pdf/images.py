@@ -40,15 +40,15 @@ import logging
 import re
 from collections.abc import Iterable, Mapping, Sequence
 from dataclasses import dataclass, field
-from typing import TYPE_CHECKING, Literal
+from typing import TYPE_CHECKING
+
+from tomd.domain.diagnostics import VectorUncertaintyStats
+from tomd.domain.image import ExtractedImage, ImageSource
 
 if TYPE_CHECKING:
     import pymupdf
 
     from .types import Block
-
-
-ImageSource = Literal["raster", "vector"]
 
 _log = logging.getLogger(__name__)
 
@@ -133,87 +133,6 @@ _CAPTION_LABEL_RE = re.compile(
     r"\s+\d+\s*[:.\-–—]\s*(.+)$",
     re.IGNORECASE,
 )
-
-
-@dataclass(frozen=True)
-class ExtractedImage:
-    """One embedded raster image kept for emission to markdown.
-
-    All fields except ``index_on_page`` and ``stored_filename`` are
-    derived during the per-page extraction phase; the index and the
-    filename are assigned by :func:`finalize_extraction` after global
-    xref deduplication, so that the position numbering reflects the
-    final canonical (page, y0, x0) order rather than ``pymupdf``'s
-    enumeration.
-
-    Field semantics across the two producer paths:
-
-    - **PDF (this module)**: every field is populated. ``bytes`` carries
-      the raw embedded-raster bytes pulled via ``doc.extract_image``.
-      The CLI convert orchestration persists those bytes via
-      ``backend.write_paper_image``.
-    - **HTML (tomd.lib.html.images)**: built from the
-      ``HtmlImagesManifest`` sidecar that mailing already wrote to
-      disk. ``bytes`` is the empty bytes sentinel ``b""`` (the bytes
-      are already on disk; no re-write needed), ``bbox`` is
-      ``(0.0, 0.0, 0.0, 0.0)`` (HTML has no spatial concept), and
-      ``xref`` is ``0`` (not applicable). ``page`` is ``0`` (the
-      paperstore-wide "no page concept" sentinel). The CLI
-      orchestration in ``cli.process._stage_convert`` checks
-      ``bytes`` truthiness to decide whether to call
-      ``write_paper_image``.
-    """
-
-    page: int                                       # 1-based for PDF, 0 for HTML
-    index_on_page: int                              # 1-based, after y/x sort
-    ext: str                                        # "png" | "jpeg" | "jpx" | ...
-    bytes: bytes                                    # empty for HTML
-    bbox: tuple[float, float, float, float]         # (x0, y0, x1, y1); zeros for HTML
-    suggested_alt: str
-    stored_filename: str                            # "<pid>-fig{page}-{index}.{ext}"
-    xref: int                                       # PDF xref; 0 for HTML
-    source: ImageSource = "raster"                  # "raster" (embedded XObject) | "vector" (rasterised clusters)
-    # Sub-captions captured by ``pipeline._filter_sections_inside_vector_images``.
-    # Each entry is ``(letter, full_text)`` where ``letter`` is the
-    # ``_SUB_CAPTION_RE`` letter group (``"a"``, ``"b"``, ...) and
-    # ``full_text`` is the dropped section's full text (``Section.text``).
-    # Tuple, not list - this dataclass is frozen, and a mutable list
-    # default would invite hidden append-mutation. Empty for raster
-    # papers and any vector image without a captured sub-caption.
-    sub_captions: tuple[tuple[str, str], ...] = ()
-    # True when the pipeline dropped this image's overall body caption
-    # section (the ``_normalize_caption`` equality gate in
-    # ``pipeline._filter_sections_inside_vector_images``). Emit keys on
-    # this: only then is the caption re-emitted as an italic paragraph -
-    # when the gate kept the body (caption merged with trailing prose),
-    # the body still carries the caption and re-emitting would
-    # duplicate it (#408). Always False for HTML images (their body is
-    # never filtered) and for images without alt-text attribution.
-    caption_body_dropped: bool = False
-
-
-@dataclass(frozen=True)
-class VectorUncertaintyStats:
-    """Per-paper accounting of the vector-extraction filter pipeline.
-
-    Surfaced as the trailing ``tomd:vector-extraction-uncertain`` marker
-    appended to ``paper.md`` when extraction was attempted and at least
-    one cluster was rejected or at least one page was skipped. Field
-    semantics are documented in the vector-extraction plan's section
-    1.6a; the closed key set for ``reasons`` is enforced by tests.
-
-    All counts are non-negative integers. ``reasons`` is a frozen
-    mapping ``reason -> count`` where reason is one of:
-    ``clusters_overflow``, ``edge_band``, ``text_overlap``,
-    ``too_few_items``, ``too_small``, ``wording_color``.
-    """
-
-    pages_scanned: int
-    candidates: int
-    kept: int
-    rejected: int
-    reasons: Mapping[str, int]
-    pages_skipped: int
 
 
 @dataclass(frozen=True)

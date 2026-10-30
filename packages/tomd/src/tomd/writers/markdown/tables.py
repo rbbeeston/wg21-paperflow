@@ -95,6 +95,3 @@ def write_table(table: Table) -> str:
         result = f"{result}\n\n*{table.caption}*"
 
     return result
-
-
-__all__ = ["write_table"]

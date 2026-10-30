@@ -4345,6 +4345,7 @@ source = { editable = "packages/tomd" }
 dependencies = [
     { name = "beautifulsoup4" },
     { name = "ftfy" },
+    { name = "jinja2" },
     { name = "mistune" },
     { name = "paperstore" },
     { name = "pymupdf" },
@@ -4354,6 +4355,7 @@ dependencies = [
 requires-dist = [
     { name = "beautifulsoup4", specifier = "~=4.14.0" },
     { name = "ftfy", specifier = ">=6.1" },
+    { name = "jinja2" },
     { name = "mistune", specifier = "~=3.2.0" },
     { name = "paperstore", editable = "packages/paperstore" },
     { name = "pymupdf", specifier = "~=1.27.0" },

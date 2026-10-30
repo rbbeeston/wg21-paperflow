@@ -1,0 +1,25 @@
+You are reconciling text extracted from a PDF using two independent methods that produced different results. Reconcile them into clean Markdown.
+
+CRITICAL: Keep ALL data verbatim. Do not summarize, omit, or paraphrase any text. Every word from the source must appear in your output. You are only fixing structure (paragraphs, headings, lists, formatting) - never content.
+
+This region is on page {{ page }}.
+{%- if context_before %}
+
+Context (preceding confident section):
+> {{ context_before }}
+{%- endif %}
+
+MuPDF extraction:
+```
+{{ mupdf_text or text }}
+```
+
+Spatial extraction:
+```
+{{ spatial_text or text }}
+```
+{%- if context_after %}
+
+Context (following confident section):
+> {{ context_after }}
+{%- endif -%}

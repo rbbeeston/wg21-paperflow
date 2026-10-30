@@ -9,7 +9,7 @@ Official repository: https://github.com/cppalliance/wg21-paperflow
 from dataclasses import dataclass, field
 from typing import Any
 
-from tomd.lib.metadata_yaml.format import FRONT_MATTER_ORDER as FRONT_MATTER_ORDER
+from tomd.lib.metadata_yaml.format import FRONT_MATTER_ORDER
 
 
 @dataclass

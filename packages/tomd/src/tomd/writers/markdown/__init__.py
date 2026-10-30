@@ -6,6 +6,10 @@ file LICENSE_1_0.txt or copy at http://www.boost.org/LICENSE_1_0.txt)
 Official repository: https://github.com/cppalliance/wg21-paperflow
 """
 
-from .writer import MarkdownWriter
+from tomd.writers.markdown.markers import append_trailer_markers
+from tomd.writers.markdown.writer import MarkdownWriter
 
-__all__ = ["MarkdownWriter"]
+__all__ = [
+    "MarkdownWriter",
+    "append_trailer_markers",
+]

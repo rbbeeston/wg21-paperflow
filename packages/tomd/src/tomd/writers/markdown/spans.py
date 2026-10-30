@@ -132,6 +132,3 @@ def _write_link_span(span: LinkSpan) -> str:
 def write_spans(spans: Sequence[Span]) -> str:
     """Format a sequence of Spans into concatenated Markdown text."""
     return "".join(write_span(s) for s in spans)
-
-
-__all__ = ["format_code_span", "write_span", "write_spans"]

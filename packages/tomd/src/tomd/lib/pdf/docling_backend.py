@@ -28,7 +28,9 @@ import fitz as _fitz
 import logging
 from pathlib import Path
 
-from .types import Block, Line, Section, SectionKind, Span, Confidence
+from tomd.domain.elements import Confidence
+
+from .types import Block, Line, Section, SectionKind, Span
 from ._fitz_lock import _FITZ_LOCK
 
 _log = logging.getLogger(__name__)

@@ -27,7 +27,8 @@ first reading is kept in the metadata and the evidence record.
 from dataclasses import dataclass, replace
 
 from .runctx import current
-from .types import Confidence, Section, Span
+from tomd.domain.elements import Confidence
+from .types import Section, Span
 from .validate import verify_layout
 
 # A table area holding more words than this is not asked about.

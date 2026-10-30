@@ -169,10 +169,3 @@ def strip_body_metadata_text(md: str) -> str:
 
     new_lines = [ln for j, ln in enumerate(lines) if j not in to_remove]
     return front + "\n".join(new_lines)
-
-
-__all__ = [
-    "normalize_front_matter",
-    "strip_body_metadata_text",
-    "strip_toc",
-]

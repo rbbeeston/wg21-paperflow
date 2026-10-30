@@ -17,10 +17,13 @@ from .cleanup import (
     find_hidden_regions,
     strip_hidden_blocks,
 )
+from tomd.domain.diagnostics import GlyphPassStats, VectorUncertaintyStats
+from tomd.domain.document import SkipReason
+from tomd.domain.elements import Confidence
+from tomd.domain.image import ExtractedImage
+
 from .extract import extract_mupdf, extract_spatial, collect_links, attach_links
 from .images import (
-    ExtractedImage,
-    VectorUncertaintyStats,
     _CAPTION_LABEL_RE,
     _CAPTION_SEARCH_RADIUS_BELOW_PT,
     _VectorExtractionStats,
@@ -29,7 +32,6 @@ from .images import (
 )
 from .vector_images import extract_page_vector_images
 from .glyphs import (
-    GlyphPassStats,
     collect_glyph_candidates,
     collect_text_emoji_bboxes,
     drop_glyphs_in_code_and_tables,
@@ -59,11 +61,9 @@ from .table import (
 from .wg21 import extract_metadata_from_blocks
 from .emit import emit_markdown, emit_prompts, renumber_uncertain_markers, table_use, _escape_italic_text
 from .types import (
-    Confidence,
     KNOWN_SECTIONS,
     Section,
     SectionKind,
-    SkipReason,
     is_readable,
 )
 from .. import DOC_NUM_RE
@@ -118,7 +118,7 @@ from .rowbands import merge_rule_bands
 from .levels import assign as assign_level
 from .summary import build as build_summary, generator as pdf_generator, header_comment, prompt_elements
 
-__all__ = ["run_pipeline", "PipelineResult", "ExtractedImage"]
+__all__ = ["run_pipeline", "PipelineResult"]
 
 _log = logging.getLogger(__name__)
 

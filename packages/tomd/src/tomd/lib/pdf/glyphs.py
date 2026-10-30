@@ -43,6 +43,8 @@ import math
 from dataclasses import dataclass
 from typing import TYPE_CHECKING
 
+from tomd.domain.diagnostics import GlyphPassStats
+
 from .emoji_data import EMOJI_PRESENTATION_RANGES
 from .images import MIN_IMAGE_DIM_PT
 from .types import Block, Line, Section, SectionKind, Span, compute_bbox
@@ -108,32 +110,6 @@ class GlyphCandidate:
 
     page: int
     bbox: tuple[float, float, float, float]
-
-
-@dataclass
-class GlyphPassStats:
-    """Per-paper accounting for the glyph-placeholder pass.
-
-    ``injected`` counts placeholders actually placed (orphan rects);
-    ``skipped_coincident`` counts rects dropped because a text-layer
-    emoji codepoint already covered the position; ``free_standing``
-    counts injected placeholders that fell back to a synthesised
-    single-line block (a subset of ``injected``); ``skipped_code_section``
-    counts placeholders removed post-structure because the line they
-    attached to became a CODE or TABLE section (a subset of the
-    originally ``injected`` count).
-    """
-
-    injected: int = 0
-    skipped_coincident: int = 0
-    free_standing: int = 0
-    skipped_code_section: int = 0
-
-    @property
-    def fired(self) -> bool:
-        """True if the pass produced anything worth disclosing."""
-        return bool(self.injected or self.skipped_coincident
-                    or self.free_standing or self.skipped_code_section)
 
 
 def _is_emoji_presentation(codepoint: int) -> bool:

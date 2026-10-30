@@ -1,7 +1,8 @@
 """Tests for lib.pdf.table."""
 
 from conftest import make_span
-from tomd.lib.pdf.types import Block, Line, Section, SectionKind, Confidence
+from tomd.domain.elements import Confidence
+from tomd.lib.pdf.types import Block, Line, Section, SectionKind
 from tomd.lib.pdf.table import (
     detect_tables, exclude_table_regions,
     _find_column_xs, _is_column_aligned_orphan,

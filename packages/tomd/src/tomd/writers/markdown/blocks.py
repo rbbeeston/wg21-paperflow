@@ -6,8 +6,6 @@ file LICENSE_1_0.txt or copy at http://www.boost.org/LICENSE_1_0.txt)
 Official repository: https://github.com/cppalliance/wg21-paperflow
 """
 
-from __future__ import annotations
-
 from collections.abc import Sequence
 from functools import singledispatch
 import re
@@ -254,9 +252,12 @@ def write_element(element: BlockElement) -> str:
 
 @write_element.register
 def _write_heading(element: Heading) -> str:
+    content = write_spans(element.spans)
+    if not content.strip():
+        return ""
     level = max(1, min(6, element.level))
     prefix = "#" * level
-    return f"{prefix} {write_spans(element.spans)}"
+    return f"{prefix} {content}"
 
 
 @write_element.register
@@ -306,10 +307,17 @@ def _write_image_element(_element: ImageElement) -> str:
     return ""
 
 
+def format_uncertain_element(
+    element: UncertainElement,
+    line_num: int = 1,
+) -> str:
+    """Format an uncertain region with its 1-based line-range marker."""
+    text = element.text.rstrip()
+    text_start = line_num + 2
+    text_end = text_start + text.count("\n")
+    return f"<!-- tomd:uncertain:L{text_start}-L{text_end} -->\n\n{text}"
+
+
 @write_element.register
 def _write_uncertain_element(element: UncertainElement) -> str:
-    prompt_str = element.prompt.replace('"', '\\"')
-    return f'<!-- tomd:uncertain prompt="{prompt_str}" -->\n{element.raw_content}'
-
-
-__all__ = ["strip_redundant_roles", "write_element"]
+    return format_uncertain_element(element)

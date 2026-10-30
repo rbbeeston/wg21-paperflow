@@ -13,13 +13,14 @@ from pathlib import Path
 import pymupdf
 import re
 
+from tomd.domain.diagnostics import GlyphPassStats
+from tomd.domain.elements import Confidence
 from tomd.lib.html import convert_html
 from tomd.lib.pdf.glyphs import (
     _GLYPH_COINCIDENT_TOLERANCE_PT as TOL,
     GLYPH_FONT_SENTINEL,
     UNKNOWN_GLYPH,
     GlyphCandidate,
-    GlyphPassStats,
     _is_emoji_presentation,
     collect_glyph_candidates,
     collect_text_emoji_bboxes,
@@ -30,7 +31,7 @@ from tomd.lib.pdf.glyphs import (
     is_glyph_only_block,
 )
 from tomd.lib.pdf.pipeline import run_pipeline
-from tomd.lib.pdf.types import Block, Confidence, Line, Section, SectionKind, Span
+from tomd.lib.pdf.types import Block, Line, Section, SectionKind, Span
 from tomd.lib.pdf.structure import compare_extractions, structure_sections
 
 from tomd.lib.check_content import _normalize

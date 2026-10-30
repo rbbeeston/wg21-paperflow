@@ -8,6 +8,7 @@ from types import SimpleNamespace
 
 import pytest
 
+from tomd.domain.elements import Confidence
 from tomd.lib.pdf.types import Span, Line, Block, Section, SectionKind
 from tomd.lib.pdf.table import (
     _block_column_positions,
@@ -1345,7 +1346,6 @@ class TestMergeCrossPageFragments:
 
     @staticmethod
     def _fragment(rows, page_num, y0, y1):
-        from tomd.lib.pdf.types import Confidence, Section, SectionKind
         lines = [_line(rows[0][0], 74.0, y0, 160.0, y0 + 13),
                  _line(rows[-1][0], 74.0, y1 - 13, 160.0, y1)]
         for ln in lines:

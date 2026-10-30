@@ -29,7 +29,8 @@ metadata: the table's content is unchanged.
 
 import re
 
-from .types import Confidence, Section
+from tomd.domain.elements import Confidence
+from .types import Section
 
 NAMES = {0: "trusted", 1: "likely", 2: "minor", 3: "structure-uncertain", 4: "content-at-risk", 5: "mark-only"}
 # First level shown in the Markdown: L0 and L1 carry no level comment.

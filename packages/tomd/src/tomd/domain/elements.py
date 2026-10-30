@@ -12,13 +12,31 @@ file LICENSE_1_0.txt or copy at http://www.boost.org/LICENSE_1_0.txt)
 
 Official repository: https://github.com/cppalliance/wg21-paperflow
 """
-from dataclasses import dataclass, field, replace
+from dataclasses import asdict, dataclass, field, replace
 from enum import StrEnum
 from typing import Literal, Self
 
 from tomd.domain.span import Span, TextSpan
+from tomd.prompts import render_prompt
 
 WordingRole = Literal["wording", "wording-add", "wording-remove"]
+
+
+class Confidence(StrEnum):
+    """Confidence level for structural classification decisions."""
+
+    HIGH = "high"
+    MEDIUM = "medium"
+    LOW = "low"
+    UNCERTAIN = "uncertain"
+
+
+@dataclass(frozen=True)
+class Provenance:
+    """Source page and confidence metadata for a block element."""
+
+    page: int
+    confidence: Confidence
 
 
 class ElementKind(StrEnum):
@@ -39,6 +57,8 @@ class ElementKind(StrEnum):
 @dataclass
 class BlockElement:
     """Base class for all document-level block AST nodes."""
+
+    provenance: Provenance | None = field(default=None, kw_only=True)
 
     @property
     def text(self) -> str:
@@ -62,7 +82,7 @@ class Heading(BlockElement):
     spans: list[Span] = field(default_factory=list)
 
     @classmethod
-    def from_text(cls, level: int, text: str) -> "Heading":
+    def from_text(cls, level: int, text: str) -> Self:
         return cls(level=level, spans=[TextSpan(text)])
 
     @property
@@ -83,7 +103,7 @@ class Paragraph(BlockElement):
     spans: list[Span] = field(default_factory=list)
 
     @classmethod
-    def from_text(cls, text: str) -> "Paragraph":
+    def from_text(cls, text: str) -> Self:
         return cls(spans=[TextSpan(text)])
 
     @property
@@ -122,7 +142,7 @@ class ListItem:
     marker: str | None = None
 
     @classmethod
-    def from_text(cls, text: str) -> "ListItem":
+    def from_text(cls, text: str) -> Self:
         return cls(spans=[TextSpan(text)])
 
     @property
@@ -171,7 +191,7 @@ class Blockquote(BlockElement):
     role: str | None = None
 
     @classmethod
-    def from_text(cls, content: str, role: str | None = None) -> "Blockquote":
+    def from_text(cls, content: str, role: str | None = None) -> Self:
         return cls(children=[Paragraph.from_text(content)] if content else [], role=role)
 
     @property
@@ -193,7 +213,7 @@ class WordingBlock(BlockElement):
     children: list[BlockElement] = field(default_factory=list)
 
     @classmethod
-    def from_text(cls, text: str, role: WordingRole = "wording") -> "WordingBlock":
+    def from_text(cls, text: str, role: WordingRole = "wording") -> Self:
         return cls(role=role, children=[Paragraph.from_text(text)] if text else [])
 
     @property
@@ -229,11 +249,18 @@ class ImageElement(BlockElement):
 
 @dataclass
 class UncertainElement(BlockElement):
-    """Flagged block with conversion uncertainty or reviewer prompt."""
+    """Region where dual-path PDF extraction disagreed."""
 
-    prompt: str
-    raw_content: str = ""
+    mupdf_text: str
+    spatial_text: str
+    page: int
+    # Body text emitted under the uncertain marker in Markdown (starts as
+    # mupdf_text, potentially trimmed by downstream passes such as abstract
+    # extraction); also used as a fallback if either extraction is empty.
+    text: str = ""
+    context_before: str = ""
+    context_after: str = ""
 
-    @property
-    def text(self) -> str:
-        return self.raw_content
+    def get_reconciliation_prompt(self) -> str:
+        """Build the self-contained LLM reconciliation prompt for this region."""
+        return render_prompt("uncertain_element.md.j2", **asdict(self))

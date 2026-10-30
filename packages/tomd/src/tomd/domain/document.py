@@ -9,17 +9,18 @@ Official repository: https://github.com/cppalliance/wg21-paperflow
 from dataclasses import dataclass, field
 from enum import StrEnum
 
-from tomd.domain.elements import BlockElement
+from tomd.domain.diagnostics import Diagnostics
+from tomd.domain.elements import BlockElement, UncertainElement
 from tomd.domain.image import ExtractedImage
 from tomd.domain.metadata import PaperMetadata
 
 
 class SkipReason(StrEnum):
-    """Reason a paper was skipped during conversion."""
+    """Closed set of early-exit reasons for paper conversion."""
 
-    EMPTY_CONTENT = "empty_content"
-    SLIDE_DECK = "slide_deck"
-    STANDARDS_DRAFT = "standards_draft"
+    EMPTY_PDF = "empty pdf"
+    SLIDE_DECK = "slide deck"
+    STANDARDS_DRAFT = "standards draft"
     UNREADABLE = "unreadable"
 
 
@@ -34,27 +35,13 @@ class PaperDocument:
     images: list[ExtractedImage] = field(default_factory=list)
     is_skipped: bool = False
     skip_reason: SkipReason | None = None
+    diagnostics: Diagnostics = field(default_factory=Diagnostics)
 
-
-@dataclass
-class ConvertedPaper:
-    """Final result container of paper conversion."""
-
-    paper_id: str
-    markdown: str
-    metadata: PaperMetadata = field(default_factory=PaperMetadata)
-    images: list[ExtractedImage] = field(default_factory=list)
-    is_skipped: bool = False
-    skip_reason: SkipReason | None = None
-
-    @classmethod
-    def from_document(cls, doc: PaperDocument, markdown: str) -> "ConvertedPaper":
-        """Construct a ConvertedPaper from a PaperDocument and generated Markdown."""
-        return cls(
-            paper_id=doc.paper_id,
-            markdown=markdown,
-            metadata=doc.metadata,
-            images=list(doc.images),
-            is_skipped=doc.is_skipped,
-            skip_reason=doc.skip_reason,
-        )
+    def get_reconciliation_prompts(self) -> list[str] | None:
+        """Build LLM reconciliation prompts for all uncertain regions, or None if none exist."""
+        prompts = [
+            elem.get_reconciliation_prompt()
+            for elem in self.elements
+            if isinstance(elem, UncertainElement)
+        ]
+        return prompts or None

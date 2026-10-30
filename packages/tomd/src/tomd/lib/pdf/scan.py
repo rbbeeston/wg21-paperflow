@@ -29,7 +29,7 @@ from .checks.data_or_format import likelihood_data
 from .checks.registry import AreaContext, run_region_checks
 from .scan_model import MODEL, likelihood
 from .summary import generator as _generator
-from .types import Confidence
+from tomd.domain.elements import Confidence
 from .visibility import hide_recorded
 
 

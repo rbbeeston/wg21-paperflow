@@ -3,8 +3,9 @@
 import math
 
 from conftest import make_block, make_line, make_section, make_span
+from tomd.domain.elements import Confidence
 from tomd.lib.pdf.types import (
-    Block, Line, Span, Section, SectionKind, Confidence,
+    Block, Line, Span, Section, SectionKind,
 )
 from tomd.lib.pdf.structure import (
     compare_extractions, structure_sections, structure_body,

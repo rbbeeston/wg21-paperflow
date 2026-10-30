@@ -48,9 +48,11 @@ from tomd.lib import (
     strip_freeform_metadata_lines,
     EMAIL_RE,
 )
+from tomd.domain.document import SkipReason
+from tomd.domain.image import ExtractedImage
 from tomd.lib.html import convert_html
 from tomd.lib.html.images import load_html_images
-from tomd.lib.pdf import ExtractedImage, PipelineResult, SkipReason, run_pipeline
+from tomd.lib.pdf import PipelineResult, run_pipeline
 from tomd.lib.pdf.emit import renumber_uncertain_markers
 
 __all__ = ["ConvertedPaper", "convert_paper", "convert_paper_full"]

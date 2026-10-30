@@ -47,7 +47,8 @@ from .relations import record_for
 from .ruled import page_hrules
 from .runctx import current
 from .summary import generator
-from .types import Confidence, Section, SectionKind
+from tomd.domain.elements import Confidence
+from .types import Section, SectionKind
 from .repair import place_stray_words
 from .validate import _newline_span, _with_columns, escalate, verify_layout, verify_pieces
 

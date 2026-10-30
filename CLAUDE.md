@@ -117,7 +117,7 @@ Model slot binding comes from each pipeline's markdown ``## Services`` block. Ed
 - Tunable thresholds are named module-level constants. No bare numeric literals for scoring penalties, timeouts, display limits, or heuristic cutoffs.
 - Broad `except Exception` catches in batch workers and callback firewalls are acceptable. Uncommented ones are treated as bugs.
 - No `default=str` in JSON serialization. If pipeline state is not cleanly serializable, fix the model, do not mask.
-- `__init__.py` files carry only re-exports (`from module import Name`), `__all__`, and `__version__`. All logic lives in named modules.
+- `__init__.py` files carry only re-exports (`from module import Name`), `__all__`, and `__version__`. All logic lives in named modules. Never define `__all__` in regular (non-`__init__.py`) modules.
 - New `.py` files carry a BSL-1.0 copyright header attributed to the author. Leave existing headers alone.
 - `convert` never re-downloads. It reads the staged source via the backend.
 - Public and reproducible. Anyone can clone this repo, run `paperflow dissect <pid>`, and replicate the same findings. No proprietary dependencies. The dissect package stays self-contained within wg21-paperflow.
@@ -172,3 +172,9 @@ uv run pytest tests/test_end_to_end_convert.py # integration
 
 - No em dashes. Use commas, periods, or colons.
 - Rename-and-grep discipline. When renaming the project or swapping a dependency, grep the entire repo (headers, user-agents, env vars, docstrings, CLAUDE.md files) and fix every reference in one pass, same commit.
+- Application code, not a PyPI library:
+  - Never use redundant import aliases (`from x import Y as Y`) to re-export symbols from regular modules. Import symbols directly from the module that defines them.
+  - When moving a class, function, or constant to a new module, update internal callers directly instead of leaving backwards-compatibility re-export shims in the old module.
+  - Never define `__all__` in regular `.py` modules (only package `__init__.py` files may use `__all__`).
+  - Use explicit numeric comparisons (`(a + b) > 0`, `count > 0`) on integer counters rather than truthiness coercion (`bool(a or b)`).
+  - Do not write tautological tests that only assert `SymbolA is SymbolB` across re-exporting modules.

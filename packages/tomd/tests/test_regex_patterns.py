@@ -6,8 +6,9 @@ labeled variants in `lib/pdf/types.py` are built on top of them.
 These tests lock down the behavior each call site depends on.
 """
 
+from tomd.domain.elements import Confidence
 from tomd.lib import DOC_NUM_RE, SECTION_NUM_PREFIX_RE
-from tomd.lib.pdf.types import DOC_FIELD_RE, SECTION_NUM_RE, Confidence
+from tomd.lib.pdf.types import DOC_FIELD_RE, SECTION_NUM_RE
 from tomd.lib.pdf.structure import _heading_level_from_number, heading_confidence
 
 

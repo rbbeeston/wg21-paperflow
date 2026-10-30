@@ -17,12 +17,12 @@ import pymupdf
 import pytest
 
 from tomd.api import convert_paper_full
+from tomd.domain.document import SkipReason
 from tomd.lib.pdf.pipeline import (
     PipelineResult,
     _enforce_skip_contract,
     run_pipeline,
 )
-from tomd.lib.pdf.types import SkipReason
 
 _PROSE = (
     "This paragraph exists so the page passes the readability gate, "

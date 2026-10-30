@@ -6,6 +6,7 @@ requires-python = ">=3.12"
 license = {text = "BSL-1.0"}
 authors = [{name = "Sergio DuBois", email = "sentientsergio@gmail.com"}]
 dependencies = [
+    "jinja2",
     "paperstore",
     "pymupdf~=1.27.0",
     "mistune~=3.2.0",

@@ -51,10 +51,11 @@ from typing import TYPE_CHECKING
 
 import pymupdf
 
+from tomd.domain.diagnostics import VectorUncertaintyStats
+
 from .images import (
     _PageImageCandidate,
     _VectorExtractionStats,
-    VectorUncertaintyStats,
     _caption_for,
 )
 from .wording import is_wording_rgb

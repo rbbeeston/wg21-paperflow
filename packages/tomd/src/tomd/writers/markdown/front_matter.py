@@ -37,6 +37,3 @@ def write_front_matter(metadata: PaperMetadata | dict[str, Any] | None) -> str:
         return ""
 
     return format_front_matter(_drop_blanks(data))
-
-
-__all__ = ["write_front_matter"]

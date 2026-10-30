@@ -18,7 +18,8 @@ from fixtures.sample_documents import (
     sample_tony_table_document,
     sample_wording_diff_document,
 )
-from tomd.lib.pdf.types import Block, Confidence, Line, Section, SectionKind, Span
+from tomd.domain.elements import Confidence
+from tomd.lib.pdf.types import Block, Line, Section, SectionKind, Span
 
 _SAMPLE_MD_DIR = _TESTS_DIR / "fixtures" / "markdown" / "sample_documents"
 

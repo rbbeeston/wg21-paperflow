@@ -28,7 +28,8 @@ from pathlib import Path
 
 from paperstore.html_manifest import HtmlImagesManifest
 
-from tomd.lib.pdf.images import _MAX_IMAGES_PER_PAPER, ExtractedImage
+from tomd.domain.image import ExtractedImage
+from tomd.lib.pdf.images import _MAX_IMAGES_PER_PAPER
 
 
 @dataclass(frozen=True)

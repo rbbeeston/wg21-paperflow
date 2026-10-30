@@ -9,29 +9,28 @@ Official repository: https://github.com/cppalliance/wg21-paperflow
 from typing import Any
 
 from tomd.domain.document import PaperDocument
-from tomd.domain.elements import BlockElement
-from tomd.domain.table import Table
+from tomd.domain.elements import UncertainElement
 from tomd.lib.metadata_yaml.format import parse_front_matter
 from tomd.lib.shared import apply_strip_leading_h1, strip_freeform_metadata_lines
-from tomd.writers.markdown.blocks import write_element
+from tomd.writers.markdown.blocks import format_uncertain_element, write_element
 from tomd.writers.markdown.front_matter import write_front_matter
+from tomd.writers.markdown.markers import append_trailer_markers
 from tomd.writers.markdown.normalizers import (
     normalize_front_matter,
     strip_body_metadata_text,
     strip_toc,
 )
-from tomd.writers.markdown.tables import write_table
 
 
 class MarkdownWriter:
     """Canonical Markdown backend writer and normalizer for PaperDocument ASTs."""
 
-    def write(
+    def write_body(
         self,
         document: PaperDocument,
         meta: dict[str, Any] | None = None,
     ) -> str:
-        """Format a PaperDocument into canonical Markdown text."""
+        """Format a PaperDocument into canonical Markdown text without trailer markers."""
         if document.is_skipped:
             return ""
 
@@ -40,20 +39,22 @@ class MarkdownWriter:
         # Branch 1: Structured AST Elements
         if document.elements:
             blocks: list[str] = []
+            line_num = 1
+
             front = write_front_matter(mailing_meta)
             if front:
                 blocks.append(front)
+                line_num += front.count("\n") + 2
 
             for elem in document.elements:
-                if isinstance(elem, Table):
-                    rendered = write_table(elem)
-                elif isinstance(elem, BlockElement):
-                    rendered = write_element(elem)
+                if isinstance(elem, UncertainElement):
+                    rendered = format_uncertain_element(elem, line_num)
                 else:
-                    rendered = getattr(elem, "text", "")
-
-                if rendered:
-                    blocks.append(rendered)
+                    rendered = write_element(elem)
+                    if not rendered.strip():
+                        continue
+                blocks.append(rendered)
+                line_num += rendered.count("\n") + 2
 
             return "\n\n".join(blocks).rstrip() + "\n"
 
@@ -73,3 +74,18 @@ class MarkdownWriter:
 
         md = strip_toc(md)
         return md
+
+    def write(
+        self,
+        document: PaperDocument,
+        meta: dict[str, Any] | None = None,
+    ) -> str:
+        """Format a PaperDocument into canonical Markdown text."""
+        if document.is_skipped:
+            return ""
+
+        return append_trailer_markers(
+            self.write_body(document, meta=meta),
+            document.diagnostics,
+            kept_image_count=len(document.images),
+        )

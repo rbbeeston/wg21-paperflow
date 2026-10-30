@@ -6,7 +6,8 @@ import logging
 import re
 from dataclasses import replace
 
-from tomd.lib.pdf.types import Confidence, KNOWN_SECTIONS, Section, SectionKind
+from tomd.domain.elements import Confidence
+from tomd.lib.pdf.types import KNOWN_SECTIONS, Section, SectionKind
 from tomd.lib.metadata_yaml.strip import _CONTENT_HEADING_NUM_RE
 
 _log = logging.getLogger(__name__)

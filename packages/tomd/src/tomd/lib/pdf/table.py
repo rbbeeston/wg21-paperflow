@@ -89,8 +89,10 @@ from dataclasses import replace
 from enum import Enum
 from typing import NamedTuple, Optional
 
+from tomd.domain.elements import Confidence
+
 from ..toc import MIN_TOC_RUN, is_toc_label
-from .types import Block, Line, Span, Section, SectionKind, Confidence, compute_bbox
+from .types import Block, Line, Span, Section, SectionKind, compute_bbox
 
 _log = logging.getLogger(__name__)
 

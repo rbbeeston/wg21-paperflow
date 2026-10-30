@@ -35,7 +35,8 @@ from difflib import SequenceMatcher
 from .runctx import current
 from .stacked import split_stacked
 from .table import _STRATEGY_MAP, TableStrategy, _classify_table, _compute_table_signals
-from .types import BULLET_CHARS, Block, Confidence, Line, Section, SectionKind, Span, TableCandidate
+from tomd.domain.elements import Confidence
+from .types import BULLET_CHARS, Block, Line, Section, SectionKind, Span, TableCandidate
 
 _log = logging.getLogger(__name__)
 

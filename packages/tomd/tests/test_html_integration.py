@@ -206,8 +206,8 @@ def test_convert_html_with_manifest_still_emits_no_image_syntax(tmp_path):
     truncation marker. A real entry with a stored filename and alt text
     must leak neither into the markdown; the truncation marker fires
     when the result says the source was capped."""
+    from tomd.domain.image import ExtractedImage
     from tomd.lib.html.images import HtmlImagesResult
-    from tomd.lib.pdf.images import ExtractedImage
 
     path = _write(tmp_path, "img_manifest.html", _IMG_POSITIONS_HTML)
     result = HtmlImagesResult(
